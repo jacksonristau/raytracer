@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include "math/vector3.h"
+#include <vector>
 
 typedef struct {
     float r, g, b;
@@ -19,10 +20,6 @@ typedef struct {
     float r;
     int m;
 } Sphere;
-
-typedef struct {
-    float x, y, z;
-} Vector3;
 
 std::vector<std::string> split(std::string in, char delim) {
     std::vector<std::string> out;
@@ -55,7 +52,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    Vector3 eye;
+    //Vector3 eye;
     Vector3 viewdir;
     Vector3 updir;
     float hfov;
@@ -72,11 +69,9 @@ int main(int argc, char *argv[]) {
         while(std::getline(input, line)) {
             std::vector<std::string> keys = split(line, ' ');
             if (keys[0] == "eye") {
-                eye.x = stof(keys[1]);
-                eye.y = stof(keys[2]);
-                eye.z = stof(keys[3]);
+                Vector3 eye = Vector3(stof(keys[1]), stof(keys[2]), stof(keys[3]));
                 read_inputs++;
-                std::cout << "eye: " << eye.x << " " << eye.y << " " << eye.z << std::endl;
+                std::cout << "eye: " << eye.x() << " " << eye.y() << " " << eye.z() << std::endl;
             }
             else if (keys[0] == "viewdir") {
                 viewdir.x = stof(keys[1]);
@@ -160,7 +155,7 @@ int main(int argc, char *argv[]) {
     Vector3 ur;
     Vector3 ll;
     Vector3 lr;
-    Vector3 w = ;
+    Vector3 w;
 
 
 

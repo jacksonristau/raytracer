@@ -20,6 +20,8 @@ class Vector3 {
         // addition
         Vector3 operator+(const Vector3& v1);
 
+        Vector3 operator=(const Vector3& v1);
+
         float x() const {return v[0];}
         float y() const {return v[1];}
         float z() const {return v[2];}

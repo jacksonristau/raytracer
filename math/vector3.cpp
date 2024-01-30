@@ -35,3 +35,10 @@ Vector3 Vector3::operator-(const Vector3& v) {
 Vector3 Vector3::operator+(const Vector3& v1) {
     return Vector3(v[0] + v1.x(), v[1] + v1.y(), v[2] + v1.z());
 }
+
+Vector3 Vector3::operator=(const Vector3& v1) {
+    v[0] = v1.x();
+    v[1] = v1.y();
+    v[2] = v1.z();
+    return *this;
+}
