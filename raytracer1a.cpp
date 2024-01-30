@@ -3,7 +3,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
-#include <map>
+#include "math/vector3.h"
 
 typedef struct {
     float r, g, b;
