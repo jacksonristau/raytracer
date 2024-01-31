@@ -35,7 +35,7 @@ Vector Ray::direction() const {
 
 // -B +- sqrt(B^2 - 4C) / 2.0
 // maybe just return the t value
-bool Ray::intersect_sphere(const Sphere& sphere, Point* p) {
+float Ray::intersect_sphere(const Sphere& sphere) {
     Point center = sphere.center();
     float B = 2.0 * (d.x() * (o.x() - center.x()) + 
                     d.y() * (o.y() - center.y()) +
@@ -45,29 +45,24 @@ bool Ray::intersect_sphere(const Sphere& sphere, Point* p) {
 
     float discrim = (B * B) - (4 * C);
     if (discrim < 0) {
-        p = nullptr;
-        return false;
+        return -1.0;
     }
     else if (discrim == 0) {
-        p = new Point(o + ((-B / 2.0) * d));
-        return true;
+        return (-B / 2.0);
     }
     else  {
         float t1 = (-B + sqrt(discrim)) / 2.0;
         float t2 = (-B - sqrt(discrim)) / 2.0;
         float out = 0.0;
         if (t1 < 0 && t2 > 0) {
-            p = new Point(o + (t1 * d));
-            return true;
+            return t1;
         }
         else if (t1 > 0 && t2 < 0) {
-            p = new Point(o + (t2 * d));
-            return true;
+            return t2;
         }
         // (t1 > 0 && t2 > 0)
         else{
-            p = new Point(o + (std::min(t1, t2) * d));
-            return true;
+            return std::min(t1, t2);
         }
     }
     

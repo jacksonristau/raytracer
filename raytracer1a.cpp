@@ -11,8 +11,11 @@
 #include "math/sphere.h"
 
 typedef struct {
-    float r, g, b;
+    int r, g, b;
 } Color;
+
+std::vector<Color> materials;
+std::vector<Sphere> objects;
 
 std::vector<std::string> split(std::string in, char delim) {
     std::vector<std::string> out;
@@ -40,22 +43,20 @@ std::string pixel_to_string(Color pixel) {
     return out.str();
 }
 
-Color trace_ray(Ray ray, std::vector<Sphere> objects, std::vector<Color> materials, Color bkgcolor) {
-    Point* closest_point = nullptr;
+Color shade_ray(int m) {
+    return materials[m];
+}
+
+Color trace_ray(Ray ray, Color bkgcolor) {
+    float min_t = INFINITY;
+    float t;
     Color output = bkgcolor;
     for (int i = 0; i < objects.size(); i++) {
-        Point *intersection;
-        if (ray.intersect_sphere(objects[i], intersection)){
-            
-            if (closest_point == nullptr) {
-                std::cout << "intersected" << std::endl;
-                closest_point = intersection;
-                output = materials[objects[i].material()];
-            }
-            else if (intersection->distance(ray.origin()) < closest_point->distance(ray.origin())) {
-                std::cout << "intersected" << std::endl;
-                closest_point = intersection;
-                output = materials[objects[i].material()];
+        float t = ray.intersect_sphere(objects[i]);
+        if (t > 0){
+            if (t < min_t) {
+                min_t = t;
+                output = shade_ray(objects[i].material());
             }
         }
     }
@@ -84,8 +85,6 @@ int main(int argc, char *argv[]) {
     float hfov;
     int resolution[2] = { -1, -1 };
     Color bkgcolor;
-    std::vector<Color> materials;
-    std::vector<Sphere> objects;
     float pi = 4.0 * atan(1.0);
 
     int read_inputs = 0;
@@ -149,9 +148,9 @@ int main(int argc, char *argv[]) {
                     std::cout << "3 numbers are required for bkgcolor" << std::endl;
                     return 0;
                 }
-                bkgcolor.r = stof(keys[1]);
-                bkgcolor.g = stof(keys[2]);
-                bkgcolor.b = stof(keys[3]);
+                bkgcolor.r = ceil(stof(keys[1]) * 255);
+                bkgcolor.g = ceil(stof(keys[1]) * 255);
+                bkgcolor.b = ceil(stof(keys[1]) * 255);
                 read_inputs++;
                 std::cout << "bkg: " << bkgcolor.r << " " << bkgcolor.g << " " << bkgcolor.b << std::endl;
             }
@@ -161,9 +160,9 @@ int main(int argc, char *argv[]) {
                     return 0;
                 }
                 Color temp = {
-                    .r = stof(keys[1]),
-                    .g = stof(keys[2]),
-                    .b = stof(keys[3]),
+                    .r = ceil(stof(keys[1]) * 255),
+                    .g = ceil(stof(keys[2]) * 255),
+                    .b = ceil(stof(keys[3]) * 255),
                 };
                 std::cout << "mtlcolor: " << temp.r << " " << temp.g << " " << temp.b << std::endl; 
                 materials.push_back(temp);
@@ -176,7 +175,7 @@ int main(int argc, char *argv[]) {
                 }
                 Point center = Point(stof(keys[1]), stof(keys[2]), stof(keys[3]));
                 float radius = stof(keys[4]);
-                objects.push_back(Sphere(center, radius));
+                objects.push_back(Sphere(center, radius, index));
                 std::cout << "sphere: " << center.x() << " " << center.y() << " " << center.z() << " " << radius << std::endl; 
             }
             else {
@@ -225,7 +224,6 @@ int main(int argc, char *argv[]) {
     float height = width / aspect;
 
     // go to view plane then to the left/right edge, then to the top/bottom
-    std::cout << width / 2 << std::endl;
     Point ul = (eye + d * viewdir) - ((width / 2) * u) + ((height/2) * v);
     Point ur = (eye + d *  viewdir) + ((width / 2) * u) + ((height/2) * v);
 
@@ -233,7 +231,7 @@ int main(int argc, char *argv[]) {
     Point lr = (eye + d *  viewdir) + ((width / 2) * u) - ((height/2) * v);
 
     Vector deltah = (1.0 / (resolution[0] - 1)) * (ur - ul) ;
-    Vector deltav = (1.0 / (resolution[0] - 1)) * (ll - ul);
+    Vector deltav = (1.0 / (resolution[1] - 1)) * (ll - ul);
 
     Ray ray = Ray(eye, ul - eye);
 
@@ -243,8 +241,8 @@ int main(int argc, char *argv[]) {
         }
         for (int j = 0; j < resolution[0]; j++){
             int pos = j + (resolution[0] * i);
-            pixelmap[pos] = trace_ray(ray, objects, materials, bkgcolor);
-            ray.set_direction(eye - (ul + (i * deltav) + (j * deltah)));
+            pixelmap[pos] = trace_ray(ray, bkgcolor);
+            ray.set_direction((ul + (i * deltav) + (j * deltah)) - eye);
         }
     }
 
@@ -277,6 +275,6 @@ int main(int argc, char *argv[]) {
     }
     output << image.str();
     output.close();
-    delete(pixelmap);
+    delete [] pixelmap;
     return 1;
 }

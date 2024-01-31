@@ -9,6 +9,8 @@ class Sphere {
 
         Sphere(const Point& center, float radius);
 
+        Sphere(const Point& center, float radius, int m_index);
+
         virtual ~Sphere();
 
         // equality

@@ -19,7 +19,7 @@ class Ray {
         void set_origin(const Point& origin);
         void set_direction(const Vector& direction);
 
-        bool intersect_sphere(const Sphere& sphere, Point *p);
+        float intersect_sphere(const Sphere& sphere);
 
         Point origin() const;
         Vector direction() const;
