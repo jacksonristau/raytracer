@@ -1,25 +1,18 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <stdio.h>
 #include <string>
-#include "math/vector3.h"
 #include <vector>
+#include <math.h>
+#include <sstream>
+
+#include "math/vector.h"
+#include "math/ray.h"
+#include "math/point.h"
+#include "math/sphere.h"
 
 typedef struct {
     float r, g, b;
 } Color;
-
-typedef struct {
-    float x, y, z;
-    float dx, dy, dz;
-} Ray;
-
-typedef struct {
-    float x, y, z;
-    float r;
-    int m;
-} Sphere;
 
 std::vector<std::string> split(std::string in, char delim) {
     std::vector<std::string> out;
@@ -37,6 +30,38 @@ std::vector<std::string> split(std::string in, char delim) {
     return out;
 }
 
+std::string pixel_to_string(Color pixel) {
+    std::stringstream out;
+    out << std::to_string(pixel.r)
+        << " "
+        << std::to_string(pixel.g)
+        << " "
+        << std::to_string(pixel.b) << "\n";
+    return out.str();
+}
+
+Color trace_ray(Ray ray, std::vector<Sphere> objects, std::vector<Color> materials, Color bkgcolor) {
+    Point* closest_point = nullptr;
+    Color output = bkgcolor;
+    for (int i = 0; i < objects.size(); i++) {
+        Point *intersection;
+        if (ray.intersect_sphere(objects[i], intersection)){
+            
+            if (closest_point == nullptr) {
+                std::cout << "intersected" << std::endl;
+                closest_point = intersection;
+                output = materials[objects[i].material()];
+            }
+            else if (intersection->distance(ray.origin()) < closest_point->distance(ray.origin())) {
+                std::cout << "intersected" << std::endl;
+                closest_point = intersection;
+                output = materials[objects[i].material()];
+            }
+        }
+    }
+    return output;
+}
+
 int main(int argc, char *argv[]) {
     // only argument should be the input file name
     if (argc != 2) {
@@ -45,6 +70,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::ifstream input;
+    std::ofstream output;
 
     input.open(argv[1]);
     if (!input.is_open()) {
@@ -52,54 +78,77 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    //Vector3 eye;
-    Vector3 viewdir;
-    Vector3 updir;
+    Point eye;
+    Vector viewdir;
+    Vector updir;
     float hfov;
     int resolution[2] = { -1, -1 };
     Color bkgcolor;
     std::vector<Color> materials;
     std::vector<Sphere> objects;
+    float pi = 4.0 * atan(1.0);
 
     int read_inputs = 0;
 
+    // read values from file
     try {
         std::string line;
         int index = -1;
         while(std::getline(input, line)) {
             std::vector<std::string> keys = split(line, ' ');
             if (keys[0] == "eye") {
-                Vector3 eye = Vector3(stof(keys[1]), stof(keys[2]), stof(keys[3]));
+                if (keys.size() != 4) {
+                    std::cout << "3 numbers are required for eye" << std::endl;
+                    return 0;
+                }
+                eye = Point(stof(keys[1]), stof(keys[2]), stof(keys[3]));
                 read_inputs++;
                 std::cout << "eye: " << eye.x() << " " << eye.y() << " " << eye.z() << std::endl;
             }
             else if (keys[0] == "viewdir") {
-                viewdir.x = stof(keys[1]);
-                viewdir.y = stof(keys[2]);
-                viewdir.z = stof(keys[3]);
+                if (keys.size() != 4) {
+                    std::cout << "3 numbers are required for viewdir" << std::endl;
+                    return 0;
+                }
+                viewdir = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]));
                 read_inputs++;
-                std::cout << "viewdir: " << viewdir.x << " " << viewdir.y << " " << viewdir.z << std::endl;
+                std::cout << "viewdir: " << viewdir.x() << " " << viewdir.y() << " " << viewdir.z() << std::endl;
             }
             else if (keys[0] == "updir") {
-                updir.x = stof(keys[1]);
-                updir.y = stof(keys[2]);
-                updir.z = stof(keys[3]);
+                if (keys.size() != 4) {
+                    std::cout << "3 numbers are required for updir" << std::endl;
+                    return 0;
+                }
+                updir = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]));
                 read_inputs++;
-                std::cout << "updir: " << updir.x << " " << updir.y << " " << updir.z << std::endl;
+                std::cout << "updir: " << updir.x() << " " << updir.y() << " " << updir.z() << std::endl;
             }
             else if (keys[0] == "hfov") {
+                if (keys.size() != 2) {
+                    std::cout << "1 number is required for hfov" << std::endl;
+                    return 0;
+                }
                 hfov = stof(keys[1]);
+                // convert to radians
+                hfov *= pi / 180;
                 read_inputs++;
                 std::cout << "hfov: " << hfov << std::endl;
             }
             else if (keys[0] == "imsize") {
+                if (keys.size() != 3) {
+                    std::cout << "2 numbers are required for imsize" << std::endl;
+                    return 0;
+                }
                 resolution[0] = stoi(keys[1]);
                 resolution[1] = stoi(keys[2]);
                 read_inputs++;
                 std::cout << "res: " << resolution[0] << " " << resolution[1] << std::endl;
             }
             else if (keys[0] == "bkgcolor") {
-                std::cout << "r: " << keys[1] << std::endl;
+                if (keys.size() != 4) {
+                    std::cout << "3 numbers are required for bkgcolor" << std::endl;
+                    return 0;
+                }
                 bkgcolor.r = stof(keys[1]);
                 bkgcolor.g = stof(keys[2]);
                 bkgcolor.b = stof(keys[3]);
@@ -107,25 +156,28 @@ int main(int argc, char *argv[]) {
                 std::cout << "bkg: " << bkgcolor.r << " " << bkgcolor.g << " " << bkgcolor.b << std::endl;
             }
             else if (keys[0] == "mtlcolor") {
+                if (keys.size() != 4) {
+                    std::cout << "3 numbers are required for mtlcolor" << std::endl;
+                    return 0;
+                }
                 Color temp = {
-                    .r = stoi(keys[1]),
-                    .g = stoi(keys[2]),
-                    .b = stoi(keys[3]),
+                    .r = stof(keys[1]),
+                    .g = stof(keys[2]),
+                    .b = stof(keys[3]),
                 };
                 std::cout << "mtlcolor: " << temp.r << " " << temp.g << " " << temp.b << std::endl; 
                 materials.push_back(temp);
                 index++;
             }
             else if (keys[0] == "sphere") {
-                Sphere temp = {
-                    .x = stof(keys[1]),
-                    .y = stof(keys[2]),
-                    .z = stof(keys[3]),
-                    .r = stof(keys[4]),
-                    .m = index
-                };
-                std::cout << "sphere: " << temp.x << " " << temp.y << " " << temp.z << " " << temp.r << std::endl; 
-                objects.push_back(temp);
+                if (keys.size() != 5) {
+                    std::cout << "4 numbers are required for spheres" << std::endl;
+                    return 0;
+                }
+                Point center = Point(stof(keys[1]), stof(keys[2]), stof(keys[3]));
+                float radius = stof(keys[4]);
+                objects.push_back(Sphere(center, radius));
+                std::cout << "sphere: " << center.x() << " " << center.y() << " " << center.z() << " " << radius << std::endl; 
             }
             else {
                 std::cout << "invalid key" << std::endl;
@@ -142,6 +194,9 @@ int main(int argc, char *argv[]) {
             std::cout << "missing at least one mtlcolor, or one sphere" << std::endl;
             return 0;
         }
+
+        std::cout << "# of material colors: " << index + 1 << std::endl;
+        std::cout << "# of objects: " << objects.size() << std::endl;
     }
     catch (std::exception& e) {
         std::cout << "invalid arg" << std::endl;
@@ -151,14 +206,77 @@ int main(int argc, char *argv[]) {
     int size = resolution[0] * resolution[1];
     Color *pixelmap = new Color[size];
     // define the 4 corners of the viewing window
-    Vector3 ul;
-    Vector3 ur;
-    Vector3 ll;
-    Vector3 lr;
-    Vector3 w;
+    viewdir.normalize();
+    Vector w = -viewdir;
 
+    // viewdir cross updir == 0
+    if (viewdir.dot(updir) < -0.9 || viewdir.dot(updir) > 0.9) {
+        std::cout << "up vector is too close to view vector" << std::endl;
+        return 0;
+    } 
+    Vector u = viewdir.cross(updir);
+    u.normalize();
+    Vector v = u.cross(viewdir);
 
+    float aspect = (float)resolution[0] / (float)resolution[1];
+    const float d = 10;
 
+    float width = 2 * d * tan(hfov / 2);
+    float height = width / aspect;
+
+    // go to view plane then to the left/right edge, then to the top/bottom
+    std::cout << width / 2 << std::endl;
+    Point ul = (eye + d * viewdir) - ((width / 2) * u) + ((height/2) * v);
+    Point ur = (eye + d *  viewdir) + ((width / 2) * u) + ((height/2) * v);
+
+    Point ll = (eye + d *  viewdir) - ((width / 2) * u) - ((height/2) * v);
+    Point lr = (eye + d *  viewdir) + ((width / 2) * u) - ((height/2) * v);
+
+    Vector deltah = (1.0 / (resolution[0] - 1)) * (ur - ul) ;
+    Vector deltav = (1.0 / (resolution[0] - 1)) * (ll - ul);
+
+    Ray ray = Ray(eye, ul - eye);
+
+    for (int i = 0; i < resolution[1]; i++) {
+        if (i != 0){
+            ray.set_direction(eye - (ul + i * deltav));
+        }
+        for (int j = 0; j < resolution[0]; j++){
+            int pos = j + (resolution[0] * i);
+            pixelmap[pos] = trace_ray(ray, objects, materials, bkgcolor);
+            ray.set_direction(eye - (ul + (i * deltav) + (j * deltah)));
+        }
+    }
+
+    std::string filename = argv[1];
+    filename.std::string::erase(filename.std::string::find("."));
+    output.open(filename + ".ppm");
+
+    if (!output.is_open()) {
+        std::cout << "failed to create output file.";
+        return 0;
+    }
+
+    output << "P3\n"
+        << "#fractal\n"
+        << resolution[0]
+        << " "
+        << resolution[1]
+        << "\n255\n";
+
+    std::stringstream image;
+    for (int i = 0; i < size; i++) {
+        if (i % (size / 100) == 0) {
+            std::cout << (i * 100) / size << '%' << '\r';
+        }
+        image << pixel_to_string(pixelmap[i]);
+        if (i == size - 1) {
+            std::cout << "100% done" << std::endl;
+            std::cout << filename << ".ppm created." << std::endl;
+        }
+    }
+    output << image.str();
+    output.close();
     delete(pixelmap);
     return 1;
 }
