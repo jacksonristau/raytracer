@@ -17,6 +17,7 @@ typedef struct {
 std::vector<Color> materials;
 std::vector<Sphere> objects;
 
+// tokenizes a list by the delimiter
 std::vector<std::string> split(std::string in, char delim) {
     std::vector<std::string> out;
     int start = 0;
@@ -33,6 +34,7 @@ std::vector<std::string> split(std::string in, char delim) {
     return out;
 }
 
+// convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
     std::stringstream out;
     out << std::to_string(pixel.r)
@@ -47,6 +49,7 @@ Color shade_ray(int m) {
     return materials[m];
 }
 
+// given a ray returns the color of any intersected geometry
 Color trace_ray(Ray ray, Color bkgcolor) {
     float min_t = INFINITY;
     float t;
@@ -85,8 +88,11 @@ int main(int argc, char *argv[]) {
     float hfov;
     int resolution[2] = { -1, -1 };
     Color bkgcolor;
+    float frustum_w = -1.0;
+    bool parallel = false;
     float pi = 4.0 * atan(1.0);
 
+    // if theres fewer 
     int read_inputs = 0;
 
     // read values from file
@@ -94,6 +100,9 @@ int main(int argc, char *argv[]) {
         std::string line;
         int index = -1;
         while(std::getline(input, line)) {
+            if (line.empty()) {
+                continue;
+            }
             std::vector<std::string> keys = split(line, ' ');
             if (keys[0] == "eye") {
                 if (keys.size() != 4) {
@@ -149,8 +158,8 @@ int main(int argc, char *argv[]) {
                     return 0;
                 }
                 bkgcolor.r = ceil(stof(keys[1]) * 255);
-                bkgcolor.g = ceil(stof(keys[1]) * 255);
-                bkgcolor.b = ceil(stof(keys[1]) * 255);
+                bkgcolor.g = ceil(stof(keys[2]) * 255);
+                bkgcolor.b = ceil(stof(keys[3]) * 255);
                 read_inputs++;
                 std::cout << "bkg: " << bkgcolor.r << " " << bkgcolor.g << " " << bkgcolor.b << std::endl;
             }
@@ -178,49 +187,63 @@ int main(int argc, char *argv[]) {
                 objects.push_back(Sphere(center, radius, index));
                 std::cout << "sphere: " << center.x() << " " << center.y() << " " << center.z() << " " << radius << std::endl; 
             }
+            else if (keys[0] == "parallel") {
+                frustum_w = stof(keys[1]);
+                parallel = true;
+                read_inputs++;
+            }
             else {
-                std::cout << "invalid key" << std::endl;
+                std::cout << "invalid key"  << std::endl;
                 return 0;
             }
         }
 
         // read fewer than 6 inputs
         if (read_inputs < 6) {
-            std::cout << "missing a required input: [eye, viewdir, updir, hfov, res, bkgcolor]" << std::endl;
+            std::cout << "missing a required input: [eye, viewdir, updir, hfov/parallel, res, bkgcolor]" << std::endl;
             return 0;
         }
         else if (index == -1 || objects.size() < 1) {
-            std::cout << "missing at least one mtlcolor, or one sphere" << std::endl;
+            std::cout << "missing at least one mtlcolor, and/or one sphere" << std::endl;
             return 0;
         }
-
+        if (parallel && frustum_w <= 0) {
+            std::cout << "invalid format: parallel <frustum_width>" << std::endl;
+            std::cout << "frustum width must be positive" << std::endl;
+            return 0;
+        }
         std::cout << "# of material colors: " << index + 1 << std::endl;
         std::cout << "# of objects: " << objects.size() << std::endl;
     }
-    catch (std::exception& e) {
-        std::cout << "invalid arg" << std::endl;
+    catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid values in input file: " << e.what() << std::endl;
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "An unexpected error occurred: " << e.what() << std::endl;
         return 0;
     }
 
     int size = resolution[0] * resolution[1];
     Color *pixelmap = new Color[size];
-    // define the 4 corners of the viewing window
     viewdir.normalize();
-    Vector w = -viewdir;
+    updir.normalize();
 
-    // viewdir cross updir == 0
+    // viewdir cross updir approaching invalidity with fp error
     if (viewdir.dot(updir) < -0.9 || viewdir.dot(updir) > 0.9) {
         std::cout << "up vector is too close to view vector" << std::endl;
         return 0;
     } 
+
+    // define the viewing coordinate system
     Vector u = viewdir.cross(updir);
     u.normalize();
     Vector v = u.cross(viewdir);
 
     float aspect = (float)resolution[0] / (float)resolution[1];
-    const float d = 10;
+    float d = 1;
 
-    float width = 2 * d * tan(hfov / 2);
+    // width is just frustum width for a parallel projection
+    float width = (parallel) ? frustum_w : 2 * d * tan(hfov / 2);
     float height = width / aspect;
 
     // go to view plane then to the left/right edge, then to the top/bottom
@@ -233,16 +256,33 @@ int main(int argc, char *argv[]) {
     Vector deltah = (1.0 / (resolution[0] - 1)) * (ur - ul) ;
     Vector deltav = (1.0 / (resolution[1] - 1)) * (ll - ul);
 
-    Ray ray = Ray(eye, ul - eye);
+    // origin is ul if parallel
+    Point origin = (parallel) ? ul : eye;
+    // direction is always viewdir if parallel
+    Vector direction = (parallel) ? viewdir : ul - eye;
 
+    Ray ray = Ray(origin, direction);
+
+    // for every pixel in the output image trace a ray to get its color
     for (int i = 0; i < resolution[1]; i++) {
-        if (i != 0){
-            ray.set_direction(eye - (ul + i * deltav));
+        // for parallel the direction is always the same
+        if (parallel) {
+            ray.set_origin((ul + (i * deltav)));
+        }
+        // for perspective origin is always the eye
+        else {
+            ray.set_direction((ul + i * deltav) - eye);
         }
         for (int j = 0; j < resolution[0]; j++){
             int pos = j + (resolution[0] * i);
             pixelmap[pos] = trace_ray(ray, bkgcolor);
-            ray.set_direction((ul + (i * deltav) + (j * deltah)) - eye);
+            
+            if (parallel) {
+                ray.set_origin((ul + (i * deltav) + (j * deltah)));
+            }
+            else {
+                ray.set_direction((ul + (i * deltav) + (j * deltah)) - eye);
+            }
         }
     }
 
@@ -255,8 +295,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    // write colors to ppm file 
     output << "P3\n"
-        << "#fractal\n"
+        << "#raytracingiscool\n"
         << resolution[0]
         << " "
         << resolution[1]
@@ -274,6 +315,8 @@ int main(int argc, char *argv[]) {
         }
     }
     output << image.str();
+
+    // cleanup
     output.close();
     delete [] pixelmap;
     return 1;

@@ -53,15 +53,19 @@ float Ray::intersect_sphere(const Sphere& sphere) {
     else  {
         float t1 = (-B + sqrt(discrim)) / 2.0;
         float t2 = (-B - sqrt(discrim)) / 2.0;
-        float out = 0.0;
-        if (t1 < 0 && t2 > 0) {
-            return t1;
-        }
-        else if (t1 > 0 && t2 < 0) {
+        
+        if (t1 <= 0 && t2 > 0) {
             return t2;
         }
+        else if (t1 > 0 && t2 <= 0) {
+            return t1;
+        }
+        // regardless trace_ray ignores negative values
+        else if (t1 <= 0 && t2 <= 0) {
+            return t1;
+        }
         // (t1 > 0 && t2 > 0)
-        else{
+        else {
             return std::min(t1, t2);
         }
     }

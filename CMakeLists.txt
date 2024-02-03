@@ -19,4 +19,4 @@ set(
 include_directories(INCLUDE_DIRS)
 
 add_executable(raytracer1a ${SOURCES})
-target_compile_options(raytracer1a PRIVATE -g)
+target_compile_options(raytracer1a PRIVATE -g -Wno-narrowing)

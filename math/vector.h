@@ -23,6 +23,7 @@ class Vector {
         // addition
         Vector operator+(const Vector& v1);
 
+        // assignment
         Vector operator=(const Vector& v1);
 
         void normalize();

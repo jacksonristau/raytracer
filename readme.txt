@@ -1,11 +1,9 @@
-parts of the raytracer
+compilation:
+from the directory with the source files (raytracer1a.cpp, math/...)
 
-1. read the input file 
-    - make sure that all of the provided data matches the format
-    - read all the data into variables
+$ mkdir build
+$ cd build
+$ cmake ..
+$ cmake --build .
 
-2. use variables to define a viewing window
-    - define a list of all the spheres in the scene
-
-3. cast rays through every pixel and check for collisions
-
+make sure to put the input files in the build folder with the executable
