@@ -14,8 +14,7 @@ typedef struct {
     int r, g, b;
 } Color;
 
-std::vector<Color> colors_d;
-std::vector<Color> colors_s;
+std::vector<Color> materials;
 std::vector<Sphere> objects;
 
 // tokenizes a list by the delimiter
@@ -93,7 +92,7 @@ int main(int argc, char *argv[]) {
     bool parallel = false;
     float pi = 4.0 * atan(1.0);
 
-    // if theres fewer somethings wrong
+    // if theres fewer 
     int read_inputs = 0;
 
     // read values from file
@@ -165,8 +164,8 @@ int main(int argc, char *argv[]) {
                 std::cout << "bkg: " << bkgcolor.r << " " << bkgcolor.g << " " << bkgcolor.b << std::endl;
             }
             else if (keys[0] == "mtlcolor") {
-                if (keys.size() != 11) {
-                    std::cout << "10 numbers are required for mtlcolor" << std::endl;
+                if (keys.size() != 4) {
+                    std::cout << "3 numbers are required for mtlcolor" << std::endl;
                     return 0;
                 }
                 Color temp = {
@@ -192,9 +191,6 @@ int main(int argc, char *argv[]) {
                 frustum_w = stof(keys[1]);
                 parallel = true;
                 read_inputs++;
-            }
-            else if () {
-
             }
             else {
                 std::cout << "invalid key"  << std::endl;

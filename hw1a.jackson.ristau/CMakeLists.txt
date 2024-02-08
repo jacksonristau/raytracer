@@ -16,6 +16,8 @@ set(
     ${PROJECT_SOURCE_DIR}/math/
 )
 
+set(CMAKE_CXX_STANDARD 20)
+
 include_directories(INCLUDE_DIRS)
 
 add_executable(raytracer1a ${SOURCES})
