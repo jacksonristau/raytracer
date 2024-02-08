@@ -56,3 +56,6 @@ test/test_runner
 
 ## images
 *.jpeg
+
+## vscode
+.vscode
