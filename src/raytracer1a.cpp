@@ -5,17 +5,14 @@
 #include <math.h>
 #include <sstream>
 
-#include "math/vector.h"
-#include "math/ray.h"
-#include "math/point.h"
-#include "math/sphere.h"
+#include "vector.h"
+#include "ray.h"
+#include "point.h"
+#include "sphere.h"
+#include "material.h"
+#include "color.h"
 
-typedef struct {
-    int r, g, b;
-} Color;
-
-std::vector<Color> colors_d;
-std::vector<Color> colors_s;
+std::vector<Material> materials;
 std::vector<Sphere> objects;
 
 // tokenizes a list by the delimiter
@@ -38,16 +35,16 @@ std::vector<std::string> split(std::string in, char delim) {
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
     std::stringstream out;
-    out << std::to_string(pixel.r)
+    out << std::to_string(pixel.r() * 255)
         << " "
-        << std::to_string(pixel.g)
+        << std::to_string(pixel.g() * 255)
         << " "
-        << std::to_string(pixel.b) << "\n";
+        << std::to_string(pixel.b() * 255) << "\n";
     return out.str();
 }
 
 Color shade_ray(int m) {
-    return materials[m];
+    return materials[m].diffuse();
 }
 
 // given a ray returns the color of any intersected geometry
@@ -158,25 +155,21 @@ int main(int argc, char *argv[]) {
                     std::cout << "3 numbers are required for bkgcolor" << std::endl;
                     return 0;
                 }
-                bkgcolor.r = ceil(stof(keys[1]) * 255);
-                bkgcolor.g = ceil(stof(keys[2]) * 255);
-                bkgcolor.b = ceil(stof(keys[3]) * 255);
+                bkgcolor = Color(stof(keys[1]), stof(keys[2]), stof(keys[3]));
                 read_inputs++;
-                std::cout << "bkg: " << bkgcolor.r << " " << bkgcolor.g << " " << bkgcolor.b << std::endl;
+                std::cout << "bkg: " << bkgcolor << std::endl;
             }
             else if (keys[0] == "mtlcolor") {
                 if (keys.size() != 11) {
                     std::cout << "10 numbers are required for mtlcolor" << std::endl;
                     return 0;
                 }
-                Color temp = {
-                    .r = static_cast<int>(stof(keys[1]) * 255),
-                    .g = static_cast<int>(stof(keys[2]) * 255),
-                    .b = static_cast<int>(stof(keys[3]) * 255),
-                };
-                std::cout << "mtlcolor: " << temp.r << " " << temp.g << " " << temp.b << std::endl; 
-                materials.push_back(temp);
+                Color d = Color(stof(keys[1]), stof(keys[2]), stof(keys[3]));
+                Color s = Color(stof(keys[4]), stof(keys[5]), stof(keys[6]));
+                // if a specular isnt given use the other constructor
+                materials.push_back(Material(d, s, stof(keys[7]), stof(keys[8]), stof(keys[9]), stof(keys[10])));
                 index++;
+                std::cout << "mtlcolor: " << materials[index] << std::endl; 
             }
             else if (keys[0] == "sphere") {
                 if (keys.size() != 5) {
@@ -192,9 +185,6 @@ int main(int argc, char *argv[]) {
                 frustum_w = stof(keys[1]);
                 parallel = true;
                 read_inputs++;
-            }
-            else if () {
-
             }
             else {
                 std::cout << "invalid key"  << std::endl;

@@ -2,33 +2,37 @@
 #define MATERIAL_H
 
 #include <ostream>
+#include "color.h"
 
+// holds information for doing blinn-phong lighting calculations
 class Material {
     public:
         Material();
 
-        Material(float r, float g, float b);
+        Material(Color diffuse, Color specular, float ka, float kd, float ks, int n);
 
-        Material(Color );
+        Material(Color diffuse, float ka, float kd, float ks, int n);
 
-        Material(const Material& p2);
+        Material(const Material& m2);
 
         virtual ~Material();
 
-        // equality
-        bool operator==(const Material& p) const;
+        Material operator=(const Material& m1);
 
-        // negation
-        Material operator-();
-
-        Material operator=(const Material& p1);
-
-        float distance(const Material& p1);
+        Color diffuse() const {return d;}
+        Color specular() const {return d;}
+        float ka() const {return k[0];}
+        float kd() const {return k[1];}
+        float ks() const {return k[2];}
+        int n() const {return n_val;}
 
     private:
-        float p[3];
+        Color d;
+        Color s;
+        float k[3];
+        int n_val;
 };
 
-std::ostream & operator<< ( std::ostream &os, const Material &p);
+std::ostream & operator<< ( std::ostream &os, const Material &m1);
 
 #endif
