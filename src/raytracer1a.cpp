@@ -11,9 +11,15 @@
 #include "sphere.h"
 #include "material.h"
 #include "color.h"
+#include "light.h"
+#include "pointlight.h"
+#include "directionallight.h"
 
 std::vector<Material> materials;
 std::vector<Sphere> objects;
+std::vector<std::unique_ptr<Light>> lights;
+Color bkgcolor;
+float epsilon = 0.0001;
 
 // tokenizes a list by the delimiter
 std::vector<std::string> split(std::string in, char delim) {
@@ -43,26 +49,68 @@ std::string pixel_to_string(Color pixel) {
     return out.str();
 }
 
-Color shade_ray(int m) {
-    return materials[m].diffuse();
+Color shade_ray(int s, Point x, Vector view) {
+    Material mat = materials[objects[s].material()];
+    Vector n = x - objects[s].center();
+    n.normalize();
+
+    Color final_color = mat.ka() * mat.diffuse();
+
+    // for every light in the scene
+    for (int i = 0; i < lights.size(); i++) {
+        float s_flag;
+        // location of the light source is infinitely far if its a directional light
+        Point source = (lights[i]->w()) ? Point(lights[i]->x(), lights[i]->y(), lights[i]->z()) : Point::Inf();
+        Vector l = (lights[i]->w()) ? x - source : Vector(lights[i]->x(), lights[i]->y(), lights[i]->z());
+        l.normalize();
+        Ray r = Ray(x, l);
+        for (int j = 0; i < objects.size(); j++) {
+            // dont check yourself 
+            if (j == s) { continue; }
+            float t = r.intersect_sphere(objects[j]);
+            // is the intersection between the light source
+            bool is_between = (lights[i]->w()) ? epsilon < t && t < x.distance(source) : t > epsilon;
+            if (is_between) {
+                s_flag = 0.0;
+                break;
+            }
+        }
+        // no need to calculate diffuse or specular for this light source
+        if (s_flag == 0.0) { continue; }
+        float ndotl = std::max(0.0f, n.dot(l));
+        // if n dot l is 0 then n dot h is also 0 so same situation
+        if (ndotl == 0.0) { continue; }
+        Vector h = l + view;
+        h.normalize();
+        Color diffuse = ndotl * mat.kd() * mat.diffuse();
+        Color specular = std::pow(n.dot(h), mat.n()) * mat.ks() * mat.specular();
+        final_color = final_color + lights[i]->intensity() * (diffuse + specular);
+    }
+    return final_color;
 }
 
+
+
 // given a ray returns the color of any intersected geometry
-Color trace_ray(Ray ray, Color bkgcolor) {
+Color trace_ray(Ray ray) {
     float min_t = INFINITY;
-    float t;
     Color output = bkgcolor;
+    int hit_sphere = -1;
     for (int i = 0; i < objects.size(); i++) {
         float t = ray.intersect_sphere(objects[i]);
         if (t > 0){
             if (t < min_t) {
                 min_t = t;
-                output = shade_ray(objects[i].material());
+                hit_sphere = i;
             }
         }
     }
+    if (hit_sphere != -1){
+        output = shade_ray(hit_sphere, ray.get_point(min_t), -ray.direction());
+    }
     return output;
 }
+
 
 int main(int argc, char *argv[]) {
     // only argument should be the input file name
@@ -85,7 +133,6 @@ int main(int argc, char *argv[]) {
     Vector updir;
     float hfov;
     int resolution[2] = { -1, -1 };
-    Color bkgcolor;
     float frustum_w = -1.0;
     bool parallel = false;
     float pi = 4.0 * atan(1.0);
@@ -186,6 +233,14 @@ int main(int argc, char *argv[]) {
                 parallel = true;
                 read_inputs++;
             }
+            else if (keys[0] == "light") {
+                if (keys[4] == "1") {
+                    lights.push_back(std::make_unique<PointLight>(stof(keys[5]), Point(stof(keys[1]), stof(keys[2]), stof(keys[3]))));
+                }
+                else {
+                    lights.push_back(std::make_unique<DirectionalLight>(stof(keys[5]), Point(stof(keys[1]), stof(keys[2]), stof(keys[3]))));
+                }
+            }
             else {
                 std::cout << "invalid key"  << std::endl;
                 return 0;
@@ -269,7 +324,7 @@ int main(int argc, char *argv[]) {
         }
         for (int j = 0; j < resolution[0]; j++){
             int pos = j + (resolution[0] * i);
-            pixelmap[pos] = trace_ray(ray, bkgcolor);
+            pixelmap[pos] = trace_ray(ray);
             
             if (parallel) {
                 ray.set_origin((ul + (i * deltav) + (j * deltah)));
@@ -313,5 +368,6 @@ int main(int argc, char *argv[]) {
     // cleanup
     output.close();
     delete [] pixelmap;
+    lights.clear();
     return 1;
 }

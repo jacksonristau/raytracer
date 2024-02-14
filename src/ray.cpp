@@ -69,5 +69,8 @@ float Ray::intersect_sphere(const Sphere& sphere) {
             return std::min(t1, t2);
         }
     }
-    
+}
+
+Point Ray::get_point(float t) {
+    return o + (t * d);
 }

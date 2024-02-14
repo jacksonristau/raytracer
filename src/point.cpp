@@ -1,6 +1,9 @@
 #include "point.h"
 #include <math.h>
 
+static const Point inf = Point(INFINITY, INFINITY, INFINITY);
+const Point& Point::Inf() { return inf; }
+
 Point::Point() {
     p[0] = 0.0;
     p[1] = 0.0;

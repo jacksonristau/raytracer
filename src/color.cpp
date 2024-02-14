@@ -37,6 +37,14 @@ Color Color::operator=(const Color& c1) {
     return *this;
 }
 
+Color Color::operator+(const Color& c1) {
+    return Color(c[0] + c1.r(), c[1] + c1.g(), c[2] + c1.b());
+}
+
+Color operator*(float s, const Color& c1) {
+    return Color(s * c1.r(), s * c1.g(), s * c1.b());
+}
+
 std::ostream & operator<< ( std::ostream& os, const Color &c1) {
   return os << "(" << c1.r() << ", " << c1.g() << ", " << c1.b() << ")";
 }

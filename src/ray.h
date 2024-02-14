@@ -21,6 +21,8 @@ class Ray {
 
         float intersect_sphere(const Sphere& sphere);
 
+        Point get_point(float t);
+
         Point origin() const;
         Vector direction() const;
 

@@ -35,6 +35,7 @@ class Vector {
         float x() const {return v[0];}
         float y() const {return v[1];}
         float z() const {return v[2];}
+        float w() const {return 0;}
 
     private:
         float v[3];

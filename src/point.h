@@ -11,7 +11,10 @@ class Point {
 
         Point(const Point& p2);
 
+        Point(float *ptr);
+
         virtual ~Point();
+
 
         // equality
         bool operator==(const Point& p) const;
@@ -26,6 +29,10 @@ class Point {
         float x() const {return p[0];}
         float y() const {return p[1];}
         float z() const {return p[2];}
+        float w() const {return 1;}
+
+        // shortcut
+        static const Point& Inf();
 
     private:
         float p[3];
