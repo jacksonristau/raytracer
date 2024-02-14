@@ -24,6 +24,8 @@ class Color {
         float g() const {return c[1];}
         float b() const {return c[2];}
 
+        void clamp();
+
     private:
         float c[3];
 };

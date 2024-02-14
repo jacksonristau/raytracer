@@ -40,12 +40,13 @@ std::vector<std::string> split(std::string in, char delim) {
 
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
-    std::stringstream out;
-    out << std::to_string(pixel.r() * 255)
+      std::stringstream out;
+    out << std::to_string(static_cast<int>(ceil(pixel.r() * 255)))
         << " "
-        << std::to_string(pixel.g() * 255)
+        << std::to_string(static_cast<int>(ceil(pixel.g() * 255)))
         << " "
-        << std::to_string(pixel.b() * 255) << "\n";
+        << std::to_string(static_cast<int>(ceil(pixel.b() * 255))) << "\n";
+    return out.str();
     return out.str();
 }
 
@@ -56,15 +57,17 @@ Color shade_ray(int s, Point x, Vector view) {
 
     Color final_color = mat.ka() * mat.diffuse();
 
-    // for every light in the scene
     for (int i = 0; i < lights.size(); i++) {
         float s_flag;
         // location of the light source is infinitely far if its a directional light
         Point source = (lights[i]->w()) ? Point(lights[i]->x(), lights[i]->y(), lights[i]->z()) : Point::Inf();
-        Vector l = (lights[i]->w()) ? x - source : Vector(lights[i]->x(), lights[i]->y(), lights[i]->z());
+        // calculate the direction of the light source based on whether its a point or directional light
+        Vector l = (lights[i]->w()) ? source - x : Vector(lights[i]->x(), lights[i]->y(), lights[i]->z());
         l.normalize();
         Ray r = Ray(x, l);
-        for (int j = 0; i < objects.size(); j++) {
+
+        // check if the light source is blocked by another object
+        for (int j = 0; j < objects.size(); j++) {
             // dont check yourself 
             if (j == s) { continue; }
             float t = r.intersect_sphere(objects[j]);
@@ -85,6 +88,8 @@ Color shade_ray(int s, Point x, Vector view) {
         Color diffuse = ndotl * mat.kd() * mat.diffuse();
         Color specular = std::pow(n.dot(h), mat.n()) * mat.ks() * mat.specular();
         final_color = final_color + lights[i]->intensity() * (diffuse + specular);
+        // if any of the color values are greater then 1 clamp them
+        final_color.clamp();
     }
     return final_color;
 }
@@ -238,7 +243,7 @@ int main(int argc, char *argv[]) {
                     lights.push_back(std::make_unique<PointLight>(stof(keys[5]), Point(stof(keys[1]), stof(keys[2]), stof(keys[3]))));
                 }
                 else {
-                    lights.push_back(std::make_unique<DirectionalLight>(stof(keys[5]), Point(stof(keys[1]), stof(keys[2]), stof(keys[3]))));
+                    lights.push_back(std::make_unique<DirectionalLight>(stof(keys[5]), Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]))));
                 }
             }
             else {

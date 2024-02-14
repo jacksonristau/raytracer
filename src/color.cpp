@@ -45,6 +45,12 @@ Color operator*(float s, const Color& c1) {
     return Color(s * c1.r(), s * c1.g(), s * c1.b());
 }
 
+void Color::clamp() {
+    if (c[0] > 1.0) c[0] = 1.0;
+    if (c[1] > 1.0) c[1] = 1.0;
+    if (c[2] > 1.0) c[2] = 1.0;
+}
+
 std::ostream & operator<< ( std::ostream& os, const Color &c1) {
   return os << "(" << c1.r() << ", " << c1.g() << ", " << c1.b() << ")";
 }
