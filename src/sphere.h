@@ -1,29 +1,29 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
-#include "point.h"
+#include "vector.h"
 
 class Sphere {
     public:
         Sphere();
 
-        Sphere(const Point& center, float radius);
+        Sphere(const Vector& center, float radius);
 
-        Sphere(const Point& center, float radius, int m_index);
+        Sphere(const Vector& center, float radius, int m_index);
 
         virtual ~Sphere();
 
         // equality
         bool operator==(const Sphere& s2) const;
 
-        void set(const Point& center, float radius);
+        void set(const Vector& center, float radius);
 
-        Point center() const {return c;}
+        Vector center() const {return c;}
         float radius() const {return r;}
         int material() const {return m;} 
 
     private:
-        Point c;
+        Vector c;
         float r;
         int m;
 };

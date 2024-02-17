@@ -1,14 +1,13 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#include "point.h"
 #include <iostream>
 
 class Vector {
     public:
         Vector();
 
-        Vector(float x, float y, float z);
+        Vector(float x, float y, float z, float w = 0.0);
 
         Vector(const Vector& v2);
 
@@ -30,22 +29,24 @@ class Vector {
 
         Vector cross(const Vector& v1);
 
+        float distance(const Vector& v1);
+
         float dot(const Vector& v1);
 
         float x() const {return v[0];}
         float y() const {return v[1];}
         float z() const {return v[2];}
-        float w() const {return 0;}
+        float w() const {return v[3];}
+
+        static const Vector& Inf();
 
     private:
-        float v[3];
+        float v[4];
 };
 
-Point operator+(const Point& p1, const Vector& v1);
+Vector operator+(const Vector& v1, const Vector& v2);
 
-Point operator-(const Point& p1, const Vector& v1);
-
-Vector operator-(const Point& p1, const Point& p2);
+Vector operator-(const Vector& v1, const Vector& v2);
 
 Vector operator*(float s, const Vector& v1);
 

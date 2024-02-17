@@ -2,22 +2,29 @@
 #include <math.h>
 #include <iostream>
 
+static const Vector inf = Vector(INFINITY, INFINITY, INFINITY, 0.0);
+const Vector& Vector::Inf() {
+    return inf;
+}
+
 Vector::Vector() {
     v[0] = 0.0;
     v[1] = 0.0;
     v[2] = 0.0;
 }
 
-Vector::Vector(float x, float y, float z) {
+Vector::Vector(float x, float y, float z, float w) {
     v[0] = x;
     v[1] = y;
     v[2] = z;
+    v[3] = w;
 }
 
 Vector::Vector(const Vector& v2) {
     v[0] = v2.x();
     v[1] = v2.y();
     v[2] = v2.z();
+    v[3] = v2.w();
 }
 
 Vector::~Vector() {
@@ -26,7 +33,8 @@ Vector::~Vector() {
 bool Vector::operator==(const Vector& v2) const {
     return fabs(v[0] - v2.x()) < 0.001 && 
             fabs(v[1] - v2.y()) < 0.001 &&
-            fabs(v[2] - v2.z()) < 0.001;
+            fabs(v[2] - v2.z()) < 0.001 &&
+            fabs(v[3] - v2.w()) < 0.001;
 }
 
 Vector Vector::operator-() {
@@ -41,6 +49,7 @@ Vector Vector::operator=(const Vector& v1) {
     v[0] = v1.x();
     v[1] = v1.y();
     v[2] = v1.z();
+    v[3] = v1.w();
     return *this;
 }
 
@@ -59,23 +68,25 @@ Vector Vector::cross(const Vector& v1) {
                     (x() * v1.y() - y() * v1.x()));
 }
 
+float Vector::distance(const Vector& v1) {
+    return sqrt(
+        (x() - v1.x()) * (x() - v1.x()) +
+        (y() - v1.y()) * (y() - v1.y()) + 
+        (z() - v1.z()) * (z() - v1.z())
+    );
+}
+
 float Vector::dot(const Vector& v1) {
     return (x() * v1.x()) + (y() * v1.y()) + (z() * v1.z());
 }
 
-// addition
-Point operator+(const Point& p1, const Vector& v1) {
-    return Point(p1.x() + v1.x(), p1.y() + v1.y(), p1.z() + v1.z());
+// good practice to check if w is not 1 or 0
+Vector operator+(const Vector& v1, const Vector& v2) {
+    return Vector(v1.x() + v2.x(), v1.y() + v2.y(), v1.z() + v2.z(), v1.w() + v2.w());
 }
 
-// subtraction
-Point operator-(const Point& p1, const Vector& v1) {
-    return Point(p1.x() - v1.x(), p1.y() - v1.y(), p1.z() - v1.z());
-}
-
-// p1 - p2 -> a vector pointing from p2 to p1
-Vector operator-(const Point& p1, const Point& p2) {
-    return Vector(p1.x() - p2.x(), p1.y() - p2.y(), p1.z() - p2.z());
+Vector operator-(const Vector& v1, const Vector& v2) {
+    return Vector(v1.x() - v2.x(), v1.y() - v2.y(), v1.z() - v2.z(), v1.w() - v2.w());
 }
 
 // scalar multiplication

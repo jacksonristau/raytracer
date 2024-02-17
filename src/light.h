@@ -1,18 +1,16 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-// abstract base
 class Light {
     public:
-        Light(float intensity) : i(intensity) {}
+        Light(Vector v, float intensity) : i(intensity), v(v) {}
         virtual ~Light() {}
 
-        virtual float intensity() const { return i; }
-        virtual float x() const = 0;
-        virtual float y() const = 0;
-        virtual float z() const = 0;
-        virtual float w() const = 0;
+        float intensity() const { return i; }
+        Vector l() const { return v; }
+        float w() const { return v.w(); }
     private:
+        const Vector v;
         float i;
 };
 

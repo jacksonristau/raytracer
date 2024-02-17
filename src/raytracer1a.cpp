@@ -7,19 +7,16 @@
 
 #include "vector.h"
 #include "ray.h"
-#include "point.h"
 #include "sphere.h"
 #include "material.h"
 #include "color.h"
 #include "light.h"
-#include "pointlight.h"
-#include "directionallight.h"
 
 std::vector<Material> materials;
 std::vector<Sphere> objects;
-std::vector<std::unique_ptr<Light>> lights;
+std::vector<Light> lights;
 Color bkgcolor;
-float epsilon = 0.0001;
+float epsilon = 0.01;
 
 // tokenizes a list by the delimiter
 std::vector<std::string> split(std::string in, char delim) {
@@ -40,7 +37,8 @@ std::vector<std::string> split(std::string in, char delim) {
 
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
-      std::stringstream out;
+    std::stringstream out;
+    pixel.clamp();
     out << std::to_string(static_cast<int>(ceil(pixel.r() * 255)))
         << " "
         << std::to_string(static_cast<int>(ceil(pixel.g() * 255)))
@@ -50,21 +48,20 @@ std::string pixel_to_string(Color pixel) {
     return out.str();
 }
 
-Color shade_ray(int s, Point x, Vector view) {
+Color shade_ray(int s, Vector x_p, Vector view_v) {
     Material mat = materials[objects[s].material()];
-    Vector n = x - objects[s].center();
-    n.normalize();
+    Vector n = x_p - objects[s].center();
+    n = 1 / objects[s].radius() * n;
 
     Color final_color = mat.ka() * mat.diffuse();
 
     for (int i = 0; i < lights.size(); i++) {
-        float s_flag;
-        // location of the light source is infinitely far if its a directional light
-        Point source = (lights[i]->w()) ? Point(lights[i]->x(), lights[i]->y(), lights[i]->z()) : Point::Inf();
+        float s_flag = 1.0;
         // calculate the direction of the light source based on whether its a point or directional light
-        Vector l = (lights[i]->w()) ? source - x : Vector(lights[i]->x(), lights[i]->y(), lights[i]->z());
+        Vector l = (lights[i].w()) ? lights[i].l() - x_p : -lights[i].l();
+
         l.normalize();
-        Ray r = Ray(x, l);
+        Ray r = Ray(x_p, l);
 
         // check if the light source is blocked by another object
         for (int j = 0; j < objects.size(); j++) {
@@ -72,7 +69,7 @@ Color shade_ray(int s, Point x, Vector view) {
             if (j == s) { continue; }
             float t = r.intersect_sphere(objects[j]);
             // is the intersection between the light source
-            bool is_between = (lights[i]->w()) ? epsilon < t && t < x.distance(source) : t > epsilon;
+            bool is_between = (lights[i].w()) ? epsilon < t && t < x_p.distance(lights[i].l()) : t > epsilon;
             if (is_between) {
                 s_flag = 0.0;
                 break;
@@ -83,13 +80,13 @@ Color shade_ray(int s, Point x, Vector view) {
         float ndotl = std::max(0.0f, n.dot(l));
         // if n dot l is 0 then n dot h is also 0 so same situation
         if (ndotl == 0.0) { continue; }
-        Vector h = l + view;
+        Vector h = l + view_v;
         h.normalize();
+        float ndoth = std::max(0.0f, n.dot(h));
         Color diffuse = ndotl * mat.kd() * mat.diffuse();
-        Color specular = std::pow(n.dot(h), mat.n()) * mat.ks() * mat.specular();
-        final_color = final_color + lights[i]->intensity() * (diffuse + specular);
+        Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
+        final_color = final_color + lights[i].intensity() * (diffuse + specular);
         // if any of the color values are greater then 1 clamp them
-        final_color.clamp();
     }
     return final_color;
 }
@@ -111,7 +108,10 @@ Color trace_ray(Ray ray) {
         }
     }
     if (hit_sphere != -1){
-        output = shade_ray(hit_sphere, ray.get_point(min_t), -ray.direction());
+        Vector x_p = ray.get_point(min_t);
+        Vector view_v = ray.origin() - x_p;
+        view_v.normalize();
+        output = shade_ray(hit_sphere, x_p, view_v);
     }
     return output;
 }
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    Point eye;
+    Vector eye;
     Vector viewdir;
     Vector updir;
     float hfov;
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
                     std::cout << "3 numbers are required for eye" << std::endl;
                     return 0;
                 }
-                eye = Point(stof(keys[1]), stof(keys[2]), stof(keys[3]));
+                eye = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), 1.0);
                 read_inputs++;
                 std::cout << "eye: " << eye.x() << " " << eye.y() << " " << eye.z() << std::endl;
             }
@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
                     std::cout << "4 numbers are required for spheres" << std::endl;
                     return 0;
                 }
-                Point center = Point(stof(keys[1]), stof(keys[2]), stof(keys[3]));
+                Vector center = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), 1.0);
                 float radius = stof(keys[4]);
                 objects.push_back(Sphere(center, radius, index));
                 std::cout << "sphere: " << center.x() << " " << center.y() << " " << center.z() << " " << radius << std::endl; 
@@ -239,12 +239,7 @@ int main(int argc, char *argv[]) {
                 read_inputs++;
             }
             else if (keys[0] == "light") {
-                if (keys[4] == "1") {
-                    lights.push_back(std::make_unique<PointLight>(stof(keys[5]), Point(stof(keys[1]), stof(keys[2]), stof(keys[3]))));
-                }
-                else {
-                    lights.push_back(std::make_unique<DirectionalLight>(stof(keys[5]), Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]))));
-                }
+                lights.push_back(Light(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), stof(keys[4])), stof(keys[5])));
             }
             else {
                 std::cout << "invalid key"  << std::endl;
@@ -301,17 +296,17 @@ int main(int argc, char *argv[]) {
     float height = width / aspect;
 
     // go to view plane then to the left/right edge, then to the top/bottom
-    Point ul = (eye + d * viewdir) - ((width / 2) * u) + ((height/2) * v);
-    Point ur = (eye + d *  viewdir) + ((width / 2) * u) + ((height/2) * v);
+    Vector ul = (eye + d * viewdir) - ((width / 2) * u) + ((height/2) * v);
+    Vector ur = (eye + d *  viewdir) + ((width / 2) * u) + ((height/2) * v);
 
-    Point ll = (eye + d *  viewdir) - ((width / 2) * u) - ((height/2) * v);
-    Point lr = (eye + d *  viewdir) + ((width / 2) * u) - ((height/2) * v);
+    Vector ll = (eye + d *  viewdir) - ((width / 2) * u) - ((height/2) * v);
+    Vector lr = (eye + d *  viewdir) + ((width / 2) * u) - ((height/2) * v);
 
-    Vector deltah = (1.0 / (resolution[0] - 1)) * (ur - ul) ;
+    Vector deltah = (1.0 / (resolution[0] - 1)) * (ur - ul);
     Vector deltav = (1.0 / (resolution[1] - 1)) * (ll - ul);
 
     // origin is ul if parallel
-    Point origin = (parallel) ? ul : eye;
+    Vector origin = (parallel) ? ul : eye;
     // direction is always viewdir if parallel
     Vector direction = (parallel) ? viewdir : ul - eye;
 

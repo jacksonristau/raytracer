@@ -20,7 +20,7 @@ class Material {
         Material operator=(const Material& m1);
 
         Color diffuse() const {return d;}
-        Color specular() const {return d;}
+        Color specular() const {return s;}
         float ka() const {return k[0];}
         float kd() const {return k[1];}
         float ks() const {return k[2];}

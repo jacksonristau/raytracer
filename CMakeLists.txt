@@ -9,7 +9,6 @@ set(
     ${PROJECT_SOURCE_DIR}/src/raytracer1a.cpp
     ${PROJECT_SOURCE_DIR}/src/material.cpp
     ${PROJECT_SOURCE_DIR}/src/color.cpp
-    ${PROJECT_SOURCE_DIR}/src/point.cpp
     ${PROJECT_SOURCE_DIR}/src/ray.cpp
     ${PROJECT_SOURCE_DIR}/src/sphere.cpp
     ${PROJECT_SOURCE_DIR}/src/vector.cpp
