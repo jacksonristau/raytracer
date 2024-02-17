@@ -45,7 +45,6 @@ std::string pixel_to_string(Color pixel) {
         << " "
         << std::to_string(static_cast<int>(ceil(pixel.b() * 255))) << "\n";
     return out.str();
-    return out.str();
 }
 
 Color shade_ray(int s, Vector x_p, Vector view_v) {
@@ -86,7 +85,6 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
         Color diffuse = ndotl * mat.kd() * mat.diffuse();
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
         final_color = final_color + lights[i].intensity() * (diffuse + specular);
-        // if any of the color values are greater then 1 clamp them
     }
     return final_color;
 }
