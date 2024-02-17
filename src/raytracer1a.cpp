@@ -12,12 +12,13 @@
 #include "color.h"
 #include "light.h"
 
+Vector eye;
 std::vector<Material> materials;
 std::vector<Sphere> objects;
 std::vector<Light> lights;
 
 // depth cueing
-Color dc = Color(-1, -1, -1);
+Color dc;
 float depth_alpha[2];
 float depth_dist[2];
 
@@ -92,19 +93,20 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
         Color diffuse = ndotl * mat.kd() * mat.diffuse();
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
         final_color = final_color + (lights[i].intensity() * lights[i].atten(d)) * (diffuse + specular);
-        if (dc != Color(-1, -1, -1)) {
-            float alpha;
-            if (d <= depth_dist[0]) {
-                alpha = depth_alpha[1];
-            }
-            else if (d >= depth_dist[1]) {
-                alpha = depth_alpha[0];
-            }
-            else {
-                alpha = depth_alpha[0] + (depth_alpha[1] - depth_alpha[0]) * ((depth_dist[1] - d) / (depth_dist[1] - depth_dist[0]));
-            }
-            final_color = alpha * final_color + (1 - alpha) * dc;
+    }
+    if (dc != Color(-1, -1, -1)) {
+        float view_dist = eye.distance(x_p);
+        float alpha;
+        if (view_dist <= depth_dist[0]) {
+            alpha = depth_alpha[1];
         }
+        else if (view_dist >= depth_dist[1]) {
+            alpha = depth_alpha[0];
+        }
+        else {
+            alpha = depth_alpha[0] + (depth_alpha[1] - depth_alpha[0]) * ((depth_dist[1] - view_dist) / (depth_dist[1] - depth_dist[0]));
+        }
+        final_color = (alpha * final_color + (1 - alpha) * dc);
     }
     return final_color;
 }
@@ -152,7 +154,6 @@ int main(int argc, char *argv[]) {
     }
 
     // scene parameters
-    Vector eye;
     Vector viewdir;
     Vector updir;
     float hfov;
@@ -161,13 +162,10 @@ int main(int argc, char *argv[]) {
     bool parallel = false;
     float pi = 4.0 * atan(1.0);
 
-    // depth cueing
-    Color dc = Color(-1, -1, -1);
-    float depth_alpha[2];
-    float depth_dist[2];
-
     // if theres fewer somethings wrong
     int read_inputs = 0;
+
+    dc = Color(-1, -1, -1);
 
     // read values from file
     try {
@@ -178,6 +176,9 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             std::vector<std::string> keys = split(line, ' ');
+            if (keys[0] == "#") {
+                continue;
+            }
             if (keys[0] == "eye") {
                 if (keys.size() != 4) {
                     std::cout << "3 numbers are required for eye" << std::endl;
