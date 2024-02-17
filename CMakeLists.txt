@@ -12,6 +12,7 @@ set(
     ${PROJECT_SOURCE_DIR}/src/ray.cpp
     ${PROJECT_SOURCE_DIR}/src/sphere.cpp
     ${PROJECT_SOURCE_DIR}/src/vector.cpp
+    ${PROJECT_SOURCE_DIR}/src/light.cpp
 )
 
 set(

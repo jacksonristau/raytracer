@@ -16,6 +16,8 @@ class Color {
         // equality
         bool operator==(const Color& c1) const;
 
+        bool operator!=(const Color& c1) const;
+
         Color operator=(const Color& c1);
 
         Color operator+(const Color& c1);

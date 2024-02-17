@@ -30,6 +30,12 @@ bool Color::operator==(const Color& c1) const {
             fabs(c[2] - c1.b()) < 0.001;
 }
 
+bool Color::operator!=(const Color& c1) const {
+    return fabs(c[0] - c1.r()) > 0.01 || 
+            fabs(c[1] - c1.g()) > 0.01 ||
+            fabs(c[2] - c1.b()) > 0.01;
+}
+
 Color Color::operator=(const Color& c1) {
     c[0] = c1.r();
     c[1] = c1.g();

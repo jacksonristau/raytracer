@@ -15,6 +15,12 @@
 std::vector<Material> materials;
 std::vector<Sphere> objects;
 std::vector<Light> lights;
+
+// depth cueing
+Color dc = Color(-1, -1, -1);
+float depth_alpha[2];
+float depth_dist[2];
+
 Color bkgcolor;
 float epsilon = 0.01;
 
@@ -58,6 +64,7 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
         float s_flag = 1.0;
         // calculate the direction of the light source based on whether its a point or directional light
         Vector l = (lights[i].w()) ? lights[i].l() - x_p : -lights[i].l();
+        float d = x_p.distance(lights[i].l());
 
         l.normalize();
         Ray r = Ray(x_p, l);
@@ -68,7 +75,7 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
             if (j == s) { continue; }
             float t = r.intersect_sphere(objects[j]);
             // is the intersection between the light source
-            bool is_between = (lights[i].w()) ? epsilon < t && t < x_p.distance(lights[i].l()) : t > epsilon;
+            bool is_between = (lights[i].w()) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
                 s_flag = 0.0;
                 break;
@@ -84,7 +91,20 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
         float ndoth = std::max(0.0f, n.dot(h));
         Color diffuse = ndotl * mat.kd() * mat.diffuse();
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
-        final_color = final_color + lights[i].intensity() * (diffuse + specular);
+        final_color = final_color + (lights[i].intensity() * lights[i].atten(d)) * (diffuse + specular);
+        if (dc != Color(-1, -1, -1)) {
+            float alpha;
+            if (d <= depth_dist[0]) {
+                alpha = depth_alpha[1];
+            }
+            else if (d >= depth_dist[1]) {
+                alpha = depth_alpha[0];
+            }
+            else {
+                alpha = depth_alpha[0] + (depth_alpha[1] - depth_alpha[0]) * ((depth_dist[1] - d) / (depth_dist[1] - depth_dist[0]));
+            }
+            final_color = alpha * final_color + (1 - alpha) * dc;
+        }
     }
     return final_color;
 }
@@ -131,6 +151,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    // scene parameters
     Vector eye;
     Vector viewdir;
     Vector updir;
@@ -139,6 +160,11 @@ int main(int argc, char *argv[]) {
     float frustum_w = -1.0;
     bool parallel = false;
     float pi = 4.0 * atan(1.0);
+
+    // depth cueing
+    Color dc = Color(-1, -1, -1);
+    float depth_alpha[2];
+    float depth_dist[2];
 
     // if theres fewer somethings wrong
     int read_inputs = 0;
@@ -232,20 +258,50 @@ int main(int argc, char *argv[]) {
                 std::cout << "sphere: " << center.x() << " " << center.y() << " " << center.z() << " " << radius << std::endl; 
             }
             else if (keys[0] == "parallel") {
+                if (keys.size() != 2) {
+                    std::cout << "1 number is required for parallel" << std::endl;
+                    return 0;
+                }
                 frustum_w = stof(keys[1]);
                 parallel = true;
                 read_inputs++;
             }
+            // for the lights the attenuation is set to 1.0, 0.0, 0.0 by default
             else if (keys[0] == "light") {
+                if (keys.size() != 6) {
+                    std::cout << "5 numbers are required for light" << std::endl;
+                    return 0;
+                }
                 lights.push_back(Light(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), stof(keys[4])), stof(keys[5])));
             }
+            else if (keys[0] == "attlight") {
+                if (keys.size() != 9) {
+                    std::cout << "8 numbers are required for attlight" << std::endl;
+                    return 0;
+                }
+                Light l = Light(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), stof(keys[4])), stof(keys[5]));
+                l.set_att(stof(keys[6]), stof(keys[7]), stof(keys[8]));
+                lights.push_back(l);
+            }
+            else if (keys[0] == "depthcueing"){
+                if (keys.size() != 8) {
+                    std::cout << "7 numbers are required for depthcueing" << std::endl;
+                    return 0;
+                }
+                dc = Color(stof(keys[1]), stof(keys[2]), stof(keys[3]));
+                depth_alpha[0] = stof(keys[4]);
+                depth_alpha[1] = stof(keys[5]);
+                depth_dist[0] = stof(keys[6]);
+                depth_dist[1] = stof(keys[7]);
+                std::cout << "depthcueing: " << dc << " alpha: " << depth_alpha[0] << "-" << depth_alpha[1] << " dist: " << depth_dist[0] << "-" << depth_dist[1] << std::endl;
+            }
             else {
-                std::cout << "invalid key"  << std::endl;
+                std::cout << "invalid key: "  << keys[0] << std::endl;
                 return 0;
             }
         }
 
-        // read fewer than 6 inputs
+        // a few checks to make sure the input is valid
         if (read_inputs < 6) {
             std::cout << "missing a required input: [eye, viewdir, updir, hfov/parallel, res, bkgcolor]" << std::endl;
             return 0;
