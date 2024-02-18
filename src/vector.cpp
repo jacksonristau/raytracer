@@ -61,14 +61,14 @@ void Vector::normalize() {
 }
 
 // vector1.cross(vector2) -> vector1 X vector2
-Vector Vector::cross(const Vector& v1) {
+Vector Vector::cross(const Vector& v1) const {
     // v cross v1
     return Vector((y() * v1.z() - z() * v1.y()), 
                     (z() * v1.x() - x() * v1.z()), 
                     (x() * v1.y() - y() * v1.x()));
 }
 
-float Vector::distance(const Vector& v1) {
+float Vector::distance(const Vector& v1) const {
     return sqrt(
         (x() - v1.x()) * (x() - v1.x()) +
         (y() - v1.y()) * (y() - v1.y()) + 
@@ -76,7 +76,7 @@ float Vector::distance(const Vector& v1) {
     );
 }
 
-float Vector::dot(const Vector& v1) {
+float Vector::dot(const Vector& v1) const {
     return (x() * v1.x()) + (y() * v1.y()) + (z() * v1.z());
 }
 

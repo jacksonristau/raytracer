@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -11,36 +10,13 @@
 #include "material.h"
 #include "color.h"
 #include "light.h"
+#include "scene.h"
 
-Vector eye;
-std::vector<Material> materials;
-std::vector<Sphere> objects;
-std::vector<Light> lights;
 
-// depth cueing
-Color dc;
-float depth_alpha[2];
-float depth_dist[2];
+const float epsilon = 0.001;
+const float pi = 4.0 * atan(1.0);
 
-Color bkgcolor;
-float epsilon = 0.01;
-
-// tokenizes a list by the delimiter
-std::vector<std::string> split(std::string in, char delim) {
-    std::vector<std::string> out;
-    int start = 0;
-    int end = 0;
-    for (int i = 0; i <= in.size(); i++) {
-        if (in[i] == delim || i == in.size()) {
-            end = i;
-            std::string word = "";
-            word.append(in, start, end - start);
-            out.push_back(word);
-            start = end + 1;
-        }
-    }
-    return out;
-}
+Scene scene;
 
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
@@ -55,28 +31,30 @@ std::string pixel_to_string(Color pixel) {
 }
 
 Color shade_ray(int s, Vector x_p, Vector view_v) {
-    Material mat = materials[objects[s].material()];
-    Vector n = x_p - objects[s].center();
-    n = 1 / objects[s].radius() * n;
+    Sphere object = scene.get_object(s);
+    Material mat = scene.get_material(object.material());
+    Vector n = x_p - object.center();
+    n = 1 / object.radius() * n;
 
     Color final_color = mat.ka() * mat.diffuse();
 
-    for (int i = 0; i < lights.size(); i++) {
+    for (int i = 0; i < scene.num_lights(); i++) {
+        Light cur_light = scene.get_light(i);
         float s_flag = 1.0;
         // calculate the direction of the light source based on whether its a point or directional light
-        Vector l = (lights[i].w()) ? lights[i].l() - x_p : -lights[i].l();
-        float d = x_p.distance(lights[i].l());
+        Vector l = (cur_light.w()) ? cur_light.l() - x_p : -cur_light.l();
+        float d = x_p.distance(cur_light.l());
 
         l.normalize();
         Ray r = Ray(x_p, l);
 
         // check if the light source is blocked by another object
-        for (int j = 0; j < objects.size(); j++) {
+        for (int j = 0; j < scene.num_objects(); j++) {
             // dont check yourself 
             if (j == s) { continue; }
-            float t = r.intersect_sphere(objects[j]);
+            float t = r.intersect_sphere(scene.get_object(j));
             // is the intersection between the light source
-            bool is_between = (lights[i].w()) ? epsilon < t && t < d : t > epsilon;
+            bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
                 s_flag = 0.0;
                 break;
@@ -92,22 +70,9 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
         float ndoth = std::max(0.0f, n.dot(h));
         Color diffuse = ndotl * mat.kd() * mat.diffuse();
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
-        final_color = final_color + (lights[i].intensity() * lights[i].atten(d)) * (diffuse + specular);
+        final_color = final_color + (cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular);
     }
-    if (dc != Color(-1, -1, -1)) {
-        float view_dist = eye.distance(x_p);
-        float alpha;
-        if (view_dist <= depth_dist[0]) {
-            alpha = depth_alpha[1];
-        }
-        else if (view_dist >= depth_dist[1]) {
-            alpha = depth_alpha[0];
-        }
-        else {
-            alpha = depth_alpha[0] + (depth_alpha[1] - depth_alpha[0]) * ((depth_dist[1] - view_dist) / (depth_dist[1] - depth_dist[0]));
-        }
-        final_color = (alpha * final_color + (1 - alpha) * dc);
-    }
+    final_color = scene.depth_cue(x_p, final_color, scene.eye().distance(x_p));
     return final_color;
 }
 
@@ -116,10 +81,10 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
 // given a ray returns the color of any intersected geometry
 Color trace_ray(Ray ray) {
     float min_t = INFINITY;
-    Color output = bkgcolor;
+    Color output = scene.background();
     int hit_sphere = -1;
-    for (int i = 0; i < objects.size(); i++) {
-        float t = ray.intersect_sphere(objects[i]);
+    for (int i = 0; i < scene.num_objects(); i++) {
+        float t = ray.intersect_sphere(scene.get_object(i));
         if (t > 0){
             if (t < min_t) {
                 min_t = t;
@@ -143,255 +108,77 @@ int main(int argc, char *argv[]) {
         printf("usage: raytracer1a <name of input file>\n");
         return 0;
     }
-
-    std::ifstream input;
-    std::ofstream output;
-
-    input.open(argv[1]);
-    if (!input.is_open()) {
-        std::cout << "unable to open file." << std::endl;
+    scene = Scene();
+    if (scene.load_from_file(argv[1]) == 0) {
         return 0;
     }
 
     // scene parameters
-    Vector viewdir;
-    Vector updir;
-    float hfov;
-    int resolution[2] = { -1, -1 };
-    float frustum_w = -1.0;
-    bool parallel = false;
-    float pi = 4.0 * atan(1.0);
-
-    // if theres fewer somethings wrong
-    int read_inputs = 0;
-
-    dc = Color(-1, -1, -1);
-
-    // read values from file
-    try {
-        std::string line;
-        int index = -1;
-        while(std::getline(input, line)) {
-            if (line.empty()) {
-                continue;
-            }
-            std::vector<std::string> keys = split(line, ' ');
-            if (keys[0] == "#") {
-                continue;
-            }
-            if (keys[0] == "eye") {
-                if (keys.size() != 4) {
-                    std::cout << "3 numbers are required for eye" << std::endl;
-                    return 0;
-                }
-                eye = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), 1.0);
-                read_inputs++;
-                std::cout << "eye: " << eye.x() << " " << eye.y() << " " << eye.z() << std::endl;
-            }
-            else if (keys[0] == "viewdir") {
-                if (keys.size() != 4) {
-                    std::cout << "3 numbers are required for viewdir" << std::endl;
-                    return 0;
-                }
-                viewdir = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]));
-                read_inputs++;
-                std::cout << "viewdir: " << viewdir.x() << " " << viewdir.y() << " " << viewdir.z() << std::endl;
-            }
-            else if (keys[0] == "updir") {
-                if (keys.size() != 4) {
-                    std::cout << "3 numbers are required for updir" << std::endl;
-                    return 0;
-                }
-                updir = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]));
-                read_inputs++;
-                std::cout << "updir: " << updir.x() << " " << updir.y() << " " << updir.z() << std::endl;
-            }
-            else if (keys[0] == "hfov") {
-                if (keys.size() != 2) {
-                    std::cout << "1 number is required for hfov" << std::endl;
-                    return 0;
-                }
-                hfov = stof(keys[1]);
-                // convert to radians
-                hfov *= pi / 180;
-                read_inputs++;
-                std::cout << "hfov: " << hfov << std::endl;
-            }
-            else if (keys[0] == "imsize") {
-                if (keys.size() != 3) {
-                    std::cout << "2 numbers are required for imsize" << std::endl;
-                    return 0;
-                }
-                resolution[0] = stoi(keys[1]);
-                resolution[1] = stoi(keys[2]);
-                read_inputs++;
-                std::cout << "res: " << resolution[0] << " " << resolution[1] << std::endl;
-            }
-            else if (keys[0] == "bkgcolor") {
-                if (keys.size() != 4) {
-                    std::cout << "3 numbers are required for bkgcolor" << std::endl;
-                    return 0;
-                }
-                bkgcolor = Color(stof(keys[1]), stof(keys[2]), stof(keys[3]));
-                read_inputs++;
-                std::cout << "bkg: " << bkgcolor << std::endl;
-            }
-            else if (keys[0] == "mtlcolor") {
-                if (keys.size() != 11) {
-                    std::cout << "10 numbers are required for mtlcolor" << std::endl;
-                    return 0;
-                }
-                Color d = Color(stof(keys[1]), stof(keys[2]), stof(keys[3]));
-                Color s = Color(stof(keys[4]), stof(keys[5]), stof(keys[6]));
-                // if a specular isnt given use the other constructor
-                materials.push_back(Material(d, s, stof(keys[7]), stof(keys[8]), stof(keys[9]), stof(keys[10])));
-                index++;
-                std::cout << "mtlcolor: " << materials[index] << std::endl; 
-            }
-            else if (keys[0] == "sphere") {
-                if (keys.size() != 5) {
-                    std::cout << "4 numbers are required for spheres" << std::endl;
-                    return 0;
-                }
-                Vector center = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), 1.0);
-                float radius = stof(keys[4]);
-                objects.push_back(Sphere(center, radius, index));
-                std::cout << "sphere: " << center.x() << " " << center.y() << " " << center.z() << " " << radius << std::endl; 
-            }
-            else if (keys[0] == "parallel") {
-                if (keys.size() != 2) {
-                    std::cout << "1 number is required for parallel" << std::endl;
-                    return 0;
-                }
-                frustum_w = stof(keys[1]);
-                parallel = true;
-                read_inputs++;
-            }
-            // for the lights the attenuation is set to 1.0, 0.0, 0.0 by default
-            else if (keys[0] == "light") {
-                if (keys.size() != 6) {
-                    std::cout << "5 numbers are required for light" << std::endl;
-                    return 0;
-                }
-                lights.push_back(Light(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), stof(keys[4])), stof(keys[5])));
-            }
-            else if (keys[0] == "attlight") {
-                if (keys.size() != 9) {
-                    std::cout << "8 numbers are required for attlight" << std::endl;
-                    return 0;
-                }
-                Light l = Light(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), stof(keys[4])), stof(keys[5]));
-                l.set_att(stof(keys[6]), stof(keys[7]), stof(keys[8]));
-                lights.push_back(l);
-            }
-            else if (keys[0] == "depthcueing"){
-                if (keys.size() != 8) {
-                    std::cout << "7 numbers are required for depthcueing" << std::endl;
-                    return 0;
-                }
-                dc = Color(stof(keys[1]), stof(keys[2]), stof(keys[3]));
-                depth_alpha[0] = stof(keys[4]);
-                depth_alpha[1] = stof(keys[5]);
-                depth_dist[0] = stof(keys[6]);
-                depth_dist[1] = stof(keys[7]);
-                std::cout << "depthcueing: " << dc << " alpha: " << depth_alpha[0] << "-" << depth_alpha[1] << " dist: " << depth_dist[0] << "-" << depth_dist[1] << std::endl;
-            }
-            else {
-                std::cout << "invalid key: "  << keys[0] << std::endl;
-                return 0;
-            }
-        }
-
-        // a few checks to make sure the input is valid
-        if (read_inputs < 6) {
-            std::cout << "missing a required input: [eye, viewdir, updir, hfov/parallel, res, bkgcolor]" << std::endl;
-            return 0;
-        }
-        else if (index == -1 || objects.size() < 1) {
-            std::cout << "missing at least one mtlcolor, and/or one sphere" << std::endl;
-            return 0;
-        }
-        if (parallel && frustum_w <= 0) {
-            std::cout << "invalid format: parallel <frustum_width>" << std::endl;
-            std::cout << "frustum width must be positive" << std::endl;
-            return 0;
-        }
-        std::cout << "# of material colors: " << index + 1 << std::endl;
-        std::cout << "# of objects: " << objects.size() << std::endl;
-    }
-    catch (const std::invalid_argument& e) {
-        std::cerr << "Invalid values in input file: " << e.what() << std::endl;
-        return 0;
-    } catch (const std::exception& e) {
-        std::cerr << "An unexpected error occurred: " << e.what() << std::endl;
-        return 0;
-    }
-
-    int size = resolution[0] * resolution[1];
+    
+    int size = scene.px_width() * scene.px_height();
     Color *pixelmap = new Color[size];
-    viewdir.normalize();
-    updir.normalize();
 
     // viewdir cross updir approaching invalidity with fp error
-    if (viewdir.dot(updir) < -0.9 || viewdir.dot(updir) > 0.9) {
+    if (scene.view().dot(scene.up()) < -0.9 || scene.view().dot(scene.up()) > 0.9) {
         std::cout << "up vector is too close to view vector" << std::endl;
         return 0;
-    } 
+    }
 
     // define the viewing coordinate system
-    Vector u = viewdir.cross(updir);
+    Vector u = scene.view().cross(scene.up());
     u.normalize();
-    Vector v = u.cross(viewdir);
+    Vector v = u.cross(scene.view());
 
-    float aspect = (float)resolution[0] / (float)resolution[1];
+    float aspect = (float)scene.px_width() / (float)scene.px_height();
     float d = 1;
 
     // width is just frustum width for a parallel projection
-    float width = (parallel) ? frustum_w : 2 * d * tan(hfov / 2);
+    float width = (scene.is_parallel()) ? scene.frustum_width() : 2 * d * tan(scene.fov() / 2);
     float height = width / aspect;
 
     // go to view plane then to the left/right edge, then to the top/bottom
-    Vector ul = (eye + d * viewdir) - ((width / 2) * u) + ((height/2) * v);
-    Vector ur = (eye + d *  viewdir) + ((width / 2) * u) + ((height/2) * v);
+    Vector ul = (scene.eye() + d * scene.view()) - ((width / 2) * u) + ((height/2) * v);
+    Vector ur = (scene.eye() + d *  scene.view()) + ((width / 2) * u) + ((height/2) * v);
 
-    Vector ll = (eye + d *  viewdir) - ((width / 2) * u) - ((height/2) * v);
-    Vector lr = (eye + d *  viewdir) + ((width / 2) * u) - ((height/2) * v);
+    Vector ll = (scene.eye() + d *  scene.view()) - ((width / 2) * u) - ((height/2) * v);
+    Vector lr = (scene.eye() + d *  scene.view()) + ((width / 2) * u) - ((height/2) * v);
 
-    Vector deltah = (1.0 / (resolution[0] - 1)) * (ur - ul);
-    Vector deltav = (1.0 / (resolution[1] - 1)) * (ll - ul);
+    Vector deltah = (1.0 / (scene.px_width() - 1)) * (ur - ul);
+    Vector deltav = (1.0 / (scene.px_height() - 1)) * (ll - ul);
 
     // origin is ul if parallel
-    Vector origin = (parallel) ? ul : eye;
+    Vector origin = (scene.is_parallel()) ? ul : scene.eye();
     // direction is always viewdir if parallel
-    Vector direction = (parallel) ? viewdir : ul - eye;
+    Vector direction = (scene.is_parallel()) ? scene.view() : ul - scene.eye();
 
     Ray ray = Ray(origin, direction);
 
     // for every pixel in the output image trace a ray to get its color
-    for (int i = 0; i < resolution[1]; i++) {
+    for (int i = 0; i < scene.px_height(); i++) {
         // for parallel the direction is always the same
-        if (parallel) {
+        if (scene.is_parallel()) {
             ray.set_origin((ul + (i * deltav)));
         }
         // for perspective origin is always the eye
         else {
-            ray.set_direction((ul + i * deltav) - eye);
+            ray.set_direction((ul + i * deltav) - scene.eye());
         }
-        for (int j = 0; j < resolution[0]; j++){
-            int pos = j + (resolution[0] * i);
+        for (int j = 0; j < scene.px_width(); j++){
+            int pos = j + (scene.px_width() * i);
             pixelmap[pos] = trace_ray(ray);
             
-            if (parallel) {
+            if (scene.is_parallel()) {
                 ray.set_origin((ul + (i * deltav) + (j * deltah)));
             }
             else {
-                ray.set_direction((ul + (i * deltav) + (j * deltah)) - eye);
+                ray.set_direction((ul + (i * deltav) + (j * deltah)) - scene.eye());
             }
         }
     }
 
     std::string filename = argv[1];
     filename.std::string::erase(filename.std::string::find("."));
+    std::ofstream output;
     output.open(filename + ".ppm");
 
     if (!output.is_open()) {
@@ -402,9 +189,9 @@ int main(int argc, char *argv[]) {
     // write colors to ppm file 
     output << "P3\n"
         << "#raytracingiscool\n"
-        << resolution[0]
+        << scene.px_width()
         << " "
-        << resolution[1]
+        << scene.px_height()
         << "\n255\n";
 
     std::stringstream image;
@@ -423,6 +210,5 @@ int main(int argc, char *argv[]) {
     // cleanup
     output.close();
     delete [] pixelmap;
-    lights.clear();
     return 1;
 }

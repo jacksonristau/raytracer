@@ -17,7 +17,7 @@ class Light {
         float atten(float d) const;
 
     private:
-        const Vector v;
+        Vector v;
         float att[3];
         float i;
 };

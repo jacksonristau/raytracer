@@ -27,11 +27,11 @@ class Vector {
 
         void normalize();
 
-        Vector cross(const Vector& v1);
+        Vector cross(const Vector& v1) const;
 
-        float distance(const Vector& v1);
+        float distance(const Vector& v1) const;
 
-        float dot(const Vector& v1);
+        float dot(const Vector& v1) const;
 
         float x() const {return v[0];}
         float y() const {return v[1];}

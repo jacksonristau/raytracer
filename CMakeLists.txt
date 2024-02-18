@@ -13,6 +13,7 @@ set(
     ${PROJECT_SOURCE_DIR}/src/sphere.cpp
     ${PROJECT_SOURCE_DIR}/src/vector.cpp
     ${PROJECT_SOURCE_DIR}/src/light.cpp
+    ${PROJECT_SOURCE_DIR}/src/scene.cpp
 )
 
 set(
@@ -20,6 +21,6 @@ set(
     ${PROJECT_SOURCE_DIR}/src
 )
 
-include_directories(INCLUDE_DIRS)
+include_directories(${INCLUDE_DIRS})
 
-add_executable(raytracer1a ${SOURCES})
+add_executable(raytracer1b ${SOURCES})
