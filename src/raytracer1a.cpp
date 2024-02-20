@@ -196,12 +196,8 @@ int main(int argc, char *argv[]) {
 
     std::stringstream image;
     for (int i = 0; i < size; i++) {
-        if (i % (size / 100) == 0) {
-            std::cout << (i * 100) / size << '%' << '\r';
-        }
         image << pixel_to_string(pixelmap[i]);
         if (i == size - 1) {
-            std::cout << "100% done" << std::endl;
             std::cout << filename << ".ppm created." << std::endl;
         }
     }

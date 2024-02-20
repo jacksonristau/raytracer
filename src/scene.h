@@ -2,6 +2,7 @@
 #define SCENE_H
 
 #include <string>
+#include <vector>
 #include "vector.h"
 #include "color.h"
 #include "material.h"
