@@ -51,6 +51,7 @@ class Scene {
         std::vector<Material> materials;
         std::vector<Sphere> objects;
         std::vector<Light> lights;
+        std::vector<Vector> vertices;
 
         Vector eye_pos;
         Vector viewdir;

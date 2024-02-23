@@ -33,8 +33,7 @@ Vector Ray::direction() const {
     return d;
 }
 
-// -B +- sqrt(B^2 - 4C) / 2.0
-// maybe just return the t value
+// check if t is negative
 float Ray::intersect_sphere(const Sphere& sphere) {
     Vector center = sphere.center();
     float B = 2.0 * (d.x() * (o.x() - center.x()) + 
@@ -69,6 +68,17 @@ float Ray::intersect_sphere(const Sphere& sphere) {
             return std::min(t1, t2);
         }
     }
+}
+
+// check if t is negative if so its behind the ray origin
+float Ray::intersect_plane(const Vector& normal, const Vector& point) {
+    float denom = normal.dot(d);
+    // if the ray is parallel to the plane
+    if (denom < 0) {
+        return -1.0;
+    }
+    float D = -normal.dot(point);
+    return -(normal.dot(o) + D) / denom;
 }
 
 Vector Ray::get_point(float t) {

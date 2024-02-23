@@ -19,6 +19,7 @@ class Ray {
         void set_direction(const Vector& direction);
 
         float intersect_sphere(const Sphere& sphere);
+        float intersect_plane(const Vector& normal, const Vector& point);
 
         Vector get_point(float t);
 
