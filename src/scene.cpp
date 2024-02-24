@@ -6,7 +6,7 @@ const float pi = 4.0 * atan(1.0);
 
 Scene::Scene() {
     materials = std::vector<Material>();
-    objects = std::vector<Sphere>();
+    spheres = std::vector<Sphere>();
     lights = std::vector<Light>();
 }
 
@@ -42,8 +42,10 @@ std::vector<std::string> Scene::split(std::string in, char delim) {
             end = i;
             std::string word = "";
             word.append(in, start, end - start);
-            out.push_back(word);
-            start = end + 1;
+            if (!word.empty()){
+                out.push_back(word);
+                start = end + 1;
+            }
         }
     }
     return out;
@@ -52,6 +54,7 @@ std::vector<std::string> Scene::split(std::string in, char delim) {
 // Static method to load a scene from a file
 int Scene::load_from_file(const std::string& filename) {
     std::ifstream input;
+    std::cout << "loading file: " << filename << std::endl;
 
     input.open(filename);
     if (!input.is_open()) {
@@ -64,13 +67,14 @@ int Scene::load_from_file(const std::string& filename) {
 
     // read values from file
     std::string line;
-    int index = -1;
+    int mtl_index = -1;
+    bool texture_defined = false;
     while(std::getline(input, line)) {
         if (line.empty()) {
             continue;
         }
         std::vector<std::string> keys = split(line, ' ');
-        if (keys[0] == "#") {
+        if (keys[0] == "#" || keys[0][0] == '#') {
             continue;
         }
         if (keys[0] == "eye") {
@@ -129,19 +133,36 @@ int Scene::load_from_file(const std::string& filename) {
                 std::cout << "10 numbers are required for mtlcolor" << std::endl;
                 return 0;
             }
+            if (texture_defined) {
+                std::cout << "untextured geometry must be defined before textured geometry" << std::endl;
+                return 0;
+            }
             Color d = Color(stof(keys[1]), stof(keys[2]), stof(keys[3]));
             Color s = Color(stof(keys[4]), stof(keys[5]), stof(keys[6]));
             materials.push_back(Material(d, s, stof(keys[7]), stof(keys[8]), stof(keys[9]), stof(keys[10])));
-            index++;
+            mtl_index++;
+        }
+        else if (keys[0] == "texture") {
+            if (keys.size() != 2) {
+                std::cout << "1 string is required for texture" << std::endl;
+                return 0;
+            }
+            materials.push_back(Material(keys[1]));
+            texture_defined = true;
+            mtl_index++;
         }
         else if (keys[0] == "sphere") {
             if (keys.size() != 5) {
                 std::cout << "4 numbers are required for spheres" << std::endl;
                 return 0;
             }
+            else if (mtl_index == -1) {
+                std::cout << "a material / texture must be defined before objects" << std::endl;
+                return 0;
+            }
             Vector center = Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), 1.0);
             float radius = stof(keys[4]);
-            objects.push_back(Sphere(center, radius, index));
+            spheres.push_back(Sphere(center, radius, mtl_index));
         }
         else if (keys[0] == "parallel") {
             if (keys.size() != 2) {
@@ -180,6 +201,29 @@ int Scene::load_from_file(const std::string& filename) {
             dist[0] = stof(keys[6]);
             dist[1] = stof(keys[7]);
         }
+        else if (keys[0] == "v") {
+            if (keys.size() != 4) {
+                std::cout << "3 numbers are required for vertices" << std::endl;
+                return 0;
+            }
+            vertices.push_back(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), 1.0));
+        }
+        else if (keys[0] == "f") {
+            if (keys.size() != 4) {
+                std::cout << "3 numbers are required for faces" << std::endl;
+                return 0;
+            }
+            if (keys[1] == "0" || keys[2] == "0" || keys[3] == "0") {
+                std::cout << "indices must start at 1" << std::endl;
+                return 0;
+            }
+            else if (mtl_index == -1) {
+                std::cout << "a material / texture must be defined before objects" << std::endl;
+                return 0;
+            }
+            indices.push_back(std::vector<int>{stoi(keys[1]) - 1, stoi(keys[2]) - 1, stoi(keys[3]) - 1});
+            material_indices.push_back(mtl_index);
+        }
         else {
             std::cout << "invalid key: "  << keys[0] << std::endl;
             return 0;
@@ -191,8 +235,8 @@ int Scene::load_from_file(const std::string& filename) {
         std::cout << "missing a required input: [eye, viewdir, updir, hfov/parallel, res, bkgcolor]" << std::endl;
         return 0;
     }
-    else if (index == -1 || objects.size() < 1) {
-        std::cout << "missing at least one mtlcolor, and/or one sphere" << std::endl;
+    else if ((mtl_index == -1) || (spheres.size() < 1 && indices.size() < 1)) {
+        std::cout << "missing at least one mtlcolor, and/or one sphere / triangle" << std::endl;
         return 0;
     }
     if (parallel && frustum_w <= 0) {
@@ -200,5 +244,6 @@ int Scene::load_from_file(const std::string& filename) {
         std::cout << "frustum width must be positive" << std::endl;
         return 0;
     }
+    std::cout << "file loaded successfully" << std::endl;
     return 1;
 }

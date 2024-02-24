@@ -22,5 +22,11 @@ set(
 )
 
 include_directories(${INCLUDE_DIRS})
-
 add_executable(raytracer1b ${SOURCES})
+
+# Add compiler optimizations
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(raytracer1b PRIVATE -O3)
+elseif(MSVC)
+    target_compile_options(raytracer1b PRIVATE /O2)
+endif()

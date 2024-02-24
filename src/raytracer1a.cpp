@@ -30,11 +30,24 @@ std::string pixel_to_string(Color pixel) {
     return out.str();
 }
 
-Color shade_ray(int s, Vector x_p, Vector view_v) {
-    Sphere object = scene.get_object(s);
-    Material mat = scene.get_material(object.material());
-    Vector n = x_p - object.center();
-    n = 1 / object.radius() * n;
+Color shade_ray(int s, Vector x_p, Vector view_v, bool sphere) {
+    Material mat;
+    Vector n;
+    if (sphere) {
+        Sphere object = scene.get_sphere(s);
+        mat = scene.get_material(object.material());
+        n = x_p - object.center();
+        n = 1 / object.radius() * n;
+    }
+    else {
+        std::vector<int> indices = scene.get_indices(s);
+        Vector p0 = scene.get_vertex(indices[0]);
+        Vector p1 = scene.get_vertex(indices[1]);
+        Vector p2 = scene.get_vertex(indices[2]);
+        Vector n = (p1 - p0).cross(p2 - p0);
+        mat = scene.get_material(scene.get_material_index(s));
+        n.normalize();
+    }
 
     Color final_color = mat.ka() * mat.diffuse();
 
@@ -49,10 +62,25 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
         Ray r = Ray(x_p, l);
 
         // check if the light source is blocked by another object
-        for (int j = 0; j < scene.num_objects(); j++) {
+        for (int j = 0; j < scene.num_spheres(); j++) {
             // dont check yourself 
-            if (j == s) { continue; }
-            float t = r.intersect_sphere(scene.get_object(j));
+            if (j == s && sphere) { continue; }
+            float t = r.intersect_sphere(scene.get_sphere(j));
+            // is the intersection between the light source
+            bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
+            if (is_between) {
+                s_flag = 0.0;
+                break;
+            }
+        }
+        for (int j = 0; j < scene.num_indices(); j++) {
+            std::vector<int> indices = scene.get_indices(s);
+            Vector p0 = scene.get_vertex(indices[0]);
+            Vector p1 = scene.get_vertex(indices[1]);
+            Vector p2 = scene.get_vertex(indices[2]);
+            // dont check yourself 
+            if (j == s && !sphere) { continue; }
+            float t = r.intersect_triangle(p0, p1, p2);
             // is the intersection between the light source
             bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
@@ -82,25 +110,38 @@ Color shade_ray(int s, Vector x_p, Vector view_v) {
 Color trace_ray(Ray ray) {
     float min_t = INFINITY;
     Color output = scene.background();
-    int hit_sphere = -1;
-    for (int i = 0; i < scene.num_objects(); i++) {
-        float t = ray.intersect_sphere(scene.get_object(i));
+    int hit_index = -1;
+    bool is_sphere = false;
+    // each sphere in scene
+    for (int i = 0; i < scene.num_spheres(); i++) {
+        float t = ray.intersect_sphere(scene.get_sphere(i));
         if (t > 0){
             if (t < min_t) {
                 min_t = t;
-                hit_sphere = i;
+                hit_index = i;
+                is_sphere = true;
             }
         }
     }
-    if (hit_sphere != -1){
+    for (int i = 0; i < scene.num_indices(); i++) {
+        std::vector<int> indices = scene.get_indices(i);
+        float t = ray.intersect_triangle(scene.get_vertex(indices[0]), scene.get_vertex(indices[1]), scene.get_vertex(indices[2]));
+        if (t > 0){
+            if (t < min_t) {
+                min_t = t;
+                hit_index = i;
+                is_sphere = false;
+            }
+        }
+    }
+    if (hit_index != -1){
         Vector x_p = ray.get_point(min_t);
         Vector view_v = ray.origin() - x_p;
         view_v.normalize();
-        output = shade_ray(hit_sphere, x_p, view_v);
+        output = shade_ray(hit_index, x_p, view_v, is_sphere);
     }
     return output;
 }
-
 
 int main(int argc, char *argv[]) {
     // only argument should be the input file name
@@ -154,6 +195,8 @@ int main(int argc, char *argv[]) {
     Ray ray = Ray(origin, direction);
 
     // for every pixel in the output image trace a ray to get its color
+    std::cout << "tracing rays..." << std::endl;
+    std::cout << "0% complete...";
     for (int i = 0; i < scene.px_height(); i++) {
         // for parallel the direction is always the same
         if (scene.is_parallel()) {
@@ -166,7 +209,7 @@ int main(int argc, char *argv[]) {
         for (int j = 0; j < scene.px_width(); j++){
             int pos = j + (scene.px_width() * i);
             pixelmap[pos] = trace_ray(ray);
-            
+            std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
             if (scene.is_parallel()) {
                 ray.set_origin((ul + (i * deltav) + (j * deltah)));
             }
@@ -175,6 +218,8 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    std::cout << '\r';
+    std::cout << "tracing complete." << std::endl;
 
     std::string filename = argv[1];
     filename.std::string::erase(filename.std::string::find("."));
@@ -195,6 +240,7 @@ int main(int argc, char *argv[]) {
         << "\n255\n";
 
     std::stringstream image;
+    std::cout << "creating image..." << std::endl;
     for (int i = 0; i < size; i++) {
         image << pixel_to_string(pixelmap[i]);
         if (i == size - 1) {

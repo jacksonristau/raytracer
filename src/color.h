@@ -9,6 +9,8 @@ class Color {
 
         Color(float r, float g, float b);
 
+        Color(float c[3]);
+
         Color(const Color& c1);
 
         virtual ~Color();

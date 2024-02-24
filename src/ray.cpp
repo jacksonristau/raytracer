@@ -42,7 +42,6 @@ float Ray::intersect_sphere(const Sphere& sphere) {
     float C = pow(o.x() - center.x(), 2) + pow(o.y() - center.y(), 2) +
               pow(o.z() - center.z(), 2) - pow(sphere.radius(), 2);
     float discrim = (B * B) - (4 * C);
-    float sqrt_discrim = sqrt(discrim);
     if (discrim < 0) {
         return -1.0;
     }
@@ -50,8 +49,8 @@ float Ray::intersect_sphere(const Sphere& sphere) {
         return (-B / 2.0);
     }
     else  {
-        float t1 = (-B + sqrt_discrim) / 2.0;
-        float t2 = (-B - sqrt_discrim) / 2.0;
+        float t1 = (-B + sqrt(discrim)) / 2.0;
+        float t2 = (-B - sqrt(discrim)) / 2.0;
         
         if (t1 <= 0 && t2 > 0) {
             return t2;
@@ -74,11 +73,48 @@ float Ray::intersect_sphere(const Sphere& sphere) {
 float Ray::intersect_plane(const Vector& normal, const Vector& point) {
     float denom = normal.dot(d);
     // if the ray is parallel to the plane
-    if (denom < 0) {
+    if (denom > -0.0001 && denom < 0.0001) {
         return -1.0;
     }
     float D = -normal.dot(point);
     return -(normal.dot(o) + D) / denom;
+}
+
+float Ray::intersect_triangle(const Vector& p0, const Vector& p1, const Vector& p2) {
+    Vector e1 = p1 - p0;
+    Vector e2 = p2 - p0;
+    
+    Vector n = e1.cross(e2);
+
+    float t = intersect_plane(n, p0);
+    if (t < 0.0) {
+        return -1.0;
+    }
+    // check if the point is inside the triangle
+    else {
+        float d11 = e1.dot(e1);
+        float d12 = e1.dot(e2);
+        float d22 = e2.dot(e2);
+        float det = (d11 * d22) - (d12 * d12);
+        if (det > -0.0001 && det < 0.0001) {
+            return -1.0;
+        }
+        Vector p = get_point(t);
+        Vector ep = p - p0;
+        float dp1 = ep.dot(e1);
+        float dp2 = ep.dot(e2);
+
+        float beta = ((d22 * dp1) - (d12 * dp2)) / det;
+        float gamma = ((d11 * dp2) - (d12 * dp1)) / det;
+        float alpha = 1 - beta - gamma;
+        if (0 <= alpha && alpha <= 1 && 0 <= beta && beta <= 1 && 0 <= gamma && gamma <= 1) {
+            return t;
+        }
+        else {
+            return -1.0;
+        }
+    }
+    return t;
 }
 
 Vector Ray::get_point(float t) {

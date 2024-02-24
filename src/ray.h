@@ -20,6 +20,7 @@ class Ray {
 
         float intersect_sphere(const Sphere& sphere);
         float intersect_plane(const Vector& normal, const Vector& point);
+        float intersect_triangle(const Vector& p0, const Vector& p1, const Vector& p2);
 
         Vector get_point(float t);
 

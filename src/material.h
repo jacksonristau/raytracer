@@ -2,6 +2,8 @@
 #define MATERIAL_H
 
 #include <ostream>
+#include <vector>
+#include <string>
 #include "color.h"
 
 // holds information for doing blinn-phong lighting calculations
@@ -11,7 +13,7 @@ class Material {
 
         Material(Color diffuse, Color specular, float ka, float kd, float ks, int n);
 
-        Material(Color diffuse, float ka, float kd, float ks, int n);
+        Material(std::string filename);
 
         Material(const Material& m2);
 
@@ -19,7 +21,10 @@ class Material {
 
         Material operator=(const Material& m1);
 
-        Color diffuse() const {return d;}
+        static std::vector<std::string> split(std::string in, char delim);
+        int load_texture(std::string filename);
+
+        Color diffuse(float u = 0, float v = 0) const;
         Color specular() const {return s;}
         float ka() const {return k[0];}
         float kd() const {return k[1];}
@@ -27,6 +32,9 @@ class Material {
         int n() const {return n_val;}
 
     private:
+        Color* texture;
+        int width;
+        int height;
         Color d;
         Color s;
         float k[3];

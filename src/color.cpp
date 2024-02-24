@@ -20,6 +20,12 @@ Color::Color(const Color& c2) {
     c[2] = c2.b();
 }
 
+Color::Color(float c2[3]) {
+    c[0] = c2[0];
+    c[1] = c2[1];
+    c[2] = c2[2];
+}
+
 Color::~Color() {
 }
 

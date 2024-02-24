@@ -19,12 +19,23 @@ class Scene {
         Color background() const { return bkgcolor;}
         
         Material get_material(int index) const { return materials[index]; }
-        Sphere get_object(int index) const { return objects[index];}
+        int get_material_index(int index) const { return material_indices[index];}
+        Sphere get_sphere(int index) const { return spheres[index];}
         Light get_light(int index) const { return lights[index];}
 
+        Vector get_vertex(int index) const { return vertices[index];}
+        Vector get_normal(int index) const { return normals[index];}
+        std::vector<int> get_indices(int index) const { return indices[index];}
+        std::vector<float> get_uv(int index) const { return uvs[index];}
+
         int num_materials() const { return materials.size();}
-        int num_objects() const { return objects.size();}
+        int num_spheres() const { return spheres.size();}
         int num_lights() const { return lights.size();}
+
+        int num_vertices() const { return vertices.size();}
+        int num_normals() const { return normals.size();}
+        int num_indices() const { return indices.size();}
+        int num_uvs() const { return uvs.size();}
 
         Vector eye() const { return eye_pos;}
         Vector view() const { return viewdir;}
@@ -49,9 +60,15 @@ class Scene {
         static std::vector<std::string> split(std::string in, char delim);
 
         std::vector<Material> materials;
-        std::vector<Sphere> objects;
+        std::vector<Sphere> spheres;
         std::vector<Light> lights;
+
         std::vector<Vector> vertices;
+        std::vector<Vector> normals;
+        std::vector<std::vector<float>> uvs;
+
+        std::vector<std::vector<int>> indices;
+        std::vector<int> material_indices;
 
         Vector eye_pos;
         Vector viewdir;
