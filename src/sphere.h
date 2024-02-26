@@ -20,7 +20,9 @@ class Sphere {
 
         Vector center() const {return c;}
         float radius() const {return r;}
-        int material() const {return m;} 
+        int material() const {return m;}
+        // returns texture coordinates at a point on the sphere using polar coordinates
+        int get_uv(const Vector& point, float* uv) const;
 
     private:
         Vector c;

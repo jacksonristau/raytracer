@@ -30,27 +30,34 @@ std::string pixel_to_string(Color pixel) {
     return out.str();
 }
 
-Color shade_ray(int s, Vector x_p, Vector view_v, bool sphere) {
-    Material mat;
-    Vector n;
-    if (sphere) {
-        Sphere object = scene.get_sphere(s);
-        mat = scene.get_material(object.material());
-        n = x_p - object.center();
-        n = 1 / object.radius() * n;
+// if bary is NULL then the intersection is with a sphere
+Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) {
+    Material mat = scene.get_material(m);
+    Color d_lambda;
+    float uv[2];
+    //std::cout << "material: " << mat.get_texture() << std::endl;
+    if (mat.has_texture()) {
+        if (bary == NULL) {
+            scene.get_sphere(o).get_uv(x_p, uv);
+            //std::cout << "u: " << uv[0] << " v: " << uv[1] << std::endl;
+        }
+        else{
+            // uvs is {{u0, v0}, {u1, v1}, {u2, v2}}
+            // u = bary[0] * u0 + bary[1] * u1 + bary[2] * u2
+            // v = bary[0] * v0 + bary[1] * v1 + bary[2] * v2
+            std::vector<std::vector<float>> uvs = scene.get_uvs(o);
+            uv[0] = bary[0] * uvs[0][0] + bary[1] * uvs[1][0] + bary[2] * uvs[2][0];
+            uv[1] = bary[0] * uvs[0][1] + bary[1] * uvs[1][1] + bary[2] * uvs[2][1];
+        }
+        d_lambda = scene.get_texture_color(mat.get_texture(), uv[0], uv[1]);
     }
+    // if theres no texture defined for the material the uvs dont matter
     else {
-        std::vector<int> indices = scene.get_indices(s);
-        Vector p0 = scene.get_vertex(indices[0]);
-        Vector p1 = scene.get_vertex(indices[1]);
-        Vector p2 = scene.get_vertex(indices[2]);
-        Vector n = (p1 - p0).cross(p2 - p0);
-        mat = scene.get_material(scene.get_material_index(s));
-        n.normalize();
+        d_lambda = mat.diffuse();
     }
+    Color final_color = mat.ka() * d_lambda;
 
-    Color final_color = mat.ka() * mat.diffuse();
-
+    // for each light source in the scene calculate the diffuse and specular components
     for (int i = 0; i < scene.num_lights(); i++) {
         Light cur_light = scene.get_light(i);
         float s_flag = 1.0;
@@ -61,10 +68,10 @@ Color shade_ray(int s, Vector x_p, Vector view_v, bool sphere) {
         l.normalize();
         Ray r = Ray(x_p, l);
 
-        // check if the light source is blocked by another object
+        // check if the light source is blocked by any sphere
         for (int j = 0; j < scene.num_spheres(); j++) {
             // dont check yourself 
-            if (j == s && sphere) { continue; }
+            if (j == o && bary == NULL) { continue; }
             float t = r.intersect_sphere(scene.get_sphere(j));
             // is the intersection between the light source
             bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
@@ -73,14 +80,11 @@ Color shade_ray(int s, Vector x_p, Vector view_v, bool sphere) {
                 break;
             }
         }
+        // check if the light source is blocked by any triangle
         for (int j = 0; j < scene.num_indices(); j++) {
-            std::vector<int> indices = scene.get_indices(s);
-            Vector p0 = scene.get_vertex(indices[0]);
-            Vector p1 = scene.get_vertex(indices[1]);
-            Vector p2 = scene.get_vertex(indices[2]);
             // dont check yourself 
-            if (j == s && !sphere) { continue; }
-            float t = r.intersect_triangle(p0, p1, p2);
+            if (j == o && bary != NULL) { continue; }
+            float t = r.intersect_triangle(scene.get_vertices(j), NULL);
             // is the intersection between the light source
             bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
@@ -96,7 +100,7 @@ Color shade_ray(int s, Vector x_p, Vector view_v, bool sphere) {
         Vector h = l + view_v;
         h.normalize();
         float ndoth = std::max(0.0f, n.dot(h));
-        Color diffuse = ndotl * mat.kd() * mat.diffuse();
+        Color diffuse = ndotl * mat.kd() * d_lambda;
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
         final_color = final_color + (cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular);
     }
@@ -123,9 +127,10 @@ Color trace_ray(Ray ray) {
             }
         }
     }
+    float bary[3];
     for (int i = 0; i < scene.num_indices(); i++) {
-        std::vector<int> indices = scene.get_indices(i);
-        float t = ray.intersect_triangle(scene.get_vertex(indices[0]), scene.get_vertex(indices[1]), scene.get_vertex(indices[2]));
+        // bary is filled with the barycentric coordinates of the intersection
+        float t = ray.intersect_triangle(scene.get_vertices(i), bary);
         if (t > 0){
             if (t < min_t) {
                 min_t = t;
@@ -134,11 +139,37 @@ Color trace_ray(Ray ray) {
             }
         }
     }
+
+    // if the ray intersects an object
     if (hit_index != -1){
-        Vector x_p = ray.get_point(min_t);
-        Vector view_v = ray.origin() - x_p;
-        view_v.normalize();
-        output = shade_ray(hit_index, x_p, view_v, is_sphere);
+        Vector intersection = ray.get_point(min_t);
+        Vector view = ray.origin() - intersection;
+        view.normalize();
+        int m_index;
+        Vector n;
+        // if the ray intersects a sphere
+        if (is_sphere) {
+            m_index = scene.get_sphere(hit_index).material();
+            n = intersection - scene.get_sphere(hit_index).center();
+            n = 1 / scene.get_sphere(hit_index).radius() * n;
+        }
+        // if the ray intersects a triangle
+        else {
+            m_index = scene.get_material_index(hit_index);
+            std::vector<Vector> normals = scene.get_normals(hit_index);
+            // if no normals are defined 
+            if (normals.size() == 0){
+                std::vector<Vector> vertices = scene.get_vertices(hit_index);
+                n = (vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]);
+                n.normalize();
+            }
+            // use the normals defined and interpolate
+            else {
+                n = bary[0] * normals[0] + bary[1] * normals[1] + bary[2] * normals[2];
+                n.normalize();
+            }
+        }
+        output = shade_ray(m_index, hit_index, n, intersection, view, (is_sphere) ? NULL : bary);
     }
     return output;
 }
@@ -171,7 +202,7 @@ int main(int argc, char *argv[]) {
     Vector v = u.cross(scene.view());
 
     float aspect = (float)scene.px_width() / (float)scene.px_height();
-    float d = 1;
+    float d = 2;
 
     // width is just frustum width for a parallel projection
     float width = (scene.is_parallel()) ? scene.frustum_width() : 2 * d * tan(scene.fov() / 2);
@@ -209,7 +240,9 @@ int main(int argc, char *argv[]) {
         for (int j = 0; j < scene.px_width(); j++){
             int pos = j + (scene.px_width() * i);
             pixelmap[pos] = trace_ray(ray);
-            std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
+            if (j % 10 == 0) {
+                std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
+            }
             if (scene.is_parallel()) {
                 ray.set_origin((ul + (i * deltav) + (j * deltah)));
             }

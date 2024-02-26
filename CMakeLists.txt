@@ -14,6 +14,7 @@ set(
     ${PROJECT_SOURCE_DIR}/src/vector.cpp
     ${PROJECT_SOURCE_DIR}/src/light.cpp
     ${PROJECT_SOURCE_DIR}/src/scene.cpp
+    ${PROJECT_SOURCE_DIR}/src/texture.cpp
 )
 
 set(

@@ -1,6 +1,7 @@
 #include "material.h"
 #include <fstream>
 #include <iostream>
+#include <cmath>
 
 Material::Material() {
     d = Color();
@@ -9,6 +10,7 @@ Material::Material() {
     k[1] = 0.6;
     k[2] = 0.3;
     n_val = 50;
+    texture = -1;
 }
 
 Material::Material(Color diffuse, Color specular, float ka, float kd, float ks, int n) {
@@ -18,17 +20,16 @@ Material::Material(Color diffuse, Color specular, float ka, float kd, float ks, 
     k[1] = kd;
     k[2] = ks;
     n_val = n;
-    texture = nullptr;
+    texture = -1;
 }
 
-Material::Material(std::string filename) {
-    load_texture(filename);
+Material::Material(int texture) : texture(texture) {
     d = Color();
     s = Color(1, 1, 1);
-    k[0] = 0.3;
+    k[0] = 0.2;
     k[1] = 0.6;
-    k[2] = 0.3;
-    n_val = 50;
+    k[2] = 0.2;
+    n_val = 20;
 }
 
 Material::Material(const Material& m2) {
@@ -38,21 +39,10 @@ Material::Material(const Material& m2) {
     k[1] = m2.kd();
     k[2] = m2.ks();
     n_val = m2.n();
-    if (m2.texture != nullptr) {
-        texture = new Color[m2.width * m2.height];
-        for (int i = 0; i < m2.width * m2.height; i++) {
-            texture[i] = m2.texture[i];
-        }
-    }
-    else {
-        texture = nullptr;
-    }
+    texture = m2.texture;
 }
 
 Material::~Material() {
-    if (texture != nullptr) {
-        delete[] texture;
-    }
 }
 
 // tokenizes a list by the delimiter
@@ -74,47 +64,9 @@ std::vector<std::string> Material::split(std::string in, char delim) {
     return out;
 }
 
-int Material::load_texture(std::string filename) {
-    std::ifstream input;
-    std::cout << "loading file: " << filename << std::endl;
 
-    input.open(filename);
-    if (!input.is_open()) {
-        std::cout << "failed to open texture file " << filename << std::endl;
-        return 0;
-    }
-    std::string format;
-    float max;
-    input >> format >> width >> height >> max;
-    if (format != "P3" || !input) {
-        std::cout << "invalid texture ppm format" << std::endl;
-        return 0;
-    }
-    try {
-        texture = new Color[width * height];
-        for (int i = 0; i < width * height; i++) {
-            int r, g, b;
-            input >> r >> g >> b;
-            if (!input) {
-                std::cout << "invalid texture ppm format" << std::endl;
-                return 0;
-            }
-            texture[i] = Color(r / max, g / max, b / max);
-        }
-    }
-    catch (std::exception e) {
-        std::cout << "invalid texture ppm format" << std::endl;
-        return 0;
-    }
-    return 1;
-}
 
-Color Material::diffuse(float u, float v) const {
-    if (texture != nullptr) {
-        int x = (int)(u * width);
-        int y = (int)(v * height);
-        return texture[x + y * width];
-    }
+Color Material::diffuse() const {
     return d;
 }
 
@@ -125,15 +77,7 @@ Material Material::operator=(const Material& m1) {
     k[1] = m1.kd();
     k[2] = m1.ks();
     n_val = m1.n();
-    if (m1.texture != nullptr) {
-        texture = new Color[m1.width * m1.height];
-        for (int i = 0; i < m1.width * m1.height; i++) {
-            texture[i] = m1.texture[i];
-        }
-    }
-    else {
-        texture = nullptr;
-    }
+    texture = m1.texture;
     return *this;
 }
 

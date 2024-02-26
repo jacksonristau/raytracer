@@ -80,13 +80,14 @@ float Ray::intersect_plane(const Vector& normal, const Vector& point) {
     return -(normal.dot(o) + D) / denom;
 }
 
-float Ray::intersect_triangle(const Vector& p0, const Vector& p1, const Vector& p2) {
-    Vector e1 = p1 - p0;
-    Vector e2 = p2 - p0;
+// coords expects a 3 element array
+float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
+    Vector e1 = vertices[1] - vertices[0];
+    Vector e2 = vertices[2] - vertices[0];
     
     Vector n = e1.cross(e2);
 
-    float t = intersect_plane(n, p0);
+    float t = intersect_plane(n, vertices[0]);
     if (t < 0.0) {
         return -1.0;
     }
@@ -100,7 +101,7 @@ float Ray::intersect_triangle(const Vector& p0, const Vector& p1, const Vector& 
             return -1.0;
         }
         Vector p = get_point(t);
-        Vector ep = p - p0;
+        Vector ep = p - vertices[0];
         float dp1 = ep.dot(e1);
         float dp2 = ep.dot(e2);
 
@@ -108,13 +109,18 @@ float Ray::intersect_triangle(const Vector& p0, const Vector& p1, const Vector& 
         float gamma = ((d11 * dp2) - (d12 * dp1)) / det;
         float alpha = 1 - beta - gamma;
         if (0 <= alpha && alpha <= 1 && 0 <= beta && beta <= 1 && 0 <= gamma && gamma <= 1) {
+            if (coords == NULL) {
+                return t;
+            }
+            coords[0] = alpha;
+            coords[1] = beta;
+            coords[2] = gamma;
             return t;
         }
         else {
             return -1.0;
         }
     }
-    return t;
 }
 
 Vector Ray::get_point(float t) {

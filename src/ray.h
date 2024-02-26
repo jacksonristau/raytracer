@@ -3,6 +3,7 @@
 
 #include "vector.h"
 #include "sphere.h"
+#include <vector>
 
 class Ray {
     public:
@@ -20,7 +21,8 @@ class Ray {
 
         float intersect_sphere(const Sphere& sphere);
         float intersect_plane(const Vector& normal, const Vector& point);
-        float intersect_triangle(const Vector& p0, const Vector& p1, const Vector& p2);
+        // returns fills the array coords with the barycentric coordinates of the intersection
+        float intersect_triangle(std::vector<Vector> vertices, float* coords);
 
         Vector get_point(float t);
 
