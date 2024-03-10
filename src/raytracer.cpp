@@ -49,7 +49,10 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
             uv[0] = bary[0] * uvs[0][0] + bary[1] * uvs[1][0] + bary[2] * uvs[2][0];
             uv[1] = bary[0] * uvs[0][1] + bary[1] * uvs[1][1] + bary[2] * uvs[2][1];
         }
+        std::cout << "getting texture color for " << uv[0] << " " << uv[1] << std::endl;
+        std::cout << "texture: " << mat.get_texture() << std::endl;
         d_lambda = scene.get_texture_color(mat.get_texture(), uv[0], uv[1]);
+        std::cout << "got texture color" << std::endl;
     }
     // if theres no texture defined for the material the uvs dont matter
     else {
@@ -87,7 +90,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
             float t = r.intersect_triangle(scene.get_vertices(j), NULL);
             // is the intersection between the light source
             bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
-            if (is_between) {
+            if (is_between || s_flag == 0.0) {
                 s_flag = 0.0;
                 break;
             }
@@ -151,7 +154,7 @@ Color trace_ray(Ray ray) {
         if (is_sphere) {
             m_index = scene.get_sphere(hit_index).material();
             n = intersection - scene.get_sphere(hit_index).center();
-            n = 1 / scene.get_sphere(hit_index).radius() * n;
+            n = (1 / scene.get_sphere(hit_index).radius()) * n;
         }
         // if the ray intersects a triangle
         else {

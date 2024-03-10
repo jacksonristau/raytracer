@@ -6,7 +6,7 @@ project(hw1a)
 
 set(
     SOURCES
-    ${PROJECT_SOURCE_DIR}/src/raytracer1a.cpp
+    ${PROJECT_SOURCE_DIR}/src/raytracer.cpp
     ${PROJECT_SOURCE_DIR}/src/material.cpp
     ${PROJECT_SOURCE_DIR}/src/color.cpp
     ${PROJECT_SOURCE_DIR}/src/ray.cpp
@@ -23,11 +23,11 @@ set(
 )
 
 include_directories(${INCLUDE_DIRS})
-add_executable(raytracer1b ${SOURCES})
+add_executable(raytracer1c ${SOURCES})
 
 # Add compiler optimizations
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(raytracer1b PRIVATE -O3)
+    target_compile_options(raytracer1c PRIVATE -O3)
 elseif(MSVC)
-    target_compile_options(raytracer1b PRIVATE /O2)
+    target_compile_options(raytracer1c PRIVATE /O2)
 endif()

@@ -291,7 +291,7 @@ int Scene::load_from_file(const std::string& filename) {
                     }
                     // if the face is defined with vertices and textures
                     else {
-                        std::cout << subkey1[1] << " " << subkey2[1] << " " << subkey3[1] << std::endl;
+                        std::cout << "flat shaded textured" << std::endl;
                         vertex_indices.push_back(std::vector<int>{stoi(keys[1]) - 1, stoi(keys[2]) - 1, stoi(keys[3]) - 1});
                         texture_indices.push_back(std::vector<int>{stoi(subkey1[1]) - 1, stoi(subkey2[1]) - 1, stoi(subkey3[1]) - 1});
                         normal_indices.push_back(std::vector<int>{-1, -1, -1});
@@ -353,10 +353,6 @@ int Scene::load_from_file(const std::string& filename) {
         std::cout << "invalid format: parallel <frustum_width>" << std::endl;
         std::cout << "frustum width must be positive" << std::endl;
         return 0;
-    }
-
-    for(int i = 0; i < materials.size(); i++) {
-        std::cout << "material " << materials[i] << std::endl;
     }
 
     std::cout << "file loaded successfully" << std::endl;

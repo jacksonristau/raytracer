@@ -107,7 +107,7 @@ float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
 
         float beta = ((d22 * dp1) - (d12 * dp2)) / det;
         float gamma = ((d11 * dp2) - (d12 * dp1)) / det;
-        float alpha = 1 - beta - gamma;
+        float alpha = 1 - (beta + gamma);
         if (0 <= alpha && alpha <= 1 && 0 <= beta && beta <= 1 && 0 <= gamma && gamma <= 1) {
             if (coords == NULL) {
                 return t;

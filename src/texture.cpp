@@ -1,6 +1,7 @@
 #include "texture.h"
 #include <fstream>
 #include <iostream>
+#include <cmath>
 
 Texture::Texture(const std::string& filename) : filename(filename) {
     std::ifstream input;
@@ -43,7 +44,18 @@ void Texture::write_to_file(const std::string& filename) const {
 }
 
 Color Texture::get_pixel(float u, float v) const {
-    int x = u * width;
-    int y = v * height;
+    int x, y;
+    if (x > 1){
+        x = floor(std::modf(u, nullptr) * (width - 1));
+    }
+    else {
+        x = u * (width - 1);
+    }
+    if (y > 1){
+        y = floor(std::modf(v, nullptr) * (height - 1));
+    }
+    else {
+        y = v * (height - 1);
+    }
     return data[y * width + x];
 }
