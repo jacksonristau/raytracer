@@ -46,13 +46,10 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
             // u = bary[0] * u0 + bary[1] * u1 + bary[2] * u2
             // v = bary[0] * v0 + bary[1] * v1 + bary[2] * v2
             std::vector<std::vector<float>> uvs = scene.get_uvs(o);
-            uv[0] = bary[0] * uvs[0][0] + bary[1] * uvs[1][0] + bary[2] * uvs[2][0];
-            uv[1] = bary[0] * uvs[0][1] + bary[1] * uvs[1][1] + bary[2] * uvs[2][1];
+            uv[0] = (bary[0] * uvs[0][0]) + (bary[1] * uvs[1][0]) + (bary[2] * uvs[2][0]);
+            uv[1] = (bary[0] * uvs[0][1]) + (bary[1] * uvs[1][1]) + (bary[2] * uvs[2][1]);
         }
-        std::cout << "getting texture color for " << uv[0] << " " << uv[1] << std::endl;
-        std::cout << "texture: " << mat.get_texture() << std::endl;
         d_lambda = scene.get_texture_color(mat.get_texture(), uv[0], uv[1]);
-        std::cout << "got texture color" << std::endl;
     }
     // if theres no texture defined for the material the uvs dont matter
     else {
@@ -242,7 +239,14 @@ int main(int argc, char *argv[]) {
         }
         for (int j = 0; j < scene.px_width(); j++){
             int pos = j + (scene.px_width() * i);
-            pixelmap[pos] = trace_ray(ray);
+            try{
+                pixelmap[pos] = trace_ray(ray);
+            }
+            catch (std::exception& e){
+                std::cout << e.what() << std::endl;
+                return 0;
+            }
+            
             if (j % 10 == 0) {
                 std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
             }

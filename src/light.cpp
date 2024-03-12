@@ -24,3 +24,7 @@ void Light::set_att(float c1, float c2, float c3) {
 float Light::atten(float d) const {
     return 1.0 / (att[0] + att[1] * d + att[2] * d * d);
 }
+
+std::ostream & operator<< ( std::ostream &os, const Light &l) {
+  return os << l.l() << "intensity: " << l.intensity() <<  std::endl;
+}

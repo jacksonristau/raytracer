@@ -45,17 +45,17 @@ void Texture::write_to_file(const std::string& filename) const {
 
 Color Texture::get_pixel(float u, float v) const {
     int x, y;
-    if (x > 1){
-        x = floor(std::modf(u, nullptr) * (width - 1));
+    float temp;
+    if (u > 1){
+        u = std::modf(u, &temp);
     }
-    else {
-        x = u * (width - 1);
+    if (v > 1){
+        v = std::modf(v, &temp);
     }
-    if (y > 1){
-        y = floor(std::modf(v, nullptr) * (height - 1));
-    }
-    else {
-        y = v * (height - 1);
+    y = v * (height - 1);
+    x = u * (width - 1);
+    if (y * width + x >= data.size()){
+        throw std::runtime_error("invalid texture coordinates: " + std::to_string(x) + ", " + std::to_string(y) + " in " + filename + " with size " + std::to_string(width) + "x" + std::to_string(height) + " and " + std::to_string(data.size()) + " pixels");
     }
     return data[y * width + x];
 }

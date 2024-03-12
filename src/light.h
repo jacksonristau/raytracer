@@ -22,4 +22,6 @@ class Light {
         float i;
 };
 
+std::ostream & operator<< ( std::ostream &os, const Light &l);
+
 #endif 

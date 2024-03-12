@@ -95,6 +95,6 @@ Vector operator*(float s, const Vector& v1) {
 }
 
 std::ostream & operator<< ( std::ostream &os, const Vector &v) {
-  return os << "<" << v.x() << ", " << v.y() << ", " << v.z() << ">";
+  return os << "<" << v.x() << ", " << v.y() << ", " << v.z() << ", " << v.w() << ">";
 }
 

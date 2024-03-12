@@ -227,7 +227,9 @@ int Scene::load_from_file(const std::string& filename) {
                     std::cout << "5 numbers are required for light" << std::endl;
                     return 0;
                 }
-                lights.push_back(Light(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), stof(keys[4])), stof(keys[5])));
+                Light temp = Light(Vector(stof(keys[1]), stof(keys[2]), stof(keys[3]), stof(keys[4])), stof(keys[5]));
+                lights.push_back(temp);
+                std::cout << "light added: " << temp << std::endl;
             }
             else if (keys[0] == "attlight") {
                 if (keys.size() != 9) {
@@ -269,6 +271,8 @@ int Scene::load_from_file(const std::string& filename) {
                     std::cout << "a material / texture must be defined before objects" << std::endl;
                     return 0;
                 }
+                // key is formatted like "f v1/vt1/vn1"
+                // each key is split into a subkeys for vertices, textures, and normals 
                 std::vector<std::string> subkey1 = split(keys[1], '/');
                 std::vector<std::string> subkey2 = split(keys[2], '/');
                 std::vector<std::string> subkey3 = split(keys[3], '/');
@@ -292,7 +296,7 @@ int Scene::load_from_file(const std::string& filename) {
                     // if the face is defined with vertices and textures
                     else {
                         std::cout << "flat shaded textured" << std::endl;
-                        vertex_indices.push_back(std::vector<int>{stoi(keys[1]) - 1, stoi(keys[2]) - 1, stoi(keys[3]) - 1});
+                        vertex_indices.push_back(std::vector<int>{stoi(subkey1[0]) - 1, stoi(subkey2[0]) - 1, stoi(subkey3[0]) - 1});
                         texture_indices.push_back(std::vector<int>{stoi(subkey1[1]) - 1, stoi(subkey2[1]) - 1, stoi(subkey3[1]) - 1});
                         normal_indices.push_back(std::vector<int>{-1, -1, -1});
                     }
@@ -353,6 +357,14 @@ int Scene::load_from_file(const std::string& filename) {
         std::cout << "invalid format: parallel <frustum_width>" << std::endl;
         std::cout << "frustum width must be positive" << std::endl;
         return 0;
+    }
+
+    // print out all uvs and texture indices
+    for (int i = 0; i < uvs.size(); i++) {
+        std::cout << "uv: " << uvs[i][0] << ", " << uvs[i][1] << std::endl;
+    }
+    for (int i = 0; i < texture_indices.size(); i++) {
+        std::cout << "texture indices: " << texture_indices[i][0] << ", " << texture_indices[i][1] << ", " << texture_indices[i][2] << std::endl;
     }
 
     std::cout << "file loaded successfully" << std::endl;
