@@ -73,7 +73,7 @@ float Ray::intersect_sphere(const Sphere& sphere) {
 float Ray::intersect_plane(const Vector& normal, const Vector& point) {
     float denom = normal.dot(d);
     // if the ray is parallel to the plane
-    if (denom > -0.0001 && denom < 0.0001) {
+    if (denom > -0.0000001 && denom < 0.0000001) {
         return -1.0;
     }
     float D = -normal.dot(point);
@@ -97,7 +97,7 @@ float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
         float d12 = e1.dot(e2);
         float d22 = e2.dot(e2);
         float det = (d11 * d22) - (d12 * d12);
-        if (det > -0.0001 && det < 0.0001) {
+        if (det > -0.0000001 && det < 0.0000001) {
             return -1.0;
         }
         Vector p = get_point(t);

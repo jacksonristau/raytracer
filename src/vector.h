@@ -36,7 +36,7 @@ class Vector {
         float x() const {return v[0];}
         float y() const {return v[1];}
         float z() const {return v[2];}
-        float w() const {return v[3];}
+        inline float w() const {return v[3];}
 
         static const Vector& Inf();
 

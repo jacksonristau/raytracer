@@ -48,8 +48,8 @@ class Scene {
         float frustum_width() const { return frustum_w;}
         bool is_parallel() const { return parallel;}
 
-        int px_width() const { return resolution[0];}
-        int px_height() const { return resolution[1];}
+        inline int px_width() const { return resolution[0];}
+        inline int px_height() const { return resolution[1];}
 
         Color dc_color() const { return dc;}
         float alpha_min() const { return alpha[0];}

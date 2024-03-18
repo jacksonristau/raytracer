@@ -33,4 +33,6 @@ elseif(MSVC)
 endif()
 
 # Add debugging flags
-# target_compile_options(raytracer1c PRIVATE -g)
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+
+

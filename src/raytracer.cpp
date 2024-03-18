@@ -13,11 +13,10 @@
 #include "scene.h"
 
 
-const float epsilon = 0.001;
+const float epsilon = 0.00001;
 const float pi = 4.0 * atan(1.0);
 
 Scene scene;
-bool checkLight = false;
 
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
@@ -61,16 +60,13 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
     // for each light source in the scene calculate the diffuse and specular components
     for (int i = 0; i < scene.num_lights(); i++) {
         Light cur_light = scene.get_light(i);
+        bool is_point = cur_light.w();
         float s_flag = 1.0;
         // calculate the direction of the light source based on whether its a point or directional light
-        Vector l = (cur_light.w()) ? cur_light.l() - x_p : -cur_light.l();
+        Vector l = (is_point) ? cur_light.l() - x_p : -cur_light.l();
         float d = x_p.distance(cur_light.l());
 
         l.normalize();
-        if (!checkLight) {
-            std::cout << "w: " << l << std::endl;
-            checkLight = true;
-        }
         Ray r = Ray(x_p, l);
 
         // check if the light source is blocked by any sphere
@@ -79,7 +75,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
             if (j == o && bary == NULL) { continue; }
             float t = r.intersect_sphere(scene.get_sphere(j));
             // is the intersection between the light source
-            bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
+            bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
                 s_flag = 0.0;
                 break;
@@ -91,7 +87,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
             if (j == o && bary != NULL) { continue; }
             float t = r.intersect_triangle(scene.get_vertices(j), NULL);
             // is the intersection between the light source
-            bool is_between = (cur_light.w()) ? epsilon < t && t < d : t > epsilon;
+            bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
             if (is_between || s_flag == 0.0) {
                 s_flag = 0.0;
                 break;
