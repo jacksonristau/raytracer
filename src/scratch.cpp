@@ -1,129 +1,77 @@
-#include "scene.h"
+#include <iostream>
 #include <fstream>
-#include <math.h>
 #include <sstream>
+#include <string>
+#include <vector>
+#include "vector.h"
+#include "color.h"
+#include "material.h"
+#include "sphere.h"
+#include "light.h"
+#include "texture.h"
+#include <memory>
 
-const float pi = 4.0 * atan(1.0);
+Vector read_vector(std::string line, float w);
 
-Scene::Scene() {
-    materials = std::vector<Material>();
-    spheres = std::vector<Sphere>();
-    lights = std::vector<Light>();
+std::vector<Material> materials;
+std::vector<std::shared_ptr<Texture>> textures;
+std::vector<Sphere> spheres;
+std::vector<Light> lights;
+
+// these all have the same length
+std::vector<Vector> vertices;
+std::vector<Vector> normals;
+std::vector<std::vector<float>> uvs;
+
+// these all have the same length and correspond at each index i
+std::vector<std::vector<int>> vertex_indices;
+std::vector<std::vector<int>> texture_indices;
+std::vector<std::vector<int>> normal_indices;
+// act like the material field in a sphere but for triangles
+std::vector<int> material_indices;
+
+Vector eye_pos;
+Vector viewdir;
+Vector updir;
+
+float hfov;
+int resolution[2];
+Color bkgcolor;
+float bkgeta;
+
+// parallel projection
+float frustum_w = -1.0;
+bool parallel = false;
+
+// depth cueing
+Color dc = Color(-1, -1, -1);
+float alpha[2];
+float dist[2];
+
+std::string get_first(std::string in, char delim) {
+    int i = 0;
+    while (in[i] != delim) {
+        i++;
+    }
+    return in.substr(0, i);
 }
 
-Scene::~Scene() {
-}
-
-Color Scene::depth_cue(Vector x, Color i, float view_dist) const {
-    Color final_color = i;
-    if (dc != Color(-1, -1, -1)) {
-        float view_dist = eye_pos.distance(x);
-        float alpha_dc;
-        if (view_dist <= dist[0]) {
-            alpha_dc = alpha[1];
-        }
-        else if (view_dist >= dist[1]) {
-            alpha_dc = alpha[0];
-        }
-        else {
-            alpha_dc = alpha[0] + (alpha[1] - alpha[0]) * ((dist[1] - view_dist) / (dist[1] - dist[0]));
-        }
-        final_color = (alpha_dc * i + (1 - alpha_dc) * dc);
-    }
-    return final_color;
-}
-
-Color Scene::get_texture_color(int index, float u, float v) const {
-    if (index == -1) {
-        return Color(0, 0, 0);
-    }
-    return textures[index]->get_pixel(u, v);
-}
-
-std::vector<Vector> Scene::get_vertices(int index) const {
-    std::vector<Vector> out;
-    std::vector<int> indices = vertex_indices[index];
-    for (int i = 0; i < 3; i++) {
-        out.push_back(vertices[indices[i]]);
-    }
-    return out;
-}
-
-std::vector<Vector> Scene::get_normals(int index) const {
-    std::vector<Vector> out;
-    std::vector<int> indices = normal_indices[index];
-    if (indices[0] == -1) {
-        return out;
-    }
-    for (int i = 0; i < 3; i++) {
-        out.push_back(normals[indices[i]]);
-    }
-    return out;
-}
-
-std::vector<std::vector<float>> Scene::get_uvs(int index) const {
-    std::vector<std::vector<float>> out;
-    std::vector<int> indices = texture_indices[index];
-    for (int i = 0; i < 3; i++) {
-        out.push_back(uvs[indices[i]]);
-    }
-    return out;
-} 
-
-// tokenizes a list by the delimiter
-std::vector<std::string> Scene::split(std::string in, char delim) {
-    std::vector<std::string> out;
-    int start = 0;
-    int end = 0;
-    for (int i = 0; i <= in.size(); i++) {
-        if (in[i] == delim || i == in.size()) {
-            end = i;
-            std::string word = "";
-            word.append(in, start, end - start);
-            if (!word.empty()){
-                out.push_back(word);
-                start = end + 1;
-            }
-        }
-    }
-    return out;
-}
-
-Vector read_vector(std::string line, float w) {
-    std::stringstream ss(line.substr(line.find(' ')+1));
-    float x, y, z;
-    std::string temp;
-    ss >> x >> y >> z;
-    if (!ss || ss >> temp) {
-        throw "Invalid input";
-    }
-    return Vector(x, y, z, w);
-}
-
-
-// Static method to load a scene from a file
-int Scene::load_from_file(const std::string& filename) {
-    std::ifstream input;
-    std::cout << "loading file: " << filename << std::endl;
-
-    input.open(filename);
-    if (!input.is_open()) {
-        std::cout << "failed to open file " << filename << std::endl;
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("usage: raytracer1a <name of input file>\n");
         return 0;
     }
-
-    // if theres fewer somethings wrong
-    int read_inputs = 0;
-
-    // read values from file
-    std::string line;
-    std::string key;
-    std::string temp;
-    int mtl_index = -1;
-    int tex_index = -1;
-    bool texture_defined = false;
     try{
-        while (std::getline(input, line)){
+        int read_inputs = 0;
+        std::ifstream file(argv[1]);
+        std::string line;
+        std::string key;
+        std::string temp;
+        int mtl_index = -1;
+        int tex_index = -1;
+        bool texture_defined = false;
+
+        while (std::getline(file, line)){
             if (line.empty()) {
                 continue;
             }
@@ -133,16 +81,13 @@ int Scene::load_from_file(const std::string& filename) {
                 read_inputs++;
             } else if (key == "viewdir") {
                 viewdir = read_vector(line, 0.0);
-                viewdir.normalize();
                 read_inputs++;
             } else if (key == "updir") {
                 updir = read_vector(line, 0.0);
-                updir.normalize();
                 read_inputs++;
             } else if (key == "hfov") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> hfov;
-                hfov *= (pi / 180);
                 if (!ss || ss >> temp) {
                     throw "Invalid input";
                 }
@@ -248,20 +193,19 @@ int Scene::load_from_file(const std::string& filename) {
                     getline(ss2, t, '/');
                     getline(ss2, n, '/');
                     if (t.empty()) {
-                        t = "0";
+                        t = "-1";
                     }
                     if (n.empty()) {
-                        n = "0";
+                        n = "-1";
                     }
-                    vs[i] = std::stoi(v) - 1;
-                    ts[i] = std::stoi(t) - 1;
-                    ns[i] = std::stoi(n) - 1;
+                    vs[i] = std::stoi(v);
+                    ts[i] = std::stoi(t);
+                    ns[i] = std::stoi(n);
                     i++;
                 }
                 vertex_indices.push_back(vs);
                 texture_indices.push_back(ts);
                 normal_indices.push_back(ns);
-                material_indices.push_back(mtl_index);
             } else if (key == "vn") {
                 normals.push_back(read_vector(line, 0.0));
             } else if (key == "vt") {
@@ -281,22 +225,6 @@ int Scene::load_from_file(const std::string& filename) {
         std::cerr << e << std::endl;
         return 1;
     }
-    
-
-    // a few checks to make sure the input is valid
-    if (read_inputs < 6) {
-        std::cout << "missing a required input: [eye, viewdir, updir, hfov/parallel, res, bkgcolor]" << std::endl;
-        return 0;
-    }
-    else if ((mtl_index == -1) || (spheres.size() < 1 && vertex_indices.size() < 1)) {
-        std::cout << "missing at least one mtlcolor, and/or one sphere / triangle" << std::endl;
-        return 0;
-    }
-    if (parallel && frustum_w <= 0) {
-        std::cout << "invalid format: parallel <frustum_width>" << std::endl;
-        std::cout << "frustum width must be positive" << std::endl;
-        return 0;
-    }
-    std::cout << "file loaded successfully" << std::endl;
-    return 1;
+    return 0;
 }
+

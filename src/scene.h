@@ -9,6 +9,7 @@
 #include "sphere.h"
 #include "light.h"
 #include "texture.h"
+#include <memory>
 
 class Scene {
     public:
@@ -62,7 +63,7 @@ class Scene {
         static std::vector<std::string> split(std::string in, char delim);
 
         std::vector<Material> materials;
-        std::vector<Texture> textures;
+        std::vector<std::shared_ptr<Texture>> textures;
         std::vector<Sphere> spheres;
         std::vector<Light> lights;
 
@@ -85,6 +86,7 @@ class Scene {
         float hfov;
         int resolution[2];
         Color bkgcolor;
+        float bkgeta;
 
         // parallel projection
         float frustum_w = -1.0;

@@ -123,6 +123,11 @@ float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
     }
 }
 
+Vector Ray::reflect(const Vector& N) {
+    Vector I = -d;
+    return (2 * N.dot(I) * N) - I;
+}
+
 Vector Ray::get_point(float t) {
     return o + (t * d);
 }

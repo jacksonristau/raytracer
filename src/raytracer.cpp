@@ -17,6 +17,7 @@ const float epsilon = 0.001;
 const float pi = 4.0 * atan(1.0);
 
 Scene scene;
+bool checkLight = false;
 
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
@@ -66,6 +67,10 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
         float d = x_p.distance(cur_light.l());
 
         l.normalize();
+        if (!checkLight) {
+            std::cout << "w: " << l << std::endl;
+            checkLight = true;
+        }
         Ray r = Ray(x_p, l);
 
         // check if the light source is blocked by any sphere
@@ -102,6 +107,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
         float ndoth = std::max(0.0f, n.dot(h));
         Color diffuse = ndotl * mat.kd() * d_lambda;
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
+        //Color reflection = trace_ray(Ray(x_p, r.reflect(n)));
         final_color = final_color + (cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular);
     }
     final_color = scene.depth_cue(x_p, final_color, scene.eye().distance(x_p));
@@ -143,7 +149,7 @@ Color trace_ray(Ray ray) {
     // if the ray intersects an object
     if (hit_index != -1){
         Vector intersection = ray.get_point(min_t);
-        Vector view = ray.origin() - intersection;
+        Vector view = -ray.direction();
         view.normalize();
         int m_index;
         Vector n;
@@ -200,6 +206,7 @@ int main(int argc, char *argv[]) {
     Vector u = scene.view().cross(scene.up());
     u.normalize();
     Vector v = u.cross(scene.view());
+    std::cout << "v: " << v << std::endl;
 
     float aspect = (float)scene.px_width() / (float)scene.px_height();
     float d = 2;

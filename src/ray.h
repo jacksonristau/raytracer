@@ -23,6 +23,7 @@ class Ray {
         float intersect_plane(const Vector& normal, const Vector& point);
         // returns fills the array coords with the barycentric coordinates of the intersection
         float intersect_triangle(std::vector<Vector> vertices, float* coords);
+        Vector reflect(const Vector& normal);
 
         Vector get_point(float t);
 

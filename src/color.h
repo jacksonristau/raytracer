@@ -9,7 +9,7 @@ class Color {
 
         Color(float r, float g, float b);
 
-        Color(float c[3]);
+        Color(float c2[3]);
 
         Color(const Color& c1);
 

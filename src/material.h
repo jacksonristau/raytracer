@@ -22,7 +22,6 @@ class Material {
         Material operator=(const Material& m1);
 
         static std::vector<std::string> split(std::string in, char delim);
-        int load_texture(std::string filename);
 
         Color diffuse() const;
         Color specular() const {return s;}
@@ -32,6 +31,8 @@ class Material {
         int n() const {return n_val;}
         bool has_texture() const {return texture != -1;}
         int get_texture() const {return texture;}
+        void set_texture(int t) {texture = t;}
+
 
     private:
         int texture;
@@ -40,6 +41,8 @@ class Material {
         Color d;
         Color s;
         float k[3];
+        float alpha;
+        float eta;
         int n_val;
 };
 

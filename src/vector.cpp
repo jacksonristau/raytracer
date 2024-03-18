@@ -38,7 +38,7 @@ bool Vector::operator==(const Vector& v2) const {
 }
 
 Vector Vector::operator-() {
-    return Vector(v[0], -v[1], -v[2]);
+    return Vector(-v[0], -v[1], -v[2]);
 }
 
 Vector Vector::operator+(const Vector& v1) {

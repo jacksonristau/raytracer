@@ -31,3 +31,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 elseif(MSVC)
     target_compile_options(raytracer1c PRIVATE /O2)
 endif()
+
+# Add debugging flags
+# target_compile_options(raytracer1c PRIVATE -g)
