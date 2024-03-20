@@ -30,8 +30,10 @@ std::string pixel_to_string(Color pixel) {
     return out.str();
 }
 
+Color trace_ray(Ray ray, int depth);
+
 // if bary is NULL then the intersection is with a sphere
-Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) {
+Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, float* bary) {
     Material mat = scene.get_material(m);
     Color d_lambda;
     float uv[2];
@@ -56,6 +58,9 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
         d_lambda = mat.diffuse();
     }
     Color final_color = mat.ka() * d_lambda;
+    // if (bary != NULL) {
+    //     std::cout << "fresnel: " << mat.fresnel() << std::endl;
+    // }
 
     // for each light source in the scene calculate the diffuse and specular components
     for (int i = 0; i < scene.num_lights(); i++) {
@@ -98,13 +103,19 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
         float ndotl = std::max(0.0f, n.dot(l));
         // if n dot l is 0 then n dot h is also 0 so same situation
         if (ndotl == 0.0) { continue; }
-        Vector h = l + view_v;
+        Vector h = l + (-i_ray.direction());
         h.normalize();
         float ndoth = std::max(0.0f, n.dot(h));
         Color diffuse = ndotl * mat.kd() * d_lambda;
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
-        //Color reflection = trace_ray(Ray(x_p, r.reflect(n)));
-        final_color = final_color + (cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular);
+        Color reflection = Color(0, 0, 0);
+        if (depth < 10 && mat.ks() != 0.0) {
+            reflection = (mat.fresnel() + ((1 - mat.fresnel()) * pow((1 - std::cos(i_ray.direction().dot(n))), 5))) * trace_ray(Ray(x_p, i_ray.reflect(n)), depth + 1);
+        }
+        // std::cout << "reflection: " << reflection << std::endl;
+        // std::cout << "fresnel: " << mat.fresnel() << std::endl;
+        // std::cout << "fr: " << (mat.fresnel() + ((1 - mat.fresnel()) * std::pow((1 - std::cos(i_ray.direction().dot(n))), 5))) << std::endl;
+        final_color = final_color + ((cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular) + reflection);
     }
     final_color = scene.depth_cue(x_p, final_color, scene.eye().distance(x_p));
     return final_color;
@@ -113,7 +124,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Vector view_v, float* bary) 
 
 
 // given a ray returns the color of any intersected geometry
-Color trace_ray(Ray ray) {
+Color trace_ray(Ray ray, int depth = 0) {
     float min_t = INFINITY;
     Color output = scene.background();
     int hit_index = -1;
@@ -171,7 +182,7 @@ Color trace_ray(Ray ray) {
                 n.normalize();
             }
         }
-        output = shade_ray(m_index, hit_index, n, intersection, view, (is_sphere) ? NULL : bary);
+        output = shade_ray(m_index, hit_index, n, intersection, ray, depth, (is_sphere) ? NULL : bary);
     }
     return output;
 }

@@ -174,7 +174,7 @@ int Scene::load_from_file(const std::string& filename) {
                 if (!ss || ss >> temp) {
                     throw "Invalid input";
                 }
-                materials.push_back(Material(Color(dr, dg, db), Color(sr, sg, sb), ka, kd, ks, n));
+                materials.push_back(Material(Color(dr, dg, db), Color(sr, sg, sb), ka, kd, ks, n, alpha, eta));
                 mtl_index++;
             } else if (key == "texture") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
@@ -186,6 +186,8 @@ int Scene::load_from_file(const std::string& filename) {
                 textures.push_back(std::make_shared<Texture>(Texture(tex_file)));
                 Material texture_mat = Material(materials[mtl_index]);
                 texture_mat.set_texture(++tex_index);
+                std::cout << materials[mtl_index].fresnel() << std::endl;
+                std::cout << texture_mat.fresnel() << std::endl;
                 materials.push_back(texture_mat);
                 texture_defined = true;
                 mtl_index++;
@@ -279,7 +281,7 @@ int Scene::load_from_file(const std::string& filename) {
         }
     } catch (const char* e) {
         std::cerr << e << std::endl;
-        return 1;
+        return 0;
     }
     
 

@@ -11,7 +11,7 @@ class Material {
     public:
         Material();
 
-        Material(Color diffuse, Color specular, float ka, float kd, float ks, int n);
+        Material(Color diffuse, Color specular, float ka, float kd, float ks, int n, float alpha, float eta);
 
         Material(int texture);
 
@@ -32,6 +32,8 @@ class Material {
         bool has_texture() const {return texture != -1;}
         int get_texture() const {return texture;}
         void set_texture(int t) {texture = t;}
+        float alpha() const {return a;}
+        float fresnel() const {return fo;}
 
 
     private:
@@ -41,8 +43,8 @@ class Material {
         Color d;
         Color s;
         float k[3];
-        float alpha;
-        float eta;
+        float a;
+        float fo;
         int n_val;
 };
 
