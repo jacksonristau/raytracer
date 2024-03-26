@@ -13,10 +13,11 @@
 #include "scene.h"
 
 
-const float epsilon = 0.00001;
+const float epsilon = 0.0001;
 const float pi = 4.0 * atan(1.0);
 
 Scene scene;
+bool checklight = false;
 
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
@@ -30,10 +31,22 @@ std::string pixel_to_string(Color pixel) {
     return out.str();
 }
 
-Color trace_ray(Ray ray, int depth);
+Color trace_ray(Ray ray, bool entering, int depth = 0, std::vector<float> refract_stack = {scene.eta()});
+
+float fresnel(float cosi, float ni, float nt, bool reflect) {
+    float fo;
+    if (reflect){
+        fo = ((ni - 1) / (ni + 1));
+    }
+    else {
+        fo = (nt - ni) / (nt + ni);
+    }
+    fo = fo * fo;
+    return fo + (1 - fo) * std::pow((1 - cosi), 5);
+}
 
 // if bary is NULL then the intersection is with a sphere
-Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, float* bary) {
+Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool entering, std::vector<float> refract_stack, float* bary) {
     Material mat = scene.get_material(m);
     Color d_lambda;
     float uv[2];
@@ -44,9 +57,6 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, float*
             //std::cout << "u: " << uv[0] << " v: " << uv[1] << std::endl;
         }
         else{
-            // uvs is {{u0, v0}, {u1, v1}, {u2, v2}}
-            // u = bary[0] * u0 + bary[1] * u1 + bary[2] * u2
-            // v = bary[0] * v0 + bary[1] * v1 + bary[2] * v2
             std::vector<std::vector<float>> uvs = scene.get_uvs(o);
             uv[0] = (bary[0] * uvs[0][0]) + (bary[1] * uvs[1][0]) + (bary[2] * uvs[2][0]);
             uv[1] = (bary[0] * uvs[0][1]) + (bary[1] * uvs[1][1]) + (bary[2] * uvs[2][1]);
@@ -58,6 +68,9 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, float*
         d_lambda = mat.diffuse();
     }
     Color final_color = mat.ka() * d_lambda;
+    if (depth >= 10){
+        return final_color;
+    }
     // if (bary != NULL) {
     //     std::cout << "fresnel: " << mat.fresnel() << std::endl;
     // }
@@ -79,11 +92,11 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, float*
             // dont check yourself 
             if (j == o && bary == NULL) { continue; }
             float t = r.intersect_sphere(scene.get_sphere(j));
+            float surface_alpha = scene.get_material(scene.get_sphere(j).material()).alpha();
             // is the intersection between the light source
             bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
-                s_flag = 0.0;
-                break;
+                s_flag = s_flag * (1 - surface_alpha);
             }
         }
         // check if the light source is blocked by any triangle
@@ -91,31 +104,73 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, float*
             // dont check yourself 
             if (j == o && bary != NULL) { continue; }
             float t = r.intersect_triangle(scene.get_vertices(j), NULL);
+            float surface_alpha = scene.get_material(scene.get_material_index(j)).alpha();
             // is the intersection between the light source
             bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
-            if (is_between || s_flag == 0.0) {
-                s_flag = 0.0;
-                break;
+            if (is_between) {
+                s_flag = s_flag * (1 - surface_alpha);
             }
         }
+        Vector I = -i_ray.direction();
+        // if (n.dot(I) < 0) {
+        //     n = -n;
+        // }
         // no need to calculate diffuse or specular for this light source
-        if (s_flag == 0.0) { continue; }
         float ndotl = std::max(0.0f, n.dot(l));
         // if n dot l is 0 then n dot h is also 0 so same situation
         if (ndotl == 0.0) { continue; }
-        Vector h = l + (-i_ray.direction());
+        I.normalize();
+        Vector h = l + I;
         h.normalize();
         float ndoth = std::max(0.0f, n.dot(h));
         Color diffuse = ndotl * mat.kd() * d_lambda;
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
         Color reflection = Color(0, 0, 0);
-        if (depth < 10 && mat.ks() != 0.0) {
-            reflection = (mat.fresnel() + ((1 - mat.fresnel()) * pow((1 - std::cos(i_ray.direction().dot(n))), 5))) * trace_ray(Ray(x_p, i_ray.reflect(n)), depth + 1);
+        Color transparent = Color(0, 0, 0);
+        if (mat.ks() > 0.0){
+            float fr = fresnel(n.dot(I), mat.eta(), 0.0, true);
+            reflection = fr * trace_ray(Ray(x_p, i_ray.reflect(n)), entering, depth + 1,  refract_stack);
         }
-        // std::cout << "reflection: " << reflection << std::endl;
-        // std::cout << "fresnel: " << mat.fresnel() << std::endl;
-        // std::cout << "fr: " << (mat.fresnel() + ((1 - mat.fresnel()) * std::pow((1 - std::cos(i_ray.direction().dot(n))), 5))) << std::endl;
-        final_color = final_color + ((cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular) + reflection);
+        if (mat.alpha() != 1.0){
+            float ni = refract_stack.back();
+            refract_stack.pop_back();
+            float nt;
+            if (entering) {
+                nt = mat.eta();
+            }
+            // exiting object
+            else {
+                nt = scene.eta();
+            }
+            refract_stack.push_back(nt);
+            Vector refract_dir = i_ray.refract(n, ni, nt);
+            float fr = fresnel(n.dot(I), ni, nt, false);
+            if (fr > 1.0) {
+                std::cout << "fr: " << fr << std::endl;
+            }
+            transparent = (1 - fr) * (1 - mat.alpha()) * trace_ray(Ray(x_p, refract_dir), !entering, depth + 1, refract_stack);
+            if (transparent.r() < 0 || transparent.g() < 0 || transparent.b() < 0) {
+                std::cout << ", fr: " << fr;
+                std::cout << ", ni: " << ni;
+                std::cout << ", nt: " << nt;
+                std::cout << ", n dot i: " << n.dot(I);
+                std::cout << ", N: " << n;
+                std::cout << ", I: " << I;
+                std::cout << ", transparent: " << transparent << std::endl;
+            }
+        }
+
+        final_color = final_color + (s_flag * ((cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular)) + reflection + transparent);
+        if (final_color.r() < 0.05 || final_color.g() < 0.05 || final_color.b() < 0.05) {
+            std::cout << "n: " << n;
+            std::cout << ", l: " << l;
+            std::cout << ", n dot l: " << ndotl;
+            std::cout << ", depth: " << depth;
+            std::cout << ", diffuse: " << diffuse;
+            std::cout << ", specular: " << specular;
+            std::cout << ", reflection: " << reflection;
+            std::cout << ", transparent: " << transparent << std::endl;
+        }
     }
     final_color = scene.depth_cue(x_p, final_color, scene.eye().distance(x_p));
     return final_color;
@@ -124,7 +179,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, float*
 
 
 // given a ray returns the color of any intersected geometry
-Color trace_ray(Ray ray, int depth = 0) {
+Color trace_ray(Ray ray, bool entering, int depth, std::vector<float> refract_stack) {
     float min_t = INFINITY;
     Color output = scene.background();
     int hit_index = -1;
@@ -132,7 +187,7 @@ Color trace_ray(Ray ray, int depth = 0) {
     // each sphere in scene
     for (int i = 0; i < scene.num_spheres(); i++) {
         float t = ray.intersect_sphere(scene.get_sphere(i));
-        if (t > 0){
+        if (t > epsilon){
             if (t < min_t) {
                 min_t = t;
                 hit_index = i;
@@ -144,7 +199,7 @@ Color trace_ray(Ray ray, int depth = 0) {
     for (int i = 0; i < scene.num_indices(); i++) {
         // bary is filled with the barycentric coordinates of the intersection
         float t = ray.intersect_triangle(scene.get_vertices(i), bary);
-        if (t > 0){
+        if (t > epsilon){
             if (t < min_t) {
                 min_t = t;
                 hit_index = i;
@@ -156,14 +211,17 @@ Color trace_ray(Ray ray, int depth = 0) {
     // if the ray intersects an object
     if (hit_index != -1){
         Vector intersection = ray.get_point(min_t);
-        Vector view = -ray.direction();
-        view.normalize();
         int m_index;
         Vector n;
         // if the ray intersects a sphere
         if (is_sphere) {
+            if (entering == false) {
+                n = scene.get_sphere(hit_index).center() - intersection;
+            }
+            else {
+                n = intersection - scene.get_sphere(hit_index).center();
+            }
             m_index = scene.get_sphere(hit_index).material();
-            n = intersection - scene.get_sphere(hit_index).center();
             n = (1 / scene.get_sphere(hit_index).radius()) * n;
         }
         // if the ray intersects a triangle
@@ -182,7 +240,7 @@ Color trace_ray(Ray ray, int depth = 0) {
                 n.normalize();
             }
         }
-        output = shade_ray(m_index, hit_index, n, intersection, ray, depth, (is_sphere) ? NULL : bary);
+        output = shade_ray(m_index, hit_index, n, intersection, ray, depth, entering, refract_stack, (is_sphere) ? NULL : bary);
     }
     return output;
 }
@@ -254,16 +312,16 @@ int main(int argc, char *argv[]) {
         for (int j = 0; j < scene.px_width(); j++){
             int pos = j + (scene.px_width() * i);
             try{
-                pixelmap[pos] = trace_ray(ray);
+                pixelmap[pos] = trace_ray(ray, true);
             }
             catch (std::exception& e){
                 std::cout << e.what() << std::endl;
                 return 0;
             }
             
-            if (j % 10 == 0) {
-                std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
-            }
+            // if (j % 10 == 0) {
+            //     std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
+            // }
             if (scene.is_parallel()) {
                 ray.set_origin((ul + (i * deltav) + (j * deltah)));
             }

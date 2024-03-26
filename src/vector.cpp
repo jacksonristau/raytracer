@@ -42,7 +42,7 @@ Vector Vector::operator-() {
 }
 
 Vector Vector::operator+(const Vector& v1) {
-    return Vector(v[0] + v1.x(), v[1] + v1.y(), v[2] + v1.z());
+    return Vector(v[0] + v1.x(), v[1] + v1.y(), v[2] + v1.z(), v[3] + v1.w());
 }
 
 Vector Vector::operator=(const Vector& v1) {

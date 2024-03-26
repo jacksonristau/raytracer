@@ -33,8 +33,7 @@ class Material {
         int get_texture() const {return texture;}
         void set_texture(int t) {texture = t;}
         float alpha() const {return a;}
-        float fresnel() const {return fo;}
-
+        float eta() const {return index_of_refraction;}
 
     private:
         int texture;
@@ -44,7 +43,7 @@ class Material {
         Color s;
         float k[3];
         float a;
-        float fo;
+        float index_of_refraction;
         int n_val;
 };
 

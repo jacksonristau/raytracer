@@ -12,7 +12,7 @@ Material::Material() {
     n_val = 50;
     texture = -1;
     a = 1.0;
-    fo = 0.0;
+    index_of_refraction = 1.0;
 }
 
 Material::Material(Color diffuse, Color specular, float ka, float kd, float ks, int n, float alpha, float eta) {
@@ -23,7 +23,7 @@ Material::Material(Color diffuse, Color specular, float ka, float kd, float ks, 
     k[2] = ks;
     n_val = n;
     a = alpha;
-    fo = ((eta - 1)/(eta + 1)) * ((eta - 1)/(eta + 1));
+    index_of_refraction = eta;
     texture = -1;
 }
 
@@ -35,7 +35,7 @@ Material::Material(int texture) : texture(texture) {
     k[2] = 0.2;
     n_val = 20;
     a = 1.0;
-    fo = 0.0;
+    index_of_refraction = 1.0;
 }
 
 Material::Material(const Material& m2) {
@@ -47,7 +47,7 @@ Material::Material(const Material& m2) {
     n_val = m2.n();
     texture = m2.texture;
     a = m2.alpha();
-    fo = m2.fresnel();
+    index_of_refraction = m2.eta();
 }
 
 Material::~Material() {
@@ -87,7 +87,6 @@ Material Material::operator=(const Material& m1) {
     n_val = m1.n();
     texture = m1.texture;
     a = m1.alpha();
-    fo = m1.fresnel();
     return *this;
 }
 

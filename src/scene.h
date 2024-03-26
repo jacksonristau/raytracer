@@ -20,6 +20,7 @@ class Scene {
         Color get_texture_color(int index, float u, float v) const;
 
         Color background() const { return bkgcolor;}
+        float eta() const { return bkgeta;}
         
         Material get_material(int index) const { return materials[index]; }
         int get_material_index(int index) const { return material_indices[index];}

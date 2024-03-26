@@ -24,6 +24,7 @@ class Ray {
         // returns fills the array coords with the barycentric coordinates of the intersection
         float intersect_triangle(std::vector<Vector> vertices, float* coords);
         Vector reflect(const Vector& normal);
+        Vector refract(Vector normal, float n1, float n2);
 
         Vector get_point(float t);
 

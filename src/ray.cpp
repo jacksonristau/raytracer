@@ -130,6 +130,25 @@ Vector Ray::reflect(const Vector& N) {
     return R;
 }
 
+Vector Ray::refract(Vector N, float n1, float n2) {
+    Vector I = -d;
+    float snell = n1 / n2;
+    float ndoti = N.dot(I);
+    Vector B = snell * ((ndoti * N) - I);
+    try{
+        float discrim = 1 - (pow(snell, 2) * (1 - pow(ndoti, 2)));
+        if (discrim < 0) {
+            throw std::exception();
+        }
+        Vector A = sqrt(discrim) * (-N);
+        return A + B;
+    }
+    catch (std::exception e){
+        std::cout << "tir" << std::endl;
+        return Vector(0, 0, 0);
+    }
+}
+
 Vector Ray::get_point(float t) {
     return o + (t * d);
 }

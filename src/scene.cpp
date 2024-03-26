@@ -186,8 +186,6 @@ int Scene::load_from_file(const std::string& filename) {
                 textures.push_back(std::make_shared<Texture>(Texture(tex_file)));
                 Material texture_mat = Material(materials[mtl_index]);
                 texture_mat.set_texture(++tex_index);
-                std::cout << materials[mtl_index].fresnel() << std::endl;
-                std::cout << texture_mat.fresnel() << std::endl;
                 materials.push_back(texture_mat);
                 texture_defined = true;
                 mtl_index++;
