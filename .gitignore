@@ -63,5 +63,5 @@ test/test_runner
 /out/build/x64-Debug
 
 ## vs
-/.vs/
-/.vs/*
+.vs
+/.vs/slnx.sqlite
