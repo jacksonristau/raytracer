@@ -1,6 +1,11 @@
 #include "sphere.h"
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif // !M_PI
+
+
 Sphere::Sphere() : c(Vector(0, 0, 0)), r(1.0){
 }
 

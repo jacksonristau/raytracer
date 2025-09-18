@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "raytracer1c.exe",
+      "name": "raytracer1c.exe",
+      "args": [
+        "teacup.txt"
+      ]
+    }
+  ]
+}

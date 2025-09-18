@@ -13,11 +13,10 @@
 #include "scene.h"
 
 
-const float epsilon = 0.0001;
+const float epsilon = 0.001;
 const float pi = 4.0 * atan(1.0);
 
 Scene scene;
-bool checklight = false;
 
 // convert from a Color struct to a string
 std::string pixel_to_string(Color pixel) {
@@ -112,17 +111,18 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
             }
         }
         Vector I = -i_ray.direction();
-        // if (n.dot(I) < 0) {
-        //     n = -n;
-        // }
         // no need to calculate diffuse or specular for this light source
         float ndotl = std::max(0.0f, n.dot(l));
+        float ndoth;
         // if n dot l is 0 then n dot h is also 0 so same situation
-        if (ndotl == 0.0) { continue; }
-        I.normalize();
-        Vector h = l + I;
-        h.normalize();
-        float ndoth = std::max(0.0f, n.dot(h));
+        if (ndotl == 0.0) {
+            ndoth = 0.0;
+        }
+        else {
+            Vector h = l + I;
+            h.normalize();
+            ndoth = std::max(0.0f, n.dot(h));
+        }
         Color diffuse = ndotl * mat.kd() * d_lambda;
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
         Color reflection = Color(0, 0, 0);
@@ -149,28 +149,9 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
                 std::cout << "fr: " << fr << std::endl;
             }
             transparent = (1 - fr) * (1 - mat.alpha()) * trace_ray(Ray(x_p, refract_dir), !entering, depth + 1, refract_stack);
-            if (transparent.r() < 0 || transparent.g() < 0 || transparent.b() < 0) {
-                std::cout << ", fr: " << fr;
-                std::cout << ", ni: " << ni;
-                std::cout << ", nt: " << nt;
-                std::cout << ", n dot i: " << n.dot(I);
-                std::cout << ", N: " << n;
-                std::cout << ", I: " << I;
-                std::cout << ", transparent: " << transparent << std::endl;
-            }
         }
 
         final_color = final_color + (s_flag * ((cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular)) + reflection + transparent);
-        if (final_color.r() < 0.05 || final_color.g() < 0.05 || final_color.b() < 0.05) {
-            std::cout << "n: " << n;
-            std::cout << ", l: " << l;
-            std::cout << ", n dot l: " << ndotl;
-            std::cout << ", depth: " << depth;
-            std::cout << ", diffuse: " << diffuse;
-            std::cout << ", specular: " << specular;
-            std::cout << ", reflection: " << reflection;
-            std::cout << ", transparent: " << transparent << std::endl;
-        }
     }
     final_color = scene.depth_cue(x_p, final_color, scene.eye().distance(x_p));
     return final_color;
@@ -216,9 +197,11 @@ Color trace_ray(Ray ray, bool entering, int depth, std::vector<float> refract_st
         // if the ray intersects a sphere
         if (is_sphere) {
             if (entering == false) {
+                // inward normal
                 n = scene.get_sphere(hit_index).center() - intersection;
             }
             else {
+                // outward normal
                 n = intersection - scene.get_sphere(hit_index).center();
             }
             m_index = scene.get_sphere(hit_index).material();
@@ -271,7 +254,6 @@ int main(int argc, char *argv[]) {
     Vector u = scene.view().cross(scene.up());
     u.normalize();
     Vector v = u.cross(scene.view());
-    std::cout << "v: " << v << std::endl;
 
     float aspect = (float)scene.px_width() / (float)scene.px_height();
     float d = 2;

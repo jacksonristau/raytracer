@@ -1,6 +1,8 @@
 #include "ray.h"
 #include <math.h>
 
+float epsilon = 0.0001;
+
 Ray::Ray() : o(Vector(0, 0, 0)), d(Vector(0, 0, -1)){
 }
 
@@ -52,15 +54,15 @@ float Ray::intersect_sphere(const Sphere& sphere) {
         float t1 = (-B + sqrt(discrim)) / 2.0;
         float t2 = (-B - sqrt(discrim)) / 2.0;
         
-        if (t1 <= 0 && t2 > 0) {
+        if (t1 < epsilon && t2 > epsilon) {
             return t2;
         }
-        else if (t1 > 0 && t2 <= 0) {
+        else if (t1 > epsilon && t2 < epsilon) {
             return t1;
         }
         // regardless trace_ray ignores negative values
-        else if (t1 <= 0 && t2 <= 0) {
-            return t1;
+        else if (t1 < epsilon && t2 <= epsilon) {
+            return -1.0;
         }
         // (t1 > 0 && t2 > 0)
         else {

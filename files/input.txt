@@ -1,0 +1,192 @@
+imsize 512 512
+eye 15 10 20
+viewdir -0.75 -0.5 -1
+hfov 60
+updir 0 1 0
+bkgcolor 0.0 0.0 0.0 1.0002
+depthcueing 0 0 0 0 0.6 20 30
+
+light 1 -1 -1 0 1
+
+mtlcolor 0.3 0.1 0.1 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -6 -4 1
+sphere -2 -6 -4 1
+sphere -0 -6 -4 1
+sphere 2 -6 -4 1
+sphere 4 -6 -4 1
+
+mtlcolor 0.5 0.25 0.1 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -6 -2 1
+sphere -2 -6 -2 1
+sphere -0 -6 -2 1
+sphere 2 -6 -2 1
+sphere 4 -6 -2 1
+
+mtlcolor 0.4 0.4 0.1 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -6 0 1
+sphere -2 -6 0 1
+sphere -0 -6 0 1
+sphere 2 -6 0 1
+sphere 4 -6 0 1
+
+mtlcolor 0.1 0.3 0.1 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -6 2 1
+sphere -2 -6 2 1
+sphere -0 -6 2 1
+sphere 2 -6 2 1
+sphere 4 -6 2 1
+
+mtlcolor 0.15 0.15 0.35 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -6 4 1
+sphere -2 -6 4 1
+sphere -0 -6 4 1
+sphere 2 -6 4 1
+sphere 4 -6 4 1
+
+
+
+mtlcolor 0.4 0.2 0.2 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -4 -4 1
+sphere -2 -4 -4 1
+sphere -0 -4 -4 1
+sphere 2 -4 -4 1
+sphere 4 -4 -4 1
+
+mtlcolor 0.6 0.35 0.2 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -4 -2 1
+sphere -2 -4 -2 1
+sphere -0 -4 -2 1
+sphere 2 -4 -2 1
+sphere 4 -4 -2 1
+
+mtlcolor 0.5 0.5 0.2 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -4 0 1
+sphere -2 -4 0 1
+sphere -0 -4 0 1
+sphere 2 -4 0 1
+sphere 4 -4 0 1
+
+mtlcolor 0.2 0.4 0.2 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -4 2 1
+sphere -2 -4 2 1
+sphere -0 -4 2 1
+sphere 2 -4 2 1
+sphere 4 -4 2 1
+
+mtlcolor 0.2 0.2 0.4 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -4 4 1
+sphere -2 -4 4 1
+sphere -0 -4 4 1
+sphere 2 -4 4 1
+sphere 4 -4 4 1
+
+
+
+mtlcolor 0.5 0.3 0.3 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -2 -4 1
+sphere -2 -2 -4 1
+sphere -0 -2 -4 1
+sphere 2 -2 -4 1
+sphere 4 -2 -4 1
+
+mtlcolor 0.7 0.45 0.3 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -2 -2 1
+sphere -2 -2 -2 1
+sphere -0 -2 -2 1
+sphere 2 -2 -2 1
+sphere 4 -2 -2 1
+
+mtlcolor 0.6 0.6 0.3 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -2 0 1
+sphere -2 -2 0 1
+sphere -0 -2 0 1
+sphere 2 -2 0 1
+sphere 4 -2 0 1
+
+mtlcolor 0.3 0.5 0.2 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -2 2 1
+sphere -2 -2 2 1
+sphere -0 -2 2 1
+sphere 2 -2 2 1
+sphere 4 -2 2 1
+
+mtlcolor 0.3 0.3 0.5 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -2 4 1
+sphere -2 -2 4 1
+sphere -0 -2 4 1
+sphere 2 -2 4 1
+sphere 4 -2 4 1
+
+
+
+mtlcolor 0.6 0.4 0.4 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -0 -4 1
+sphere -2 -0 -4 1
+sphere -0 -0 -4 1
+sphere 2 -0 -4 1
+sphere 4 -0 -4 1
+
+mtlcolor 0.8 0.55 0.4 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -0 -2 1
+sphere -2 -0 -2 1
+sphere -0 -0 -2 1
+sphere 2 -0 -2 1
+sphere 4 -0 -2 1
+
+mtlcolor 0.7 0.7 0.4 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -0 0 1
+sphere -2 -0 0 1
+sphere -0 -0 0 1
+sphere 2 -0 0 1
+sphere 4 -0 0 1
+
+mtlcolor 0.4 0.6 0.3 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -0 2 1
+sphere -2 -0 2 1
+sphere -0 -0 2 1
+sphere 2 -0 2 1
+sphere 4 -0 2 1
+
+mtlcolor 0.4 0.4 0.6 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 -0 4 1
+sphere -2 -0 4 1
+sphere -0 -0 4 1
+sphere 2 -0 4 1
+sphere 4 -0 4 1
+
+
+
+mtlcolor 0.7 0.5 0.5 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 2 -4 1
+sphere -2 2 -4 1
+sphere -0 2 -4 1
+sphere 2 2 -4 1
+sphere 4 2 -4 1
+
+mtlcolor 0.9 0.65 0.5 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 2 -2 1
+sphere -2 2 -2 1
+sphere -0 2 -2 1
+sphere 2 2 -2 1
+sphere 4 2 -2 1
+
+mtlcolor 0.8 0.8 0.5 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 2 0 1
+sphere -2 2 0 1
+sphere -0 2 0 1
+sphere 2 2 0 1
+sphere 4 2 0 1
+
+mtlcolor 0.5 0.7 0.4 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 2 2 1
+sphere -2 2 2 1
+sphere -0 2 2 1
+sphere 2 2 2 1
+sphere 4 2 2 1
+
+mtlcolor 0.5 0.5 0.7 1 1 1 0.2 0.6 0.2 50 1.0 1.0
+sphere -4 2 4 1
+sphere -2 2 4 1
+sphere -0 2 4 1
+sphere 2 2 4 1
+sphere 4 2 4 1

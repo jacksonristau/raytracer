@@ -95,7 +95,7 @@ Vector read_vector(std::string line, float w) {
     std::string temp;
     ss >> x >> y >> z;
     if (!ss || ss >> temp) {
-        throw "Invalid input";
+        throw "Invalid input: <vector> <x> <y> <z>";
     }
     return Vector(x, y, z, w);
 }
@@ -128,6 +128,9 @@ int Scene::load_from_file(const std::string& filename) {
                 continue;
             }
             key = line.substr(0, line.find(' '));
+            if (key == "#") {
+                continue;
+            }
             if (key == "eye") {
                 eye_pos = read_vector(line, 1.0);
                 read_inputs++;
@@ -144,14 +147,14 @@ int Scene::load_from_file(const std::string& filename) {
                 ss >> hfov;
                 hfov *= (pi / 180);
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: hfov <angle>";
                 }
                 read_inputs++;
             } else if (key == "imsize") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> resolution[0] >> resolution[1];
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: imsize <width> <height>";
                 }
                 read_inputs++;
             } else if (key == "bkgcolor") {
@@ -159,7 +162,7 @@ int Scene::load_from_file(const std::string& filename) {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> r >> g >> b >> eta;
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: bkgcolor <r> <g> <b> <eta>";
                 }
                 bkgcolor = Color(r, g, b);
                 bkgeta = eta;
@@ -172,7 +175,7 @@ int Scene::load_from_file(const std::string& filename) {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> dr >> dg >> db >> sr >> sg >> sb >> ka >> kd >> ks >> n >> alpha >> eta;
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: mtlcolor <dr> <dg> <db> <sr> <sg> <sb> <ka> <kd> <ks> <n> <alpha> <eta>";
                 }
                 materials.push_back(Material(Color(dr, dg, db), Color(sr, sg, sb), ka, kd, ks, n, alpha, eta));
                 mtl_index++;
@@ -181,7 +184,7 @@ int Scene::load_from_file(const std::string& filename) {
                 std::string tex_file;
                 ss >> tex_file;
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: texture <filename>";
                 }
                 textures.push_back(std::make_shared<Texture>(Texture(tex_file)));
                 Material texture_mat = Material(materials[mtl_index]);
@@ -194,14 +197,14 @@ int Scene::load_from_file(const std::string& filename) {
                 float x, y, z, r;
                 ss >> x >> y >> z >> r;
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: sphere <x> <y> <z> <r>";
                 }
                 spheres.push_back(Sphere(Vector(x, y, z, 1.0), r, mtl_index));
             } else if (key == "parallel") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> frustum_w;
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: parallel <frustum_width>";
                 }
                 parallel = true;
                 read_inputs++;
@@ -210,7 +213,7 @@ int Scene::load_from_file(const std::string& filename) {
                 float x, y, z, w, i;
                 ss >> x >> y >> z >> w >> i;
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: light <x> <y> <z> <w> <i>";
                 }
                 lights.push_back(Light(Vector(x, y, z, w), i));
             } else if (key == "attlight") {
@@ -228,7 +231,7 @@ int Scene::load_from_file(const std::string& filename) {
                 float r, g, b, alpha_min, alpha_max, dist_min, dist_max;
                 ss >> r >> g >> b >> alpha_min >> alpha_max >> dist_min >> dist_max;
                 if (!ss || ss >> temp) {
-                    throw "Invalid input";
+                    throw "Invalid input: depthcueing <r> <g> <b> <alpha_min> <alpha_max> <dist_min> <dist_max>";
                 }
                 dc = Color(r, g, b);
                 alpha[0] = alpha_min;
@@ -274,11 +277,11 @@ int Scene::load_from_file(const std::string& filename) {
                 }
                 uvs.push_back({u, v});
             } else {
-                throw "Invalid input";
+                throw "Invalid input: unrecognized key";
             }
         }
     } catch (const char* e) {
-        std::cerr << e << std::endl;
+        std::cout << "Error: Invalid argument" << key << std::endl;
         return 0;
     }
     
