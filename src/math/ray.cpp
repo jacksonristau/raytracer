@@ -1,7 +1,7 @@
 #include "ray.h"
 #include <math.h>
 
-float epsilon = 0.0001;
+const float EPSILON = 1e-8;
 
 Ray::Ray() : o(Vector(0, 0, 0)), d(Vector(0, 0, -1)){
 }
@@ -54,14 +54,14 @@ float Ray::intersect_sphere(const Sphere& sphere) {
         float t1 = (-B + sqrt(discrim)) / 2.0;
         float t2 = (-B - sqrt(discrim)) / 2.0;
         
-        if (t1 < epsilon && t2 > epsilon) {
+        if (t1 < EPSILON && t2 > EPSILON) {
             return t2;
         }
-        else if (t1 > epsilon && t2 < epsilon) {
+        else if (t1 > EPSILON && t2 < EPSILON) {
             return t1;
         }
         // regardless trace_ray ignores negative values
-        else if (t1 < epsilon && t2 <= epsilon) {
+        else if (t1 < EPSILON && t2 <= EPSILON) {
             return -1.0;
         }
         // (t1 > 0 && t2 > 0)
@@ -75,11 +75,16 @@ float Ray::intersect_sphere(const Sphere& sphere) {
 float Ray::intersect_plane(const Vector& normal, const Vector& point) {
     float denom = normal.dot(d);
     // if the ray is parallel to the plane
-    if (denom > -0.0000001 && denom < 0.0000001) {
+    /*if (denom > -0.0000001 && denom < 0.0000001) {
+        return -1.0;
+    }*/
+    if (fabs(denom) < 1e-6f) {
         return -1.0;
     }
     float D = -normal.dot(point);
-    return -(normal.dot(o) + D) / denom;
+    float t = -(normal.dot(o) + D) / denom;
+    if (t < 1e-6f) return -1.0f;
+    return t;
 }
 
 // coords expects a 3 element array
@@ -90,8 +95,8 @@ float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
     Vector n = e1.cross(e2);
 
     float t = intersect_plane(n, vertices[0]);
-    if (t < 0.0) {
-        return -1.0;
+    if (t < 1e-6f) {
+        return -1.0f;
     }
     // check if the point is inside the triangle
     else {
@@ -99,8 +104,11 @@ float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
         float d12 = e1.dot(e2);
         float d22 = e2.dot(e2);
         float det = (d11 * d22) - (d12 * d12);
-        if (det > -0.0000001 && det < 0.0000001) {
+        /*if (det > -0.0001 && det < 0.0001) {
             return -1.0;
+        }*/
+        if (fabs(det) < EPSILON) {
+            return -1.0f;
         }
         Vector p = get_point(t);
         Vector ep = p - vertices[0];
@@ -109,8 +117,9 @@ float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
 
         float beta = ((d22 * dp1) - (d12 * dp2)) / det;
         float gamma = ((d11 * dp2) - (d12 * dp1)) / det;
-        float alpha = 1 - (beta + gamma);
-        if (0 <= alpha && alpha <= 1 && 0 <= beta && beta <= 1 && 0 <= gamma && gamma <= 1) {
+        float alpha = 1.0f - (beta + gamma);
+        const float BARY_EPS = 1e-6f;
+        if (alpha >= -BARY_EPS && alpha <= 1.0f && beta >= -BARY_EPS && beta <= 1.0f && gamma >= -BARY_EPS && gamma <= 1.0f) {
             if (coords == NULL) {
                 return t;
             }
@@ -120,7 +129,7 @@ float Ray::intersect_triangle(std::vector<Vector> vertices, float *coords) {
             return t;
         }
         else {
-            return -1.0;
+            return -1.0f;
         }
     }
 }

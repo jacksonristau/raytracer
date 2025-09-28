@@ -4,17 +4,20 @@
 #include <math.h>
 #include <sstream>
 
-#include "vector.h"
-#include "ray.h"
+#include "math/vector.h"
+#include "math/ray.h"
 #include "sphere.h"
 #include "material.h"
 #include "color.h"
 #include "light.h"
 #include "scene.h"
+#include "camera.h"
 
 
-const float epsilon = 0.001;
+const float epsilon = 0.00000001;
 const float pi = 4.0 * atan(1.0);
+
+bool print_once = false;
 
 Scene scene;
 
@@ -84,8 +87,8 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
         float d = x_p.distance(cur_light.l());
 
         l.normalize();
-        Ray r = Ray(x_p, l);
-
+        Ray r = Ray(x_p + (1e-4f * n), l);
+        float ndotl = std::max(0.0f, n.dot(l));
         // check if the light source is blocked by any sphere
         for (int j = 0; j < scene.num_spheres(); j++) {
             // dont check yourself 
@@ -93,7 +96,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
             float t = r.intersect_sphere(scene.get_sphere(j));
             float surface_alpha = scene.get_material(scene.get_sphere(j).material()).alpha();
             // is the intersection between the light source
-            bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
+            bool is_between = (is_point) ? t > 0.0f && t < d : t > 0.0f;
             if (is_between) {
                 s_flag = s_flag * (1 - surface_alpha);
             }
@@ -102,17 +105,19 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
         for (int j = 0; j < scene.num_indices(); j++) {
             // dont check yourself 
             if (j == o && bary != NULL) { continue; }
+            if (ndotl >= 0 && !is_point)
+                continue;
             float t = r.intersect_triangle(scene.get_vertices(j), NULL);
-            float surface_alpha = scene.get_material(scene.get_material_index(j)).alpha();
             // is the intersection between the light source
-            bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
+            bool is_between = (is_point) ? t > 0.0 && t < d : t > 0.0;
             if (is_between) {
+                float surface_alpha = scene.get_material(scene.get_material_index(j)).alpha();
                 s_flag = s_flag * (1 - surface_alpha);
             }
         }
         Vector I = -i_ray.direction();
         // no need to calculate diffuse or specular for this light source
-        float ndotl = std::max(0.0f, n.dot(l));
+        
         float ndoth;
         // if n dot l is 0 then n dot h is also 0 so same situation
         if (ndotl == 0.0) {
@@ -145,15 +150,22 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
             refract_stack.push_back(nt);
             Vector refract_dir = i_ray.refract(n, ni, nt);
             float fr = fresnel(n.dot(I), ni, nt, false);
-            if (fr > 1.0) {
+            /*if (fr > 1.0) {
                 std::cout << "fr: " << fr << std::endl;
-            }
+            }*/
             transparent = (1 - fr) * (1 - mat.alpha()) * trace_ray(Ray(x_p, refract_dir), !entering, depth + 1, refract_stack);
         }
 
         final_color = final_color + (s_flag * ((cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular)) + reflection + transparent);
     }
-    final_color = scene.depth_cue(x_p, final_color, scene.eye().distance(x_p));
+    if (!print_once) {
+        std::cout << "before cueing: " << final_color << '\n';
+    }
+    final_color = scene.get_camera().depth_cue(x_p, final_color);
+    if (!print_once) {
+        std::cout << "after cueing: " << final_color << '\n';
+        print_once = true;
+    }
     return final_color;
 }
 
@@ -238,62 +250,20 @@ int main(int argc, char *argv[]) {
     if (scene.load_from_file(argv[1]) == 0) {
         return 0;
     }
-
+    Camera camera = scene.get_camera();
     // scene parameters
     
-    int size = scene.px_width() * scene.px_height();
+    int size = camera.px_width() * camera.px_height();
     Color *pixelmap = new Color[size];
-
-    // viewdir cross updir approaching invalidity with fp error
-    if (scene.view().dot(scene.up()) < -0.9 || scene.view().dot(scene.up()) > 0.9) {
-        std::cout << "up vector is too close to view vector" << std::endl;
-        return 0;
-    }
-
-    // define the viewing coordinate system
-    Vector u = scene.view().cross(scene.up());
-    u.normalize();
-    Vector v = u.cross(scene.view());
-
-    float aspect = (float)scene.px_width() / (float)scene.px_height();
-    float d = 2;
-
-    // width is just frustum width for a parallel projection
-    float width = (scene.is_parallel()) ? scene.frustum_width() : 2 * d * tan(scene.fov() / 2);
-    float height = width / aspect;
-
-    // go to view plane then to the left/right edge, then to the top/bottom
-    Vector ul = (scene.eye() + d * scene.view()) - ((width / 2) * u) + ((height/2) * v);
-    Vector ur = (scene.eye() + d *  scene.view()) + ((width / 2) * u) + ((height/2) * v);
-
-    Vector ll = (scene.eye() + d *  scene.view()) - ((width / 2) * u) - ((height/2) * v);
-    Vector lr = (scene.eye() + d *  scene.view()) + ((width / 2) * u) - ((height/2) * v);
-
-    Vector deltah = (1.0 / (scene.px_width() - 1)) * (ur - ul);
-    Vector deltav = (1.0 / (scene.px_height() - 1)) * (ll - ul);
-
-    // origin is ul if parallel
-    Vector origin = (scene.is_parallel()) ? ul : scene.eye();
-    // direction is always viewdir if parallel
-    Vector direction = (scene.is_parallel()) ? scene.view() : ul - scene.eye();
-
-    Ray ray = Ray(origin, direction);
 
     // for every pixel in the output image trace a ray to get its color
     std::cout << "tracing rays..." << std::endl;
     std::cout << "0% complete...";
-    for (int i = 0; i < scene.px_height(); i++) {
-        // for parallel the direction is always the same
-        if (scene.is_parallel()) {
-            ray.set_origin((ul + (i * deltav)));
-        }
-        // for perspective origin is always the eye
-        else {
-            ray.set_direction((ul + i * deltav) - scene.eye());
-        }
-        for (int j = 0; j < scene.px_width(); j++){
-            int pos = j + (scene.px_width() * i);
+    for (int i = 0; i < camera.px_height(); i++) {
+        for (int j = 0; j < camera.px_width(); j++){
+            int pos = j + (camera.px_width() * i);
             try{
+                Ray ray = camera.generate_ray(j, i);
                 pixelmap[pos] = trace_ray(ray, true);
             }
             catch (std::exception& e){
@@ -301,14 +271,8 @@ int main(int argc, char *argv[]) {
                 return 0;
             }
             
-            // if (j % 10 == 0) {
-            //     std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
-            // }
-            if (scene.is_parallel()) {
-                ray.set_origin((ul + (i * deltav) + (j * deltah)));
-            }
-            else {
-                ray.set_direction((ul + (i * deltav) + (j * deltah)) - scene.eye());
+            if (j % 50 == 0) {
+                std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
             }
         }
     }
@@ -328,9 +292,9 @@ int main(int argc, char *argv[]) {
     // write colors to ppm file 
     output << "P3\n"
         << "#raytracingiscool\n"
-        << scene.px_width()
+        << camera.px_width()
         << " "
-        << scene.px_height()
+        << camera.px_height()
         << "\n255\n";
 
     std::stringstream image;

@@ -9,17 +9,20 @@ set(
     ${PROJECT_SOURCE_DIR}/src/raytracer.cpp
     ${PROJECT_SOURCE_DIR}/src/material.cpp
     ${PROJECT_SOURCE_DIR}/src/color.cpp
-    ${PROJECT_SOURCE_DIR}/src/ray.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/ray.cpp
     ${PROJECT_SOURCE_DIR}/src/sphere.cpp
-    ${PROJECT_SOURCE_DIR}/src/vector.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/vector.cpp
     ${PROJECT_SOURCE_DIR}/src/light.cpp
     ${PROJECT_SOURCE_DIR}/src/scene.cpp
     ${PROJECT_SOURCE_DIR}/src/texture.cpp
+    ${PROJECT_SOURCE_DIR}/src/camera.cpp
+
 )
 
 set(
     INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/src/math
 )
 
 include_directories(${INCLUDE_DIRS})

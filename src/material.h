@@ -1,5 +1,4 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#pragma once
 
 #include <ostream>
 #include <vector>
@@ -48,5 +47,3 @@ class Material {
 };
 
 std::ostream & operator<< ( std::ostream &os, const Material &m1);
-
-#endif

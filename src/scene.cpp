@@ -14,25 +14,6 @@ Scene::Scene() {
 Scene::~Scene() {
 }
 
-Color Scene::depth_cue(Vector x, Color i, float view_dist) const {
-    Color final_color = i;
-    if (dc != Color(-1, -1, -1)) {
-        float view_dist = eye_pos.distance(x);
-        float alpha_dc;
-        if (view_dist <= dist[0]) {
-            alpha_dc = alpha[1];
-        }
-        else if (view_dist >= dist[1]) {
-            alpha_dc = alpha[0];
-        }
-        else {
-            alpha_dc = alpha[0] + (alpha[1] - alpha[0]) * ((dist[1] - view_dist) / (dist[1] - dist[0]));
-        }
-        final_color = (alpha_dc * i + (1 - alpha_dc) * dc);
-    }
-    return final_color;
-}
-
 Color Scene::get_texture_color(int index, float u, float v) const {
     if (index == -1) {
         return Color(0, 0, 0);
@@ -122,6 +103,16 @@ int Scene::load_from_file(const std::string& filename) {
     int mtl_index = -1;
     int tex_index = -1;
     bool texture_defined = false;
+    Vector eye_pos;
+    Vector view_dir;
+    Vector up_dir;
+    int hfov;
+    int resolution[2];
+    int frustum_w = -1.0f;
+    bool parallel = false;
+    Color dc = Color(-1, -1, -1);
+    float alpha[2];
+    float dist[2];
     try{
         while (std::getline(input, line)){
             if (line.empty()) {
@@ -135,12 +126,12 @@ int Scene::load_from_file(const std::string& filename) {
                 eye_pos = read_vector(line, 1.0);
                 read_inputs++;
             } else if (key == "viewdir") {
-                viewdir = read_vector(line, 0.0);
-                viewdir.normalize();
+                view_dir = read_vector(line, 0.0);
+                view_dir.normalize();
                 read_inputs++;
             } else if (key == "updir") {
-                updir = read_vector(line, 0.0);
-                updir.normalize();
+                up_dir = read_vector(line, 0.0);
+                up_dir.normalize();
                 read_inputs++;
             } else if (key == "hfov") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
@@ -177,6 +168,7 @@ int Scene::load_from_file(const std::string& filename) {
                 if (!ss || ss >> temp) {
                     throw "Invalid input: mtlcolor <dr> <dg> <db> <sr> <sg> <sb> <ka> <kd> <ks> <n> <alpha> <eta>";
                 }
+                std::cout << "specular: " << ks << '\n';
                 materials.push_back(Material(Color(dr, dg, db), Color(sr, sg, sb), ka, kd, ks, n, alpha, eta));
                 mtl_index++;
             } else if (key == "texture") {
@@ -300,6 +292,13 @@ int Scene::load_from_file(const std::string& filename) {
         std::cout << "frustum width must be positive" << std::endl;
         return 0;
     }
+    // viewdir cross updir approaching invalidity with fp error
+    float vdotu = view_dir.dot(up_dir);
+    if (vdotu < -0.9 || vdotu > 0.9) {
+        std::cout << "up vector is too close to view vector" << std::endl;
+        return 0;
+    }
+    camera = Camera(resolution, hfov, dc, alpha, dist, eye_pos, view_dir, up_dir);
     std::cout << "file loaded successfully" << std::endl;
     return 1;
 }

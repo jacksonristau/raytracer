@@ -1,7 +1,6 @@
-#ifndef LIGHT_H
-#define LIGHT_H
+#pragma once
 
-#include "vector.h"
+#include "math/vector.h"
 
 class Light {
     public:
@@ -23,5 +22,3 @@ class Light {
 };
 
 std::ostream & operator<< ( std::ostream &os, const Light &l);
-
-#endif 

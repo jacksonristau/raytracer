@@ -1,10 +1,10 @@
-imsize 900 600
-eye 12.5 5 2.5
-viewdir -2 -0.5 2
+imsize 16 16
+eye 0 1 6
+viewdir 0 0 -1
 updir 0 1 0
 hfov 45
 bkgcolor 0.5 0.7 0.9 1
-light 1 -1 1 0 1
+light 1 1 10 0 1
 mtlcolor 0 1 0 1 1 1 0.2 0.8 0 20 0.75 1
 
 v -3.000000 1.800000 0.000000

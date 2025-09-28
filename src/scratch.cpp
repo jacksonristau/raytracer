@@ -117,3 +117,36 @@ Color shade_ray(int m, int o, Vector x_p, Ray i_ray, bool entering, float* bary)
     Color diffuse = ndotl * mat.kd() * d_lambda;
     Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
 }
+
+/* old main loop pre camera
+for (int i = 0; i < camera.px_height(); i++) {
+        // for parallel the direction is always the same
+        if (scene.is_parallel()) {
+            ray.set_origin((ul + (i * deltav)));
+        }
+        // for perspective origin is always the eye
+        else {
+            ray.set_direction((ul + i * deltav) - scene.eye());
+        }
+        for (int j = 0; j < scene.px_width(); j++){
+            int pos = j + (scene.px_width() * i);
+            try{
+                pixelmap[pos] = trace_ray(ray, true);
+            }
+            catch (std::exception& e){
+                std::cout << e.what() << std::endl;
+                return 0;
+            }
+
+            if (j % 50 == 0) {
+                std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
+            }
+            if (scene.is_parallel()) {
+                ray.set_origin((ul + (i * deltav) + (j * deltah)));
+            }
+            else {
+                ray.set_direction((ul + (i * deltav) + (j * deltah)) - scene.eye());
+            }
+        }
+    }
+*/

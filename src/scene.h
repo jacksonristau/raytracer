@@ -1,14 +1,14 @@
-#ifndef SCENE_H
-#define SCENE_H
+#pragma once
 
 #include <string>
 #include <vector>
-#include "vector.h"
+#include "math/vector.h"
 #include "color.h"
 #include "material.h"
 #include "sphere.h"
 #include "light.h"
 #include "texture.h"
+#include "camera.h"
 #include <memory>
 
 class Scene {
@@ -26,6 +26,7 @@ class Scene {
         int get_material_index(int index) const { return material_indices[index];}
         Sphere get_sphere(int index) const { return spheres[index];}
         Light get_light(int index) const { return lights[index];}
+        Camera get_camera() const { return camera; }
 
         // these return lists of vertices, normals, and uvs for a given index into the indices array
         std::vector<Vector> get_vertices(int index) const;
@@ -40,23 +41,6 @@ class Scene {
         int num_normals() const { return normals.size();}
         int num_indices() const { return vertex_indices.size();}
         int num_uvs() const { return uvs.size();}
-
-        Vector eye() const { return eye_pos;}
-        Vector view() const { return viewdir;}
-        Vector up() const { return updir;}
-
-        float fov() const { return hfov;}
-        float frustum_width() const { return frustum_w;}
-        bool is_parallel() const { return parallel;}
-
-        inline int px_width() const { return resolution[0];}
-        inline int px_height() const { return resolution[1];}
-
-        Color dc_color() const { return dc;}
-        float alpha_min() const { return alpha[0];}
-        float alpha_max() const { return alpha[1];}
-        float dist_min() const { return dist[0];}
-        float dist_max() const { return dist[1];}
 
         Color depth_cue(Vector x, Color i, float view_dist) const;
 
@@ -80,23 +64,8 @@ class Scene {
         // act like the material field in a sphere but for triangles
         std::vector<int> material_indices;
 
-        Vector eye_pos;
-        Vector viewdir;
-        Vector updir;
+        Camera camera;
 
-        float hfov;
-        int resolution[2];
         Color bkgcolor;
         float bkgeta;
-
-        // parallel projection
-        float frustum_w = -1.0;
-        bool parallel = false;
-
-        // depth cueing
-        Color dc = Color(-1, -1, -1);
-        float alpha[2];
-        float dist[2];
 };
-
-#endif

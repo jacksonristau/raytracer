@@ -1,0 +1,30 @@
+raytracer refactor:
+
+organize into modules
+
+parallelize raytracing for performance
+
+acceleration data structure
+
+rework scene defintion
+- especially obj files
+
+update core logic for surfaces
+
+provide a preview window to draw to?
+
+main changes:
+object abstraction: object3d for all geometry primitives
+
+					object3d
+					    |
+			plane,	sphere, triangle
+
+all of them implement the intersection function
+
+camera abstraction: separate out the camera properties and logic
+possibly generate rays for pixels here instead of a main loop
+
+scene will then contain the camera, list of objects, list of light sources and list of materials
+
+can also create a class containing the information about an intersection point
