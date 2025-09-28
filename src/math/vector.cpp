@@ -7,10 +7,12 @@ const Vector& Vector::Inf() {
     return inf;
 }
 
+// defaults to a vector
 Vector::Vector() {
     v[0] = 0.0;
     v[1] = 0.0;
     v[2] = 0.0;
+    v[3] = 0.0;
 }
 
 Vector::Vector(float x, float y, float z, float w) {

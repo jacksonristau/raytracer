@@ -42,8 +42,6 @@ class Scene {
         int num_indices() const { return vertex_indices.size();}
         int num_uvs() const { return uvs.size();}
 
-        Color depth_cue(Vector x, Color i, float view_dist) const;
-
     private:
         static std::vector<std::string> split(std::string in, char delim);
 

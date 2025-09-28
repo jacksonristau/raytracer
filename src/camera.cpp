@@ -4,7 +4,7 @@ Camera::Camera() {
 	eye_pos, view_dir, up_dir = Vector();
 }
 
-Camera::Camera(int res[], int hfov, Color dc, float a[2], float d[2], Vector eye, Vector view, Vector up) {
+Camera::Camera(int res[], float hfov, Color dc, float a[2], float d[2], Vector eye, Vector view, Vector up) {
     resolution[0] = res[0];
     resolution[1] = res[1];
     depth_color = dc;

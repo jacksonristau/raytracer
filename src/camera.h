@@ -7,7 +7,7 @@
 class Camera {
 	public:
 		Camera();
-		Camera(int res[], int hfov, Color dc, float alpha[2], float dist[2], Vector e, Vector v, Vector u);
+		Camera(int res[], float hfov, Color dc, float alpha[2], float dist[2], Vector e, Vector v, Vector u);
 		~Camera();
 
 		Ray generate_ray(int x, int y);
@@ -39,6 +39,7 @@ class Camera {
 		// parallel projection
 		float frustum_w = -1.0f;
 		bool parallel = false;
+		// radians
 		float hfov;
 
 		// depth cueing

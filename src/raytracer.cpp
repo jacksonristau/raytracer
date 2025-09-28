@@ -14,7 +14,7 @@
 #include "camera.h"
 
 
-const float epsilon = 0.00000001;
+const float epsilon = 1e-4f;
 const float pi = 4.0 * atan(1.0);
 
 bool print_once = false;
@@ -58,7 +58,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
             scene.get_sphere(o).get_uv(x_p, uv);
             //std::cout << "u: " << uv[0] << " v: " << uv[1] << std::endl;
         }
-        else{
+        else {
             std::vector<std::vector<float>> uvs = scene.get_uvs(o);
             uv[0] = (bary[0] * uvs[0][0]) + (bary[1] * uvs[1][0]) + (bary[2] * uvs[2][0]);
             uv[1] = (bary[0] * uvs[0][1]) + (bary[1] * uvs[1][1]) + (bary[2] * uvs[2][1]);
@@ -70,7 +70,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
         d_lambda = mat.diffuse();
     }
     Color final_color = mat.ka() * d_lambda;
-    if (depth >= 10){
+    if (depth >= 10) {
         return final_color;
     }
     // if (bary != NULL) {
@@ -87,8 +87,8 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
         float d = x_p.distance(cur_light.l());
 
         l.normalize();
-        Ray r = Ray(x_p + (1e-4f * n), l);
-        float ndotl = std::max(0.0f, n.dot(l));
+        Ray r = Ray(x_p, l);
+
         // check if the light source is blocked by any sphere
         for (int j = 0; j < scene.num_spheres(); j++) {
             // dont check yourself 
@@ -96,7 +96,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
             float t = r.intersect_sphere(scene.get_sphere(j));
             float surface_alpha = scene.get_material(scene.get_sphere(j).material()).alpha();
             // is the intersection between the light source
-            bool is_between = (is_point) ? t > 0.0f && t < d : t > 0.0f;
+            bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
                 s_flag = s_flag * (1 - surface_alpha);
             }
@@ -105,19 +105,17 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
         for (int j = 0; j < scene.num_indices(); j++) {
             // dont check yourself 
             if (j == o && bary != NULL) { continue; }
-            if (ndotl >= 0 && !is_point)
-                continue;
             float t = r.intersect_triangle(scene.get_vertices(j), NULL);
+            float surface_alpha = scene.get_material(scene.get_material_index(j)).alpha();
             // is the intersection between the light source
-            bool is_between = (is_point) ? t > 0.0 && t < d : t > 0.0;
+            bool is_between = (is_point) ? epsilon < t && t < d : t > epsilon;
             if (is_between) {
-                float surface_alpha = scene.get_material(scene.get_material_index(j)).alpha();
                 s_flag = s_flag * (1 - surface_alpha);
             }
         }
         Vector I = -i_ray.direction();
         // no need to calculate diffuse or specular for this light source
-        
+        float ndotl = std::max(0.0f, n.dot(l));
         float ndoth;
         // if n dot l is 0 then n dot h is also 0 so same situation
         if (ndotl == 0.0) {
@@ -132,11 +130,13 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
         Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
         Color reflection = Color(0, 0, 0);
         Color transparent = Color(0, 0, 0);
-        if (mat.ks() > 0.0){
+        if (mat.ks() > 0.0) {
             float fr = fresnel(n.dot(I), mat.eta(), 0.0, true);
-            reflection = fr * trace_ray(Ray(x_p, i_ray.reflect(n)), entering, depth + 1,  refract_stack);
+            Ray reflected_ray = Ray(x_p, i_ray.reflect(n));
+            reflected_ray.set_origin(reflected_ray.origin() + epsilon * reflected_ray.direction());
+            reflection = fr * trace_ray(reflected_ray, entering, depth + 1, refract_stack);
         }
-        if (mat.alpha() != 1.0){
+        if (mat.alpha() != 1.0) {
             float ni = refract_stack.back();
             refract_stack.pop_back();
             float nt;
@@ -150,22 +150,15 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
             refract_stack.push_back(nt);
             Vector refract_dir = i_ray.refract(n, ni, nt);
             float fr = fresnel(n.dot(I), ni, nt, false);
-            /*if (fr > 1.0) {
-                std::cout << "fr: " << fr << std::endl;
-            }*/
-            transparent = (1 - fr) * (1 - mat.alpha()) * trace_ray(Ray(x_p, refract_dir), !entering, depth + 1, refract_stack);
+            
+            Ray refracted_ray = Ray(x_p, refract_dir);
+            refracted_ray.set_origin(refracted_ray.origin() + epsilon * refracted_ray.direction());
+            transparent = (1 - fr) * (1 - mat.alpha()) * trace_ray(refracted_ray, !entering, depth + 1, refract_stack);
         }
 
         final_color = final_color + (s_flag * ((cur_light.intensity() * cur_light.atten(d)) * (diffuse + specular)) + reflection + transparent);
     }
-    if (!print_once) {
-        std::cout << "before cueing: " << final_color << '\n';
-    }
     final_color = scene.get_camera().depth_cue(x_p, final_color);
-    if (!print_once) {
-        std::cout << "after cueing: " << final_color << '\n';
-        print_once = true;
-    }
     return final_color;
 }
 
@@ -262,8 +255,8 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < camera.px_height(); i++) {
         for (int j = 0; j < camera.px_width(); j++){
             int pos = j + (camera.px_width() * i);
+            Ray ray = camera.generate_ray(j, i);
             try{
-                Ray ray = camera.generate_ray(j, i);
                 pixelmap[pos] = trace_ray(ray, true);
             }
             catch (std::exception& e){
@@ -271,8 +264,10 @@ int main(int argc, char *argv[]) {
                 return 0;
             }
             
-            if (j % 50 == 0) {
+            if (j % 100 == 0) {
                 std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
+                /*std::cout << "ray_dir: " << ray.direction() << '\n';
+                std::cout << "i: " << i << "j: " << j << '\n';*/
             }
         }
     }

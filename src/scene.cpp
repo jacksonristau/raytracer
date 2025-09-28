@@ -106,7 +106,7 @@ int Scene::load_from_file(const std::string& filename) {
     Vector eye_pos;
     Vector view_dir;
     Vector up_dir;
-    int hfov;
+    float hfov;
     int resolution[2];
     int frustum_w = -1.0f;
     bool parallel = false;
@@ -136,7 +136,7 @@ int Scene::load_from_file(const std::string& filename) {
             } else if (key == "hfov") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> hfov;
-                hfov *= (pi / 180);
+                hfov *= (pi / 180.0f);
                 if (!ss || ss >> temp) {
                     throw "Invalid input: hfov <angle>";
                 }
