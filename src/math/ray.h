@@ -1,7 +1,7 @@
-#ifndef RAY_H
-#define RAY_H
+#pragma once
 
-#include "vector.h"
+#include "vector3.h"
+#include "point3.h"
 #include "sphere.h"
 #include <vector>
 
@@ -9,30 +9,25 @@ class Ray {
     public:
         Ray();
 
-        Ray(const Vector& origin, const Vector& direction);
+        Ray(const Point3& origin, const Vector3& direction);
 
         virtual ~Ray();
 
-        // equality
-        bool operator==(const Ray& r2) const;
-
-        void set_origin(const Vector& origin);
-        void set_direction(const Vector& direction);
+        void set_origin(const Point3& origin);
+        void set_direction(const Vector3& direction);
 
         float intersect_sphere(const Sphere& sphere);
-        float intersect_plane(const Vector& normal, const Vector& point);
+        float intersect_plane(const Vector3& normal, const Point3& point);
         // returns fills the array coords with the barycentric coordinates of the intersection
-        float intersect_triangle(std::vector<Vector> vertices, float* coords);
-        Vector reflect(const Vector& normal);
-        Vector refract(Vector normal, float n1, float n2);
+        float intersect_triangle(std::vector<Point3> vertices, float* coords);
+        Vector3 reflect(const Vector3& normal);
+        Vector3 refract(Vector3 normal, float n1, float n2);
 
-        Vector get_point(float t);
+        Point3 get_point(float t);
 
-        Vector origin() const;
-        Vector direction() const;
-
-    private:
-        Vector o;
-        Vector d;
+        Point3 o;
+        Vector3 d;
 };
-#endif
+
+// equality
+bool operator== (const Ray& r1, const Ray& r2);

@@ -1,11 +1,11 @@
 #pragma once
+#include "math/vector3.h"
 
-#include "math/vector.h"
-
+template <typename T>
 class Light {
     public:
         Light();
-        Light(Vector l, float intensity);
+        Light(T l, float intensity);
         virtual ~Light();
 
         float intensity() const { return i; }
@@ -16,7 +16,7 @@ class Light {
         float atten(float d) const;
 
     private:
-        Vector v;
+        T l;
         float att[3];
         float i;
 };

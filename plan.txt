@@ -9,7 +9,7 @@ acceleration data structure
 rework scene defintion
 - especially obj files
 
-update core logic for surfaces
+update core logic for primitves
 
 provide a preview window to draw to?
 
@@ -28,3 +28,36 @@ possibly generate rays for pixels here instead of a main loop
 scene will then contain the camera, list of objects, list of light sources and list of materials
 
 can also create a class containing the information about an intersection point
+
+main():
+    foreach pixel y in height:
+        foreach pixel x in width:
+            ray = camera.generate_ray(x, y)
+            trace_ray(ray)
+
+trace_ray(ray):
+    // simplified version of taking a ray and getting the first primitive hit
+    hit = intersect(ray)
+    if !hit:
+        return bkg_color
+    
+    // recursively trace reflected rays
+    
+    if (hit.is_glossy)
+        reflected_ray = reflect(ray, hit)
+        reflected_color = trace_ray(reflected_ray)
+    
+    if (hit.is_transparent)
+        refracted_ray = refract(ray, hit)
+        refracted_color = trace_ray(refracted_ray)
+    
+    // send out shadow feelers
+    foreach light l in lights:
+        if intersect(shadow_ray):
+            light_color[i] = 0
+
+    overall_color = shade(  hit, 
+                            reflected_color, 
+                            refracted_color,
+                            light_color)
+    return overall color

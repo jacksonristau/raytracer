@@ -11,7 +11,9 @@ set(
     ${PROJECT_SOURCE_DIR}/src/color.cpp
     ${PROJECT_SOURCE_DIR}/src/math/ray.cpp
     ${PROJECT_SOURCE_DIR}/src/sphere.cpp
-    ${PROJECT_SOURCE_DIR}/src/math/vector.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
     ${PROJECT_SOURCE_DIR}/src/light.cpp
     ${PROJECT_SOURCE_DIR}/src/scene.cpp
     ${PROJECT_SOURCE_DIR}/src/texture.cpp
