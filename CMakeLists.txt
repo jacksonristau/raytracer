@@ -26,7 +26,7 @@ set(
 )
 
 include_directories(${INCLUDE_DIRS})
-add_executable(raytracer1c ${SOURCES})
+add_executable(raytracer ${SOURCES})
 
 # Add compiler optimizations
 #if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -39,10 +39,10 @@ add_executable(raytracer1c ${SOURCES})
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 add_custom_command(
-    TARGET raytracer1c POST_BUILD
+    TARGET raytracer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/files"
-        "$<TARGET_FILE_DIR:raytracer1c>"
+        "$<TARGET_FILE_DIR:raytracer>"
 )
 
 
