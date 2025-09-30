@@ -1,8 +1,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <math.h>
 #include <sstream>
+#include <cmath>
 
 #include "math/vector.h"
 #include "math/ray.h"
@@ -12,10 +12,10 @@
 #include "light.h"
 #include "scene.h"
 #include "camera.h"
+#include "math/pi.h"
 
 
 const float epsilon = 1e-4f;
-const float pi = 4.0 * atan(1.0);
 
 bool print_once = false;
 
@@ -44,7 +44,7 @@ float fresnel(float cosi, float ni, float nt, bool reflect) {
         fo = (nt - ni) / (nt + ni);
     }
     fo = fo * fo;
-    return fo + (1 - fo) * std::pow((1 - cosi), 5);
+    return fo + (1 - fo) * std::powf((1 - cosi), 5);
 }
 
 // if bary is NULL then the intersection is with a sphere
@@ -127,7 +127,7 @@ Color shade_ray(int m, int o, Vector n, Vector x_p, Ray i_ray, int depth, bool e
             ndoth = std::max(0.0f, n.dot(h));
         }
         Color diffuse = ndotl * mat.kd() * d_lambda;
-        Color specular = std::pow(ndoth, mat.n()) * mat.ks() * mat.specular();
+        Color specular = powf(ndoth, static_cast<float>(mat.n())) * mat.ks() * mat.specular();
         Color reflection = Color(0, 0, 0);
         Color transparent = Color(0, 0, 0);
         if (mat.ks() > 0.0) {
@@ -257,7 +257,9 @@ int main(int argc, char *argv[]) {
             int pos = j + (camera.px_width() * i);
             Ray ray = camera.generate_ray(j, i);
             try{
-                pixelmap[pos] = trace_ray(ray, true);
+                Color pixel_color = trace_ray(ray, true);
+                if (pos < size)
+                    pixelmap[pos] = pixel_color;
             }
             catch (std::exception& e){
                 std::cout << e.what() << std::endl;

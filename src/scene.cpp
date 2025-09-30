@@ -1,14 +1,14 @@
 #include "scene.h"
 #include <fstream>
-#include <math.h>
 #include <sstream>
 
-const float pi = 4.0 * atan(1.0);
+const float pi = 4.0f * atan(1.0f);
 
 Scene::Scene() {
     materials = std::vector<Material>();
     spheres = std::vector<Sphere>();
     lights = std::vector<Light>();
+    bkgeta = 1.00001f;
 }
 
 Scene::~Scene() {
@@ -108,7 +108,7 @@ int Scene::load_from_file(const std::string& filename) {
     Vector up_dir;
     float hfov;
     int resolution[2];
-    int frustum_w = -1.0f;
+    float frustum_w = -1.0f;
     bool parallel = false;
     Color dc = Color(-1, -1, -1);
     float alpha[2];
@@ -162,7 +162,8 @@ int Scene::load_from_file(const std::string& filename) {
                 if (texture_defined) {
                     throw "untextured geometry must be defined before textured geometry";
                 }
-                float dr, dg, db, sr, sg, sb, ka, kd, ks, n, alpha, eta;
+                int n;
+                float dr, dg, db, sr, sg, sb, ka, kd, ks, alpha, eta;
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> dr >> dg >> db >> sr >> sg >> sb >> ka >> kd >> ks >> n >> alpha >> eta;
                 if (!ss || ss >> temp) {
@@ -273,7 +274,7 @@ int Scene::load_from_file(const std::string& filename) {
             }
         }
     } catch (const char* e) {
-        std::cout << "Error: Invalid argument" << key << std::endl;
+        std::cout << "Error: Invalid argument" << key << '\n' << e << '\n';
         return 0;
     }
     

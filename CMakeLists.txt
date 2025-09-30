@@ -22,7 +22,6 @@ set(
 set(
     INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/src/math
 )
 
 include_directories(${INCLUDE_DIRS})

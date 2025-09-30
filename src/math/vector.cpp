@@ -1,5 +1,4 @@
 #include "vector.h"
-#include <math.h>
 #include <iostream>
 
 static const Vector inf = Vector(INFINITY, INFINITY, INFINITY, 0.0);
@@ -9,10 +8,10 @@ const Vector& Vector::Inf() {
 
 // defaults to a vector
 Vector::Vector() {
-    v[0] = 0.0;
-    v[1] = 0.0;
-    v[2] = 0.0;
-    v[3] = 0.0;
+    v[0] = 0.0f;
+    v[1] = 0.0f;
+    v[2] = 0.0f;
+    v[3] = 0.0f;
 }
 
 Vector::Vector(float x, float y, float z, float w) {
@@ -56,7 +55,7 @@ Vector Vector::operator=(const Vector& v1) {
 }
 
 void Vector::normalize() {
-    float magnitude = 1.0 / sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    float magnitude = 1.0f / sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     v[0] *= magnitude;
     v[1] *= magnitude;
     v[2] *= magnitude;

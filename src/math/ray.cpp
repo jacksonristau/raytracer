@@ -1,7 +1,7 @@
 #include "ray.h"
-#include <math.h>
+#include <cmath>
 
-const float EPSILON = 1e-8;
+const float EPSILON = 1e-8f;
 
 Ray::Ray() : o(Vector(0, 0, 0)), d(Vector(0, 0, -1)){
 }
@@ -38,21 +38,21 @@ Vector Ray::direction() const {
 // check if t is negative
 float Ray::intersect_sphere(const Sphere& sphere) {
     Vector center = sphere.center();
-    float B = 2.0 * (d.x() * (o.x() - center.x()) + 
-                    d.y() * (o.y() - center.y()) +
-                    d.z() * (o.z() - center.z()));
-    float C = pow(o.x() - center.x(), 2) + pow(o.y() - center.y(), 2) +
-              pow(o.z() - center.z(), 2) - pow(sphere.radius(), 2);
-    float discrim = (B * B) - (4 * C);
-    if (discrim < 0) {
-        return -1.0;
+    float B = 2.0f * (d.x() * (o.x() - center.x()) + 
+                     d.y() * (o.y() - center.y()) +
+                     d.z() * (o.z() - center.z()));
+    float C = std::pow(o.x() - center.x(), 2.0f) + std::pow(o.y() - center.y(), 2.0f) +
+              std::pow(o.z() - center.z(), 2.0f) - std::pow(sphere.radius(), 2.0f);
+    float discrim = (B * B) - (4.0f * C);
+    if (discrim < 0.0f) {
+        return -1.0f;
     }
-    else if (discrim == 0) {
-        return (-B / 2.0);
+    else if (discrim == 0.0f) {
+        return (-B / 2.0f);
     }
     else  {
-        float t1 = (-B + sqrt(discrim)) / 2.0;
-        float t2 = (-B - sqrt(discrim)) / 2.0;
+        float t1 = (-B + sqrt(discrim)) / 2.0f;
+        float t2 = (-B - sqrt(discrim)) / 2.0f;
         
         if (t1 < EPSILON && t2 > EPSILON) {
             return t2;
@@ -79,7 +79,7 @@ float Ray::intersect_plane(const Vector& normal, const Vector& point) {
         return -1.0;
     }*/
     if (fabs(denom) < 1e-6f) {
-        return -1.0;
+        return -1.0f;
     }
     float D = -normal.dot(point);
     float t = -(normal.dot(o) + D) / denom;
@@ -147,7 +147,7 @@ Vector Ray::refract(Vector N, float n1, float n2) {
     float ndoti = N.dot(I);
     Vector B = snell * ((ndoti * N) - I);
     try{
-        float discrim = 1 - (pow(snell, 2) * (1 - pow(ndoti, 2)));
+        float discrim = 1 - (powf(snell, 2) * (1.0f - powf(ndoti, 2)));
         if (discrim < 0) {
             throw std::exception();
         }
@@ -156,7 +156,7 @@ Vector Ray::refract(Vector N, float n1, float n2) {
     }
     catch (std::exception e){
         std::cout << "tir" << std::endl;
-        return Vector(0, 0, 0);
+        return Vector(0.0f, 0.0f, 0.0f);
     }
 }
 

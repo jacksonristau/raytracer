@@ -34,13 +34,13 @@ class Scene {
         std::vector<std::vector<float>> get_uvs(int index) const;
         
 
-        int num_materials() const { return materials.size();}
-        int num_spheres() const { return spheres.size();}
-        int num_lights() const { return lights.size();}
-        int num_vertices() const { return vertices.size();}
-        int num_normals() const { return normals.size();}
-        int num_indices() const { return vertex_indices.size();}
-        int num_uvs() const { return uvs.size();}
+        auto num_materials() const { return materials.size();}
+        auto num_spheres() const { return spheres.size();}
+        auto num_lights() const { return lights.size();}
+        auto num_vertices() const { return vertices.size();}
+        auto num_normals() const { return normals.size();}
+        auto num_indices() const { return vertex_indices.size();}
+        auto num_uvs() const { return uvs.size();}
 
     private:
         static std::vector<std::string> split(std::string in, char delim);

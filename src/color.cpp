@@ -1,11 +1,10 @@
 #include "color.h"
-#include <math.h>
 
 Color::Color() {
     // nice lil green
-    c[0] = 0.2;
-    c[1] = 0.6;
-    c[2] = 0.2;
+    c[0] = 0.2f;
+    c[1] = 0.6f;
+    c[2] = 0.2f;
 }
 
 Color::Color(float r, float g, float b) {
@@ -31,15 +30,15 @@ Color::~Color() {
 
 // equality
 bool Color::operator==(const Color& c1) const {
-    return fabs(c[0] - c1.r()) < 0.001 && 
-            fabs(c[1] - c1.g()) < 0.001 &&
-            fabs(c[2] - c1.b()) < 0.001;
+    return fabs(c[0] - c1.r()) < 0.001f && 
+            fabs(c[1] - c1.g()) < 0.001f &&
+            fabs(c[2] - c1.b()) < 0.001f;
 }
 
 bool Color::operator!=(const Color& c1) const {
-    return fabs(c[0] - c1.r()) > 0.01 || 
-            fabs(c[1] - c1.g()) > 0.01 ||
-            fabs(c[2] - c1.b()) > 0.01;
+    return fabs(c[0] - c1.r()) > 0.01f || 
+            fabs(c[1] - c1.g()) > 0.01f ||
+            fabs(c[2] - c1.b()) > 0.01f;
 }
 
 Color Color::operator=(const Color& c1) {
@@ -58,9 +57,9 @@ Color operator*(float s, const Color& c1) {
 }
 
 void Color::clamp() {
-    if (c[0] > 1.0) c[0] = 1.0;
-    if (c[1] > 1.0) c[1] = 1.0;
-    if (c[2] > 1.0) c[2] = 1.0;
+    if (c[0] > 1.0) c[0] = 1.0f;
+    if (c[1] > 1.0) c[1] = 1.0f;
+    if (c[2] > 1.0) c[2] = 1.0f;
 }
 
 std::ostream & operator<< ( std::ostream& os, const Color &c1) {

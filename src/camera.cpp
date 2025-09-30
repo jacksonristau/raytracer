@@ -2,9 +2,16 @@
 
 Camera::Camera() {
 	eye_pos, view_dir, up_dir = Vector();
+    resolution[0] = 0;
+    resolution[1] = 0;
+    hfov = 45;
+    dist[0] = 0;
+    dist[1] = 0;
+    alpha[0] = 0;
+    alpha[1] = 0;
 }
 
-Camera::Camera(int res[], float hfov, Color dc, float a[2], float d[2], Vector eye, Vector view, Vector up) {
+Camera::Camera(int res[], float fov, Color dc, float a[2], float d[2], Vector eye, Vector view, Vector up) {
     resolution[0] = res[0];
     resolution[1] = res[1];
     depth_color = dc;
@@ -15,6 +22,7 @@ Camera::Camera(int res[], float hfov, Color dc, float a[2], float d[2], Vector e
 	eye_pos = eye;
 	view_dir = view;
 	up_dir = up;
+    hfov = fov;
 
     // define the viewing coordinate system
     Vector u = view_dir.cross(up_dir);
@@ -29,14 +37,14 @@ Camera::Camera(int res[], float hfov, Color dc, float a[2], float d[2], Vector e
     float height = width / aspect;
     std::cout << "camera resolution: " << resolution[0] << " x " << resolution[1] << "\n";
     // go to view plane then to the left/right edge, then to the top/bottom
-    ul = (eye_pos + d_val * view_dir) - ((width / 2) * u) + ((height / 2) * v);
-    Vector ur = (eye_pos + d_val * view_dir) + ((width / 2) * u) + ((height / 2) * v);
+    ul = (eye_pos + d_val * view_dir) - ((width / 2.0f) * u) + ((height / 2.0f) * v);
+    Vector ur = (eye_pos + d_val * view_dir) + ((width / 2.0f) * u) + ((height / 2.0f) * v);
 
-    Vector ll = (eye_pos + d_val * view_dir) - ((width / 2) * u) - ((height / 2) * v);
-    Vector lr = (eye_pos + d_val * view_dir) + ((width / 2) * u) - ((height / 2) * v);
+    Vector ll = (eye_pos + d_val * view_dir) - ((width / 2.0f) * u) - ((height / 2.0f) * v);
+    Vector lr = (eye_pos + d_val * view_dir) + ((width / 2.0f) * u) - ((height / 2.0f) * v);
 
-    deltah = (1.0 / (resolution[0] - 1)) * (ur - ul);
-    deltav = (1.0 / (resolution[1] - 1)) * (ll - ul);
+    deltah = (1.0f / (resolution[0] - 1)) * (ur - ul);
+    deltav = (1.0f / (resolution[1] - 1)) * (ll - ul);
 }
 
 Camera::~Camera()
@@ -45,13 +53,15 @@ Camera::~Camera()
 
 Ray Camera::generate_ray(int x, int y) {
     // parallel projection moves the origin around
+    float xf = static_cast<float>(x);
+    float yf = static_cast<float>(y);
 	if (parallel) {
-        Vector origin = ul + (x * deltah) + (y * deltav);
+        Vector origin = ul + (xf * deltah) + (yf * deltav);
 		return Ray(origin, view_dir);
 	}
     // perspective projection moves the view direction around
 	else {
-        Vector direction = (ul + (y * deltav) + (x * deltah)) - eye_pos;
+        Vector direction = (ul + (yf * deltav) + (xf * deltah)) - eye_pos;
 		return Ray(eye_pos, direction);
 	}
 }

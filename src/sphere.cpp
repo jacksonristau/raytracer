@@ -1,18 +1,14 @@
 #include "sphere.h"
-#include <math.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif // !M_PI
+#include "math/pi.h"
 
 
-Sphere::Sphere() : c(Vector(0, 0, 0)), r(1.0){
+Sphere::Sphere() : c(Vector(0, 0, 0)), r(1.0), m(-1){
 }
 
 Sphere::Sphere(const Vector& center, float radius, int m_index) : c(center), r(radius), m(m_index) {
 } 
 
-Sphere::Sphere(const Vector& center, float radius) : c(center), r(radius) {
+Sphere::Sphere(const Vector& center, float radius) : c(center), r(radius), m(-1){
 }
 
 Sphere::~Sphere() {
@@ -27,8 +23,8 @@ int Sphere::get_uv(const Vector& point, float* uv) const {
     n = (1 / r) * n;
     float theta = atan2(n.y(), n.x());
     float phi = acos(n.z());
-    uv[0] = std::max(theta / (2 * M_PI), ((theta + (2 * M_PI)) / (2 * M_PI)));
-    uv[1] = phi / (M_PI);
+    uv[0] = std::max(theta / TwoPi, ((theta + TwoPi) / TwoPi));
+    uv[1] = phi / Pi;
     return 1;
 }
 
