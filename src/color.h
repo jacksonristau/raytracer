@@ -24,17 +24,14 @@ class Color {
 
         Color operator+(const Color& c1);
 
-        float r() const {return c[0];}
-        float g() const {return c[1];}
-        float b() const {return c[2];}
-
         void clamp();
 
-    private:
-        float c[3];
+        float r, g, b;
 };
 
 Color operator*(float s, const Color& c1);
+
+Color operator*(const Color& c1, float s);
 
 std::ostream & operator<< ( std::ostream &os, const Color &c1);
 

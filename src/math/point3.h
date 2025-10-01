@@ -15,18 +15,18 @@ public:
     // negation
     Point3 operator- () const;
 
-    // subtraction
-    Vector3 operator- (const Point3& p1) const;
-
     // assignment
     Point3 operator= (const Point3& p1);
 
     float x, y, z;
 };
+Point3 operator- (const Point3& p1, const Vector3& v1) ;
+
+Vector3 operator- (const Point3& p1, const Point3& p2);
 
 float distance(const Point3& p1, const Point3& p2);
 
-Point3 operator+ (Point3& p1, Vector3& v1);
+Point3 operator+ (const Point3& p1, const Vector3& v1);
 
 bool operator== (const Point3& p1, const Point3& p2);
 

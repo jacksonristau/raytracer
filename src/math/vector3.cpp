@@ -1,5 +1,4 @@
 #include "vector3.h"
-#include "constants.h"
 #include "floatutil.h"
 #include <iostream>
 

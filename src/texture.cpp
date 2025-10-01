@@ -39,7 +39,7 @@ void Texture::write_to_file(const std::string& filename) const {
     }
     output << "P3\n" << width << " " << height << "\n255\n";
     for (int i = 0; i < width * height; i++) {
-        output << (int)(data[i].r() * 255) << " " << (int)(data[i].g() * 255) << " " << (int)(data[i].b() * 255) << "\n";
+        output << (int)(data[i].r * 255) << " " << (int)(data[i].g * 255) << " " << (int)(data[i].b * 255) << "\n";
     }
 }
 

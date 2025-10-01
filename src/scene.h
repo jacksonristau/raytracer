@@ -2,11 +2,11 @@
 
 #include <string>
 #include <vector>
-#include "math/vector.h"
+#include "math/vector3.h"
 #include "color.h"
 #include "material.h"
 #include "sphere.h"
-#include "light.h"
+#include "light/light.h"
 #include "texture.h"
 #include "camera.h"
 #include <memory>
@@ -25,12 +25,12 @@ class Scene {
         Material get_material(int index) const { return materials[index]; }
         int get_material_index(int index) const { return material_indices[index];}
         Sphere get_sphere(int index) const { return spheres[index];}
-        Light get_light(int index) const { return lights[index];}
+        ILight get_light(int index) const { return lights[index];}
         Camera get_camera() const { return camera; }
 
         // these return lists of vertices, normals, and uvs for a given index into the indices array
-        std::vector<Vector> get_vertices(int index) const;
-        std::vector<Vector> get_normals(int index) const;
+        std::vector<Point3> get_vertices(int index) const;
+        std::vector<Vector3> get_normals(int index) const;
         std::vector<std::vector<float>> get_uvs(int index) const;
         
 
@@ -48,11 +48,11 @@ class Scene {
         std::vector<Material> materials;
         std::vector<std::shared_ptr<Texture>> textures;
         std::vector<Sphere> spheres;
-        std::vector<Light> lights;
+        std::vector<ILight> lights;
 
         // these all have the same length
-        std::vector<Vector> vertices;
-        std::vector<Vector> normals;
+        std::vector<Point3> vertices;
+        std::vector<Vector3> normals;
         std::vector<std::vector<float>> uvs;
 
         // these all have the same length and correspond at each index i

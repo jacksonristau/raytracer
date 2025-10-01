@@ -18,7 +18,7 @@ class Sphere {
         // returns texture coordinates at a point on the sphere using polar coordinates
         int get_uv(const Point3& point, float* uv) const;
 
-        Point3 c;
-        float r;
-        int m;
+        Point3 center;
+        float radius;
+        int material_id;
 };

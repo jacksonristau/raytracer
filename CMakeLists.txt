@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 4.1)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -14,7 +14,8 @@ set(
     ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
     ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
     ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
-    ${PROJECT_SOURCE_DIR}/src/light.cpp
+    ${PROJECT_SOURCE_DIR}/src/light/lightp.cpp
+    ${PROJECT_SOURCE_DIR}/src/light/lightd.cpp
     ${PROJECT_SOURCE_DIR}/src/scene.cpp
     ${PROJECT_SOURCE_DIR}/src/texture.cpp
     ${PROJECT_SOURCE_DIR}/src/camera.cpp
@@ -30,14 +31,14 @@ include_directories(${INCLUDE_DIRS})
 add_executable(raytracer ${SOURCES})
 
 # Add compiler optimizations
-#if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-#    target_compile_options(raytracer1c PRIVATE -O3)
-#elseif(MSVC)
-#   target_compile_options(raytracer1c PRIVATE /O2)
-#endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+   target_compile_options(raytracer PRIVATE -O3)
+elseif(MSVC)
+  target_compile_options(raytracer PRIVATE /O2)
+endif()
 
 # Add debugging flags
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 add_custom_command(
     TARGET raytracer POST_BUILD

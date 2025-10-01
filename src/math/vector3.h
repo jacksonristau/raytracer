@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "point3.h";
+#include "point3.h"
 
 class Vector3 {
     public:

@@ -1,0 +1,48 @@
+# comment
+# camera eye position (point)
+eye xpos_f ypos_f zpos_f
+
+# image resolution
+imsize pxwidth_i pxheight_i
+
+# camera view direction <vector>
+viewdir xdir_f ydir_f zdir_f
+
+# camera up diretion <vector>
+updir xdir_f ydir_f zdir_f
+
+# background color rgb refractive index (eta) for the background medium
+bkgcolor red_f greed_f blue_f bkgeta_f
+
+# light point light w = 1 directional light w = 0 i for light intensity
+light x_f y_f z_f w_f i_f
+
+# field of view
+hfov fov_i
+
+# applies to all objects coming after it until a new one is specified
+# has to be defined before any textures are
+# diffuse rgb, specular rgb, 
+# ambient coefficient, diffuse coeff, specular coeff
+# phong exponent, alpha transparency, refractive index (eta) for the medium
+mtlcolor red_f green_f blue_f red_f green_f blue_f ka kd ks n alpha eta
+
+# texture file
+texture filename_str
+
+# defines the width for the parallel projection optional
+# will be a perspective projection if absent
+parallel frustumwidth_f
+
+# center point, radius
+sphere cx_f cy_f cz_f red_f
+
+# attenuated light which loses intesity as it gets further based on c1c2c3
+attlight x_f y_f z_f w_f i_f c1 c2 c3
+
+# gives a foggy effect with the given color at the distance range min max and
+# blended with the alpha min max
+depthcueing r_f g_f b_f alpha_min_f alpha_max_f dist_min_f dist_max_f
+
+# follow obj format
+v f vn vt 

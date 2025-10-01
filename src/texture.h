@@ -1,5 +1,4 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#pragma once
 
 #include <string>
 #include "color.h"
@@ -21,5 +20,3 @@ public:
         int height;
         std::vector<Color> data;
 };
-
-#endif

@@ -1,28 +1,30 @@
 #include "scene.h"
 #include <fstream>
 #include <sstream>
+#include "floatutil.h"
+#include "lightp.h"
+#include "lightd.h"
 
 const float pi = 4.0f * atan(1.0f);
 
 Scene::Scene() {
     materials = std::vector<Material>();
     spheres = std::vector<Sphere>();
-    lights = std::vector<Light>();
-    bkgeta = 1.00001f;
+    lights = std::vector<ILight>();
+    bkgeta = 1.0003f;
 }
 
-Scene::~Scene() {
-}
+Scene::~Scene() {}
 
 Color Scene::get_texture_color(int index, float u, float v) const {
     if (index == -1) {
-        return Color(0, 0, 0);
+        return Color(0.0f, 0.0f, 0.0f);
     }
     return textures[index]->get_pixel(u, v);
 }
 
-std::vector<Vector> Scene::get_vertices(int index) const {
-    std::vector<Vector> out;
+std::vector<Point3> Scene::get_vertices(int index) const {
+    std::vector<Point3> out;
     std::vector<int> indices = vertex_indices[index];
     for (int i = 0; i < 3; i++) {
         out.push_back(vertices[indices[i]]);
@@ -30,8 +32,8 @@ std::vector<Vector> Scene::get_vertices(int index) const {
     return out;
 }
 
-std::vector<Vector> Scene::get_normals(int index) const {
-    std::vector<Vector> out;
+std::vector<Vector3> Scene::get_normals(int index) const {
+    std::vector<Vector3> out;
     std::vector<int> indices = normal_indices[index];
     if (indices[0] == -1) {
         return out;
@@ -70,7 +72,7 @@ std::vector<std::string> Scene::split(std::string in, char delim) {
     return out;
 }
 
-Vector read_vector(std::string line, float w) {
+Vector3 read_vector(std::string line) {
     std::stringstream ss(line.substr(line.find(' ')+1));
     float x, y, z;
     std::string temp;
@@ -78,9 +80,19 @@ Vector read_vector(std::string line, float w) {
     if (!ss || ss >> temp) {
         throw "Invalid input: <vector> <x> <y> <z>";
     }
-    return Vector(x, y, z, w);
+    return Vector3(x, y, z);
 }
 
+Point3 read_point(std::string line) {
+    std::stringstream ss(line.substr(line.find(' ')+1));
+    float x, y, z;
+    std::string temp;
+    ss >> x >> y >> z;
+    if (!ss || ss >> temp) {
+        throw "Invalid input: <vector> <x> <y> <z>";
+    }
+    return Point3(x, y, z);
+}
 
 // Static method to load a scene from a file
 int Scene::load_from_file(const std::string& filename) {
@@ -103,9 +115,9 @@ int Scene::load_from_file(const std::string& filename) {
     int mtl_index = -1;
     int tex_index = -1;
     bool texture_defined = false;
-    Vector eye_pos;
-    Vector view_dir;
-    Vector up_dir;
+    Point3 eye_pos;
+    Vector3 view_dir;
+    Vector3 up_dir;
     float hfov;
     int resolution[2];
     float frustum_w = -1.0f;
@@ -123,14 +135,14 @@ int Scene::load_from_file(const std::string& filename) {
                 continue;
             }
             if (key == "eye") {
-                eye_pos = read_vector(line, 1.0);
+                eye_pos = read_point(line);
                 read_inputs++;
             } else if (key == "viewdir") {
-                view_dir = read_vector(line, 0.0);
+                view_dir = read_vector(line);
                 view_dir.normalize();
                 read_inputs++;
             } else if (key == "updir") {
-                up_dir = read_vector(line, 0.0);
+                up_dir = read_vector(line);
                 up_dir.normalize();
                 read_inputs++;
             } else if (key == "hfov") {
@@ -169,7 +181,6 @@ int Scene::load_from_file(const std::string& filename) {
                 if (!ss || ss >> temp) {
                     throw "Invalid input: mtlcolor <dr> <dg> <db> <sr> <sg> <sb> <ka> <kd> <ks> <n> <alpha> <eta>";
                 }
-                std::cout << "specular: " << ks << '\n';
                 materials.push_back(Material(Color(dr, dg, db), Color(sr, sg, sb), ka, kd, ks, n, alpha, eta));
                 mtl_index++;
             } else if (key == "texture") {
@@ -192,7 +203,7 @@ int Scene::load_from_file(const std::string& filename) {
                 if (!ss || ss >> temp) {
                     throw "Invalid input: sphere <x> <y> <z> <r>";
                 }
-                spheres.push_back(Sphere(Vector(x, y, z, 1.0), r, mtl_index));
+                spheres.push_back(Sphere(Point3(x, y, z), r, mtl_index));
             } else if (key == "parallel") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 ss >> frustum_w;
@@ -208,17 +219,25 @@ int Scene::load_from_file(const std::string& filename) {
                 if (!ss || ss >> temp) {
                     throw "Invalid input: light <x> <y> <z> <w> <i>";
                 }
-                lights.push_back(Light(Vector(x, y, z, w), i));
+                if (equalf(w, 1.0)){
+                    lights.push_back(LightP(Point3(x, y, z), i));
+                }
+                else {
+                    lights.push_back(LightD(Vector3(x, y, z), i));
+                }
             } else if (key == "attlight") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
-                float x, y, z, w, i, a, b, c;
-                ss >> x >> y >> z >> w >> i >> a >> b >> c;
+                float x, y, z, w, i, c0, c1, c2;
+                ss >> x >> y >> z >> w >> i >> c0 >> c1 >> c2;
                 if (!ss || ss >> temp) {
                     throw "Invalid input";
                 }
-                Light l = Light(Vector(x, y, z, w), i);
-                l.set_att(a, b, c);
-                lights.push_back(l);
+                if (equalf(w, 1.0)){
+                    lights.push_back(LightP(Point3(x, y, z), i, c0, c1, c2));
+                }
+                else {
+                    lights.push_back(LightD(Vector3(x, y, z), i, c0, c1, c2));
+                }
             } else if (key == "depthcueing") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 float r, g, b, alpha_min, alpha_max, dist_min, dist_max;
@@ -232,7 +251,7 @@ int Scene::load_from_file(const std::string& filename) {
                 dist[0] = dist_min;
                 dist[1] = dist_max;
             } else if (key == "v") {
-                vertices.push_back(read_vector(line, 1.0));
+                vertices.push_back(read_point(line));
             } else if (key == "f") {
                 std::vector<int> vs(3), ts(3), ns(3);
                 std::stringstream ss(line.substr(line.find(' ')+1));
@@ -259,7 +278,7 @@ int Scene::load_from_file(const std::string& filename) {
                 normal_indices.push_back(ns);
                 material_indices.push_back(mtl_index);
             } else if (key == "vn") {
-                normals.push_back(read_vector(line, 0.0));
+                normals.push_back(read_vector(line));
             } else if (key == "vt") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
                 float u, v;
