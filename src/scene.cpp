@@ -1,16 +1,16 @@
 #include "scene.h"
 #include <fstream>
 #include <sstream>
-#include "floatutil.h"
-#include "lightp.h"
-#include "lightd.h"
+#include "math/floatutil.h"
+#include "light/lightp.h"
+#include "light/lightd.h"
 
 const float pi = 4.0f * atan(1.0f);
 
 Scene::Scene() {
     materials = std::vector<Material>();
     spheres = std::vector<Sphere>();
-    lights = std::vector<ILight>();
+    lights = std::vector<ILight*>();
     bkgeta = 1.0003f;
 }
 
@@ -220,10 +220,10 @@ int Scene::load_from_file(const std::string& filename) {
                     throw "Invalid input: light <x> <y> <z> <w> <i>";
                 }
                 if (equalf(w, 1.0)){
-                    lights.push_back(LightP(Point3(x, y, z), i));
+                    lights.push_back(new LightP(Point3(x, y, z), i));
                 }
                 else {
-                    lights.push_back(LightD(Vector3(x, y, z), i));
+                    lights.push_back(new LightD(Vector3(x, y, z), i));
                 }
             } else if (key == "attlight") {
                 std::stringstream ss(line.substr(line.find(' ')+1));
@@ -233,10 +233,10 @@ int Scene::load_from_file(const std::string& filename) {
                     throw "Invalid input";
                 }
                 if (equalf(w, 1.0)){
-                    lights.push_back(LightP(Point3(x, y, z), i, c0, c1, c2));
+                    lights.push_back(new LightP(Point3(x, y, z), i, c0, c1, c2));
                 }
                 else {
-                    lights.push_back(LightD(Vector3(x, y, z), i, c0, c1, c2));
+                    lights.push_back(new LightD(Vector3(x, y, z), i, c0, c1, c2));
                 }
             } else if (key == "depthcueing") {
                 std::stringstream ss(line.substr(line.find(' ')+1));

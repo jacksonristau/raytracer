@@ -1,6 +1,8 @@
 #pragma once
-#include "vector3.h"
+
 #include <iostream>
+
+class Vector3;
 
 class Point3 {
 public:
@@ -20,13 +22,14 @@ public:
 
     float x, y, z;
 };
-Point3 operator- (const Point3& p1, const Vector3& v1) ;
-
-Vector3 operator- (const Point3& p1, const Point3& p2);
 
 float distance(const Point3& p1, const Point3& p2);
 
 Point3 operator+ (const Point3& p1, const Vector3& v1);
+
+Point3 operator- (const Point3& p1, const Vector3& v1);
+
+Vector3 operator- (const Point3& p1, const Point3& p2);
 
 bool operator== (const Point3& p1, const Point3& p2);
 

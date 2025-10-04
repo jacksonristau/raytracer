@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 3.31)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -31,14 +31,14 @@ include_directories(${INCLUDE_DIRS})
 add_executable(raytracer ${SOURCES})
 
 # Add compiler optimizations
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-   target_compile_options(raytracer PRIVATE -O3)
-elseif(MSVC)
-  target_compile_options(raytracer PRIVATE /O2)
-endif()
+#if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+#   target_compile_options(raytracer PRIVATE -O3)
+#elseif(MSVC)
+#  target_compile_options(raytracer PRIVATE /O2)
+#endif()
 
 # Add debugging flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 add_custom_command(
     TARGET raytracer POST_BUILD

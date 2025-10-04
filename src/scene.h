@@ -25,7 +25,7 @@ class Scene {
         Material get_material(int index) const { return materials[index]; }
         int get_material_index(int index) const { return material_indices[index];}
         Sphere get_sphere(int index) const { return spheres[index];}
-        ILight get_light(int index) const { return lights[index];}
+        ILight* get_light(int index) const { return lights[index];}
         Camera get_camera() const { return camera; }
 
         // these return lists of vertices, normals, and uvs for a given index into the indices array
@@ -48,7 +48,7 @@ class Scene {
         std::vector<Material> materials;
         std::vector<std::shared_ptr<Texture>> textures;
         std::vector<Sphere> spheres;
-        std::vector<ILight> lights;
+        std::vector<ILight*> lights;
 
         // these all have the same length
         std::vector<Point3> vertices;

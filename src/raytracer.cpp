@@ -82,15 +82,15 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
     for (int i = 0; i < scene.num_lights(); i++) {
         auto l = scene.get_light(i);
         // ILight& cur_light = scene.get_light(i);
-        bool is_point = l.is_point();
+        bool is_point = l->is_point();
         float s_flag = 1.0;
         // // calculate the direction of the light source based on whether its a point or directional light
         // Vector l = (is_point) ? cur_light.l() - x_p : -cur_light.l();
-        float d = l.dist(x_p);
+        float d = l->dist(x_p);
 
         // l.normalize();
         // Ray r = Ray(x_p, l);
-        Ray shadow_ray = l.get_shadow_ray(x_p);
+        Ray shadow_ray = l->get_shadow_ray(x_p);
 
         // check if the light source is blocked by any sphere
         for (int j = 0; j < scene.num_spheres(); j++) {
@@ -159,13 +159,11 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
             transparent = (1 - fr) * (1 - mat.alpha()) * trace_ray(refracted_ray, !entering, depth + 1, refract_stack);
         }
 
-        final_color = final_color + (s_flag * ((l.intensity() * l.atten(d)) * (diffuse + specular)) + reflection + transparent);
+        final_color = final_color + (s_flag * ((l->intensity() * l->atten(d)) * (diffuse + specular)) + reflection + transparent);
     }
     final_color = scene.get_camera().depth_cue(x_p, final_color);
     return final_color;
 }
-
-
 
 // given a ray returns the color of any intersected geometry
 Color trace_ray(Ray ray, bool entering, int depth, std::vector<float> refract_stack) {

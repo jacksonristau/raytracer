@@ -18,12 +18,12 @@ bool operator==(const Ray& r1, const Ray& r2) {
 
 // check if t is negative
 float Ray::intersect_sphere(const Sphere& sphere) {
-    Point3 center = sphere.c;
+    Point3 center = sphere.center;
     float B = 2.0f * (d.x * (o.x - center.x) + 
                      d.y * (o.y - center.y) +
                      d.z * (o.z - center.z));
     float C = std::pow(o.x - center.x, 2.0f) + std::pow(o.y - center.y, 2.0f) +
-              std::pow(o.z - center.z, 2.0f) - std::pow(sphere.r, 2.0f);
+              std::pow(o.z - center.z, 2.0f) - std::pow(sphere.radius, 2.0f);
     float discrim = (B * B) - (4.0f * C);
     if (discrim < 0.0f) {
         return -1.0f;

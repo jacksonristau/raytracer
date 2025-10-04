@@ -1,5 +1,6 @@
 #pragma once
 #include "point3.h"
+#include "vector3.h"
 #include "floatutil.h"
 
 Point3::Point3() : x(0.0f), y(0.0f), z(0.0f) {}

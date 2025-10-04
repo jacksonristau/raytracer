@@ -3,11 +3,11 @@
 #include "math/floatutil.h"
 
 
-Sphere::Sphere() : c(Point3(0, 0, 0)), r(1.0), m(-1){}
+Sphere::Sphere() : center(Point3(0, 0, 0)), radius(1.0), material_id(-1){}
 
-Sphere::Sphere(const Point3& center, float radius, int m_index) : c(center), r(radius), m(m_index) {} 
+Sphere::Sphere(const Point3& center, float radius, int m_index) : center(center), radius(radius), material_id(m_index) {}
 
-Sphere::Sphere(const Point3& center, float radius) : c(center), r(radius), m(-1){}
+Sphere::Sphere(const Point3& center, float radius) : center(center), radius(radius), material_id(-1){}
 
 Sphere::~Sphere() {}
 
@@ -16,8 +16,8 @@ int Sphere::get_uv(const Point3& point, float* uv) const {
     if (uv == NULL) {
         return 0;
     }
-    Vector3 n = point - c;
-    n = (1 / r) * n;
+    Vector3 n = point - center;
+    n = (1 / radius) * n;
     float theta = atan2(n.y, n.x);
     float phi = acos(n.z);
     uv[0] = std::max(theta / TwoPi, ((theta + TwoPi) / TwoPi));
@@ -26,5 +26,5 @@ int Sphere::get_uv(const Point3& point, float* uv) const {
 }
 
 bool Sphere::operator==(const Sphere& s1) const {
-    return c == s1.c && equalf(r, s1.r);
+    return center == s1.center && equalf(radius, s1.radius);
 }
