@@ -2,59 +2,57 @@
 #include <cmath>
 #include "constants.h"
 
-Ray::Ray() : o(Point3(0.0f, 0.0f, 0.0f)), d(Vector3(0.0f, 0.0f, 0.0f)){}
+Ray::Ray() : origin(Point3(0.0f, 0.0f, 0.0f)), direction(Vector3(0.0f, 0.0f, 0.0f)){}
 
-Ray::Ray(const Point3& origin, const Vector3& direction) {
-    o = origin;
-    d = direction;
-    d.normalize();
+Ray::Ray(const Point3& origin, const Vector3& direction) : origin(origin), direction(direction){
+    this->direction.normalize();
 }
 
 Ray::~Ray() {}
 
 bool operator==(const Ray& r1, const Ray& r2) {
-    return r1.o == r2.o && r1.d == r2.d;
+    return r1.origin == r2.origin && r1.direction == r2.direction;
 }
 
 // check if t is negative
-float Ray::intersect_sphere(const Sphere& sphere) {
-    Point3 center = sphere.center;
-    float B = 2.0f * (d.x * (o.x - center.x) + 
-                     d.y * (o.y - center.y) +
-                     d.z * (o.z - center.z));
-    float C = std::pow(o.x - center.x, 2.0f) + std::pow(o.y - center.y, 2.0f) +
-              std::pow(o.z - center.z, 2.0f) - std::pow(sphere.radius, 2.0f);
-    float discrim = (B * B) - (4.0f * C);
-    if (discrim < 0.0f) {
-        return -1.0f;
-    }
-    else if (discrim == 0.0f) {
-        return (-B / 2.0f);
-    }
-    else  {
-        float t1 = (-B + sqrt(discrim)) / 2.0f;
-        float t2 = (-B - sqrt(discrim)) / 2.0f;
+// float Ray::intersect_sphere(const Sphere& sphere) {
+//     Point3 center = sphere.center;
+//     float B = 2.0f * (d.x * (o.x - center.x) + 
+//                      d.y * (o.y - center.y) +
+//                      d.z * (o.z - center.z));
+//     float C = std::pow(o.x - center.x, 2.0f) + std::pow(o.y - center.y, 2.0f) +
+//               std::pow(o.z - center.z, 2.0f) - std::pow(sphere.radius, 2.0f);
+//     float discrim = (B * B) - (4.0f * C);
+//     if (discrim < 0.0f) {
+//         return -1.0f;
+//     }
+//     else if (discrim == 0.0f) {
+//         return (-B / 2.0f);
+//     }
+//     else  {
+//         float t1 = (-B + sqrt(discrim)) / 2.0f;
+//         float t2 = (-B - sqrt(discrim)) / 2.0f;
         
-        if (t1 < Eps && t2 > Eps) {
-            return t2;
-        }
-        else if (t1 > Eps && t2 < Eps) {
-            return t1;
-        }
-        // regardless trace_ray ignores negative values
-        else if (t1 < Eps && t2 <= Eps) {
-            return -1.0;
-        }
-        // (t1 > 0 && t2 > 0)
-        else {
-            return std::min(t1, t2);
-        }
-    }
-}
+//         if (t1 < Eps && t2 > Eps) {
+//             return t2;
+//         }
+//         else if (t1 > Eps && t2 < Eps) {
+//             return t1;
+//         }
+//         // regardless trace_ray ignores negative values
+//         else if (t1 < Eps && t2 <= Eps) {
+//             return -1.0;
+//         }
+//         // (t1 > 0 && t2 > 0)
+//         else {
+//             return std::min(t1, t2);
+//         }
+//     }
+// }
 
 // check if t is negative if so its behind the ray origin
 float Ray::intersect_plane(const Vector3& normal, const Point3& point) {
-    float denom = normal.dot(d);
+    float denom = normal.dot(direction);
     // if the ray is parallel to the plane
     /*if (denom > -0.0000001 && denom < 0.0000001) {
         return -1.0;
@@ -63,7 +61,7 @@ float Ray::intersect_plane(const Vector3& normal, const Point3& point) {
         return -1.0f;
     }
     float D = -normal.dot(point);
-    float t = -(normal.dot(o) + D) / denom;
+    float t = -(normal.dot(origin) + D) / denom;
     if (t < Eps) return -1.0f;
     return t;
 }
@@ -115,14 +113,14 @@ float Ray::intersect_triangle(std::vector<Point3> vertices, float *coords) {
 }
 
 Vector3 Ray::reflect(const Vector3& N) {
-    Vector3 I = -d;
+    Vector3 I = -direction;
     Vector3 R = (2 * N.dot(I) * N) - I;
     R.normalize();
     return R;
 }
 
 Vector3 Ray::refract(Vector3 N, float n1, float n2) {
-    Vector3 I = -d;
+    Vector3 I = -direction;
     float snell = n1 / n2;
     float ndoti = N.dot(I);
     Vector3 B = snell * ((ndoti * N) - I);
@@ -135,11 +133,12 @@ Vector3 Ray::refract(Vector3 N, float n1, float n2) {
         return A + B;
     }
     catch (std::exception e){
+        // total internal reflection
         std::cout << "TIR" << std::endl;
         return Vector3(0.0f, 0.0f, 0.0f);
     }
 }
 
-Point3 Ray::get_point(float t) {
-    return o + (t * d);
+Point3 Ray::get_point(float t) const {
+    return origin + (t * direction);
 }

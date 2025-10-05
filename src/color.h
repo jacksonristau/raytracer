@@ -1,6 +1,4 @@
-#ifndef COLOR_H
-#define COLOR_H
-
+#pragma once
 #include <ostream>
 
 class Color {
@@ -34,5 +32,3 @@ Color operator*(float s, const Color& c1);
 Color operator*(const Color& c1, float s);
 
 std::ostream & operator<< ( std::ostream &os, const Color &c1);
-
-#endif

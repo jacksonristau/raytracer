@@ -1,8 +1,20 @@
-cmake_minimum_required(VERSION 3.31)
-set(CMAKE_CXX_STANDARD 14)
+cmake_minimum_required(VERSION 4.1)
+project(raytracer)
+
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(hw1a)
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG main
+)
+FetchContent_MakeAvailable(googletest)
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# FetchContent_MakeAvailable(googletest)
 
 set(
     SOURCES
@@ -10,7 +22,9 @@ set(
     ${PROJECT_SOURCE_DIR}/src/material.cpp
     ${PROJECT_SOURCE_DIR}/src/color.cpp
     ${PROJECT_SOURCE_DIR}/src/math/ray.cpp
-    ${PROJECT_SOURCE_DIR}/src/sphere.cpp
+    ${PROJECT_SOURCE_DIR}/src/geometry/sphere.cpp
+    ${PROJECT_SOURCE_DIR}/src/geometry/plane.cpp
+    ${PROJECT_SOURCE_DIR}/src/primitive.cpp
     ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
     ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
     ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
@@ -19,7 +33,7 @@ set(
     ${PROJECT_SOURCE_DIR}/src/scene.cpp
     ${PROJECT_SOURCE_DIR}/src/texture.cpp
     ${PROJECT_SOURCE_DIR}/src/camera.cpp
-
+    
 )
 
 set(
@@ -48,3 +62,21 @@ add_custom_command(
 )
 
 
+enable_testing()
+
+add_executable(
+    raytracer_tests
+    ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
+    ${PROJECT_SOURCE_DIR}/tests/vector3_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/point3_test.cpp
+)
+
+target_link_libraries(
+  raytracer_tests
+  GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_discover_tests(raytracer_tests)

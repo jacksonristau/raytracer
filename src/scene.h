@@ -5,7 +5,7 @@
 #include "math/vector3.h"
 #include "color.h"
 #include "material.h"
-#include "sphere.h"
+#include "geometry/sphere.h"
 #include "light/light.h"
 #include "texture.h"
 #include "camera.h"

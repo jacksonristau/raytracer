@@ -6,7 +6,7 @@
 
 #include "math/vector3.h"
 #include "math/ray.h"
-#include "sphere.h"
+#include "geometry/sphere.h"
 #include "material.h"
 #include "color.h"
 #include "light/light.h"
@@ -116,16 +116,16 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
                 s_flag = s_flag * (1 - surface_alpha);
             }
         }
-        Vector3 I = -i_ray.d;
+        Vector3 I = -i_ray.direction;
         // no need to calculate diffuse or specular for this light source
-        float ndotl = std::max(0.0f, n.dot(shadow_ray.d));
+        float ndotl = std::max(0.0f, n.dot(shadow_ray.direction));
         float ndoth;
         // if n dot l is 0 then n dot h is also 0 so same situation
         if (ndotl == 0.0) {
             ndoth = 0.0;
         }
         else {
-            Vector3 h = shadow_ray.d + I;
+            Vector3 h = shadow_ray.direction + I;
             h.normalize();
             ndoth = std::max(0.0f, n.dot(h));
         }
@@ -136,7 +136,7 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
         if (mat.ks() > 0.0) {
             float fr = fresnel(n.dot(I), mat.eta(), 0.0, true);
             Ray reflected_ray = Ray(x_p, i_ray.reflect(n));
-            reflected_ray.o = reflected_ray.o + (Eps * reflected_ray.d);
+            reflected_ray.origin = reflected_ray.origin + (Eps * reflected_ray.direction);
             reflection = fr * trace_ray(reflected_ray, entering, depth + 1, refract_stack);
         }
         if (mat.alpha() != 1.0) {
@@ -155,7 +155,7 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
             float fr = fresnel(n.dot(I), ni, nt, false);
             
             Ray refracted_ray = Ray(x_p, refract_dir);
-            refracted_ray.o = refracted_ray.o + (Eps * refracted_ray.d);
+            refracted_ray.origin = refracted_ray.origin + (Eps * refracted_ray.direction);
             transparent = (1 - fr) * (1 - mat.alpha()) * trace_ray(refracted_ray, !entering, depth + 1, refract_stack);
         }
 

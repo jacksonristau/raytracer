@@ -13,3 +13,11 @@ bool equalf(float A, float B, float maxRelDiff = 1e-8f)
         return true;
     return false;
 }
+
+inline bool is_negative(float value, float eps = 1e-8f) {
+    return value < -eps;
+}
+
+inline bool is_near_zero(float value, float eps = 1e-8f) {
+    return std::fabs(value) < eps;
+}
