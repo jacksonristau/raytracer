@@ -28,6 +28,7 @@ set(
     ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
     ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
     ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/point2.cpp
     ${PROJECT_SOURCE_DIR}/src/light/lightp.cpp
     ${PROJECT_SOURCE_DIR}/src/light/lightd.cpp
     ${PROJECT_SOURCE_DIR}/src/scene.cpp
@@ -68,9 +69,11 @@ add_executable(
     raytracer_tests
     ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
     ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
+    ${PROJECT_SOURCE_DIR}/src/math/point2.cpp
     ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
     ${PROJECT_SOURCE_DIR}/tests/vector3_test.cpp
     ${PROJECT_SOURCE_DIR}/tests/point3_test.cpp
+    ${PROJECT_SOURCE_DIR}/tests/point2_test.cpp
 )
 
 target_link_libraries(

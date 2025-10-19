@@ -7,9 +7,7 @@ class Vector3;
 class Point3 {
 public:
     Point3();
-
     Point3(float x, float y, float z);
-
     Point3(const Point3& p1);
 
     virtual ~Point3();

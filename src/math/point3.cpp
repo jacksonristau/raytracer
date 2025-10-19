@@ -52,7 +52,7 @@ Point3 operator+ (const Point3& p1, const Vector3& v1) {
 }
 
 Point3 operator*(float s, const Point3& p1) {
-	return Point3(p1.x * s, p1.y * s, p1.z * s);
+	return Point3(s * p1.x, s * p1.y, s * p1.z);
 }
 
 Point3 operator*(const Point3& p1, float s) {
