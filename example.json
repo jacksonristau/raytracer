@@ -1,0 +1,36 @@
+{
+    "materials": [
+        { 
+            "name": "red",
+            "diffuse": [0.5, 0, 0],
+            "specular": [0.5, 0, 0],
+            "ka": 0.2,
+            "kd": 0.6,
+            "ks": 0.0,
+            "n": 50,
+            "alpha": 1,
+            "eta": 1.2
+        }
+    ],
+    "camera": {
+        "eye": [0, 0, 0],
+        "viewdir": [0, 0, -1],
+        "updir": [0, 1, 0],
+        "hfov": 90,
+        "imsize": [800, 600]
+    },
+    "bkgcolor": [0.5, 0.5, 0.5],
+    "spheres": [
+        { "center": [0, 0, -5], "radius": 1, "material": "red" }
+    ],
+    "lights": [
+        {"l": [0, 0, 1], "type": "point", "i": 1, "att": [0.1, 0.5, 1]}
+    ],
+    "texture": "./files/wood.ppm",
+    "parallel": 2.5,
+    "depthcueing": {
+        "color": [0.5, 0.0, 0.1], 
+        "alpha": [0.1, 1],
+        "dist": [1, 10]
+    }
+}

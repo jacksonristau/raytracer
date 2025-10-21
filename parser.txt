@@ -1,0 +1,13 @@
+create a map of all the valid starting keys
+{
+    viewdir,
+    updir,
+    hfov,
+    etc
+}
+
+split out parsing tasks into seperate types
+vector parser, point parser...
+
+even less specific
+tuple parser 

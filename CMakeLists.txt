@@ -12,6 +12,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 # set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # FetchContent_MakeAvailable(googletest)
@@ -44,6 +48,8 @@ set(
 
 include_directories(${INCLUDE_DIRS})
 add_executable(raytracer ${SOURCES})
+
+target_link_libraries(raytracer nlohmann_json::nlohmann_json)
 
 # Add compiler optimizations
 #if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

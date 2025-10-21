@@ -35,7 +35,7 @@ texture filename_str
 parallel frustumwidth_f
 
 # center point, radius
-sphere cx_f cy_f cz_f red_f
+sphere cx_f cy_f cz_f r_f
 
 # attenuated light which loses intesity as it gets further based on c1c2c3
 attlight x_f y_f z_f w_f i_f c1 c2 c3

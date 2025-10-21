@@ -28,7 +28,9 @@ class Scene {
         ILight* get_light(int index) const { return lights[index];}
         Camera get_camera() const { return camera; }
 
-        // these return lists of vertices, normals, and uvs for a given index into the indices array
+        // these return lists of vertices, normals, and uvs 
+        // for a given index into the indices array
+        
         std::vector<Point3> get_vertices(int index) const;
         std::vector<Vector3> get_normals(int index) const;
         std::vector<std::vector<float>> get_uvs(int index) const;
