@@ -1,16 +1,13 @@
-#include <gtest/gtest.h>
+#include <catch2/catch_test_macros.hpp>
 
-// basic assertions
-TEST(HelloTest, BasicAssertions) {
-    // expect two strings to not be equal
-    EXPECT_STRNE("hello", "world");
-    // expect equality
-    EXPECT_EQ(7 * 6, 42);
+unsigned int Factorial(unsigned int number) {
+    return number <= 1 ? number : Factorial(number - 1) * number;
 }
 
-TEST(HelloTest, BasicFail) {
-    // expect two strings to not be equal
-    EXPECT_STREQ("hello", "world");
-    // expect equality
-    EXPECT_EQ(7 * 6, 42);
+TEST_CASE("Factorials are computed", "[factorial]") {
+    REQUIRE(Factorial(0) == 1);
+    REQUIRE(Factorial(1) == 1);
+    REQUIRE(Factorial(2) == 2);
+    REQUIRE(Factorial(3) == 6);
+    REQUIRE(Factorial(10) == 3628800);
 }

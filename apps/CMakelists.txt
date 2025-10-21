@@ -1,0 +1,13 @@
+set(RAYTRACER_APPS raytracer-cli sandbox)
+
+option(CLI "build the cli raytracer" ON)
+option(SANDBOX "build the sandbox exe" ON)
+
+# conditionally build apps
+if(CLI)
+	add_subdirectory(raytracer-cli)
+endif()
+
+if(SANDBOX)
+	add_subdirectory(sandbox)
+endif()

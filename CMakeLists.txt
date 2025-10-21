@@ -6,44 +6,42 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-set(
-    SOURCES
-    ${PROJECT_SOURCE_DIR}/src/raytracer.cpp
-    ${PROJECT_SOURCE_DIR}/src/material.cpp
-    ${PROJECT_SOURCE_DIR}/src/color.cpp
-    ${PROJECT_SOURCE_DIR}/src/math/ray.cpp
-    ${PROJECT_SOURCE_DIR}/src/geometry/sphere.cpp
-    ${PROJECT_SOURCE_DIR}/src/geometry/plane.cpp
-    ${PROJECT_SOURCE_DIR}/src/primitive.cpp
-    ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
-    ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
-    ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
-    ${PROJECT_SOURCE_DIR}/src/math/point2.cpp
-    ${PROJECT_SOURCE_DIR}/src/light/lightp.cpp
-    ${PROJECT_SOURCE_DIR}/src/light/lightd.cpp
-    ${PROJECT_SOURCE_DIR}/src/scene.cpp
-    ${PROJECT_SOURCE_DIR}/src/texture.cpp
-    ${PROJECT_SOURCE_DIR}/src/camera.cpp
-    
-)
+# Only do these if this is the main project, and not if it is included through add_subdirectory
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
-set(
-    INCLUDE_DIRS
-    ${PROJECT_SOURCE_DIR}/include
-)
+  # Optionally set things like CMAKE_CXX_STANDARD, CMAKE_POSITION_INDEPENDENT_CODE here
 
-include_directories(${INCLUDE_DIRS})
-add_executable(raytracer ${SOURCES})
+  # Let's ensure -std=c++xx instead of -std=g++xx
+  set(CMAKE_CXX_EXTENSIONS OFF)
 
-target_link_libraries(raytracer nlohmann_json::nlohmann_json)
+  # Let's nicely support folders in IDEs
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_custom_command(
-    TARGET raytracer POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/files"
-        "$<TARGET_FILE_DIR:raytracer>"
-)
+  # Testing only available if this is the main app
+  # Note this needs to be done in the main CMakeLists
+  # since it calls enable_testing, which must be in the
+  # main CMakeLists.
+  include(CTest)
+endif()
 
-if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MYPROJECT_BUILD_TESTING) AND BUILD_TESTING)
-    add_subdirectory(tests)
+# FetchContent added in CMake 3.11, downloads during the configure step
+# FetchContent_MakeAvailable was added in CMake 3.14; simpler usage
+include(FetchContent)
+
+# add json library
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+# raytracerlib code
+add_subdirectory(src)
+
+# executable code
+add_subdirectory(apps)
+
+# Testing only available if this is the main app
+# Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
+# how to use override: cmake -B build -S . -DMODERN_CMAKE_BUILD_TESTING=ON
+if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING)
+   AND BUILD_TESTING)
+  add_subdirectory(tests)
 endif()

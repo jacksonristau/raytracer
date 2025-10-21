@@ -1,0 +1,11 @@
+add_executable(raytracer-cli main.cpp)
+
+target_link_libraries(raytracer-cli PRIVATE raytracerlib nlohmann_json)
+
+add_custom_command(
+    TARGET raytracer-cli POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        "${CMAKE_SOURCE_DIR}/files"
+        "${CMAKE_SOURCE_DIR}/files/textures"
+        "$<TARGET_FILE_DIR:raytracer-cli>"
+)
