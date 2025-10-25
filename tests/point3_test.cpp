@@ -7,23 +7,23 @@
 
 constexpr float EPS = 1e-6f;
 
-TEST_CASE("Vector3: constructors, equality, negation and assignment") {
-	Vector3 v0; // default
-	REQUIRE(v0 == Vector3(0.0f, 0.0f, 0.0f));
+TEST_CASE("Point3: constructors, equality, negation and assignment") {
+	Point3 p0; // default
+	REQUIRE(p0 == Point3(0.0f, 0.0f, 0.0f));
 
-	Vector3 v1(1.5f, -2.0f, 3.25f);
-	REQUIRE(std::fabs(v1.x - 1.5f) <= EPS);
-	REQUIRE(std::fabs(v1.y - -2.0f) <= EPS);
-	REQUIRE(std::fabs(v1.z - 3.25f) <= EPS);
+	Point3 p1(1.5f, -2.0f, 3.25f);
+	REQUIRE(std::fabs(p1.x - 1.5f) <= EPS);
+	REQUIRE(std::fabs(p1.y - -2.0f) <= EPS);
+	REQUIRE(std::fabs(p1.z - 3.25f) <= EPS);
 
-	Vector3 v2(v1); // copy ctor
-	REQUIRE(v2 == v1);
+	Point3 p2(p1); // copy ctor
+	REQUIRE(p2 == p1);
 
-	Vector3 v3;
-	v3 = v1; // assignment
-	REQUIRE(v3 == v1);
+	Point3 p3;
+	p3 = p1; // assignment
+	REQUIRE(p3 == p1);
 
-	Vector3 vneg = -v1;
+	Point3 pneg = -p1;
 	REQUIRE(std::fabs(vneg.x - -v1.x) <= EPS);
 	REQUIRE(std::fabs(vneg.y - -v1.y) <= EPS);
 	REQUIRE(std::fabs(vneg.z - -v1.z) <= EPS);

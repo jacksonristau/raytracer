@@ -6,12 +6,12 @@
 
 #include "math/vector3.h"
 #include "math/ray.h"
-#include "geometry/sphere.h"
-#include "material.h"
-#include "color.h"
-#include "light/light.h"
-#include "scene.h"
-#include "camera.h"
+#include "../include/geometry/sphere.h"
+#include "../include/gfx/material.h"
+#include "../include/gfx/color.h"
+#include "../include/gfx/lights.h"
+#include "../include/gfx/scene.h"
+#include "../include/gfx/camera.h"
 #include "math/constants.h"
 #include <algorithm>
 
