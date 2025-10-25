@@ -4,17 +4,20 @@
 
 #include "../include/math/vector3.h"
 #include "../include/math/point3.h"
+#include "../include/math/floatutil.h"
 
 constexpr float EPS = 1e-6f;
 
 TEST_CASE("Point3: constructors, equality, negation and assignment") {
 	Point3 p0; // default
-	REQUIRE(p0 == Point3(0.0f, 0.0f, 0.0f));
+	REQUIRE(p0.x == 0.0f);
+	REQUIRE(p0.y == 0.0f);
+	REQUIRE(p0.z == 0.0f);
 
 	Point3 p1(1.5f, -2.0f, 3.25f);
-	REQUIRE(std::fabs(p1.x - 1.5f) <= EPS);
-	REQUIRE(std::fabs(p1.y - -2.0f) <= EPS);
-	REQUIRE(std::fabs(p1.z - 3.25f) <= EPS);
+	REQUIRE(equalf(p1.x, 1.5f));
+	REQUIRE(equalf(p1.y, -2.0f));
+	REQUIRE(equalf(p1.z, 3.25f));
 
 	Point3 p2(p1); // copy ctor
 	REQUIRE(p2 == p1);
@@ -24,66 +27,37 @@ TEST_CASE("Point3: constructors, equality, negation and assignment") {
 	REQUIRE(p3 == p1);
 
 	Point3 pneg = -p1;
-	REQUIRE(std::fabs(vneg.x - -v1.x) <= EPS);
-	REQUIRE(std::fabs(vneg.y - -v1.y) <= EPS);
-	REQUIRE(std::fabs(vneg.z - -v1.z) <= EPS);
+	REQUIRE(equalf(pneg.x, -p1.x));
+	REQUIRE(equalf(pneg.y, -p1.y));
+	REQUIRE(equalf(pneg.z, -p1.z));
 }
 
-TEST_CASE("Vector3: normalize and distance") {
-	Vector3 v(3.0f, 0.0f, 4.0f); // length 5
-	v.normalize();
-	// length should be 1.0
-	REQUIRE(std::fabs(v.distance(Vector3(0.0f, 0.0f, 0.0f)) - 1.0f) <= EPS);
-	// normalized components should be 3/5 and 4/5 where appropriate
-	REQUIRE(std::fabs(v.x - (3.0f / 5.0f)) <= EPS);
-	REQUIRE(std::fabs(v.z - (4.0f / 5.0f)) <= EPS);
+TEST_CASE("Point3 distance") {
+	Point3 p(3.0f, 0.0f, 4.0f); // length 5
+	
+	REQUIRE(equalf(distance(Point3(0.0f, 0.0f, 0.0f), p), 5.0f));
 }
 
-TEST_CASE("Vector3: cross and dot products") {
-	Vector3 i(1.0f, 0.0f, 0.0f);
-	Vector3 j(0.0f, 1.0f, 0.0f);
-	Vector3 k(0.0f, 0.0f, 1.0f);
+TEST_CASE("Point3: arithmetic operators (+, -, scalar *)") {
+	Point3  p1(1.0f, 1.0f, 1.0f);
+    Point3  p2(2.0f, 0.0f, 1.0f);
+    Vector3 v1(1.0f, 0.0f, 0.0f);
 
-	Vector3 cross = i.cross(j);
-	REQUIRE(cross == k);
+    REQUIRE(p1 * 2.0f == Point3(2.0f, 2.0f, 2.0f));
 
-	REQUIRE(std::fabs(i.dot(j) - 0.0f) <= EPS);
-	REQUIRE(std::fabs(i.dot(i) - 1.0f) <= EPS);
+    REQUIRE(p1 - p2 == Vector3(-1.0f, 1.0f, 0.0f));
 
-	Point3 p(2.0f, 0.0f, -1.0f);
-	Vector3 v(1.0f, 0.0f, 0.0f);
-	// dot with Point3 delegates to the point coordinates
-	REQUIRE(std::fabs(v.dot(p) - 2.0f) <= EPS);
+    REQUIRE(p1 + v1 == Point3(2.0f, 1.0f, 1.0f));
+    REQUIRE(p1 - v1 == Point3(0.0f, 1.0f, 1.0f));
 }
 
-TEST_CASE("Vector3: arithmetic operators (+, -, scalar *)") {
-	Vector3 a(1.0f, 2.0f, 3.0f);
-	Vector3 b(0.5f, -1.0f, 2.0f);
-
-	Vector3 sum = a + b;
-	REQUIRE(sum == Vector3(1.5f, 1.0f, 5.0f));
-
-	Vector3 diff = a - b;
-	REQUIRE(diff == Vector3(0.5f, 3.0f, 1.0f));
-
-	Vector3 scaled = 2.0f * b;
-	REQUIRE(scaled == Vector3(1.0f, -2.0f, 4.0f));
-}
-
-TEST_CASE("Vector3: Inf() returns infinities") {
-	const Vector3 &inf = Vector3::Inf();
-	REQUIRE(std::isinf(inf.x));
-	REQUIRE(std::isinf(inf.y));
-	REQUIRE(std::isinf(inf.z));
-}
-
-TEST_CASE("Vector3: ostream prints components") {
-	Vector3 v(1.0f, -2.5f, 3.75f);
+TEST_CASE("Point3: ostream prints components") {
+	Point3 p(1.0f, -2.5f, 3.75f);
 	std::ostringstream oss;
-	oss << v;
+	oss << p;
 	std::string out = oss.str();
 	// basic sanity checks on formatting
-	REQUIRE(out.front() == '<');
+	REQUIRE(out.front() == '(');
 	REQUIRE(out.find(",") != std::string::npos);
-	REQUIRE(out.back() == '>');
+	REQUIRE(out.back() == ')');
 }

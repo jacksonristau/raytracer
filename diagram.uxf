@@ -1,0 +1,17 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>170</x><y>210</y><w>130</w><h>100</h></coordinates><panel_attributes>Primitive
+--
++ intersect()
+--
+- IShape* geometry
+- Material* material</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>500</x><y>250</y><w>100</w><h>80</h></coordinates><panel_attributes>Sphere
+--
+- </panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>50</x><y>440</y><w>130</w><h>110</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+IShape
+--
++ intersect(Ray&amp;)
++ normal(Point&amp;)
+--
+- IShape* geometry
+- Material* material</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>100</x><y>300</y><w>150</w><h>160</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>130;10;10;140</additional_attributes></element><element><id>UMLClass</id><coordinates><x>330</x><y>450</y><w>100</w><h>100</h></coordinates><panel_attributes>/Material/
+--
+</panel_attributes><additional_attributes></additional_attributes></element></diagram>

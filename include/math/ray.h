@@ -9,10 +9,16 @@ class Ray {
         Ray();
         Ray(const Point3& origin, const Vector3& direction);
 
+        // copy
+        Ray(const Ray& r);
+
+        // assignment
+        Ray operator= (const Ray& r);
+
         virtual ~Ray();
-        float intersect_plane(const Vector3& normal, const Point3& point);
+        //float intersect_plane(const Vector3& normal, const Point3& point);
         // returns fills the array coords with the barycentric coordinates of the intersection
-        float intersect_triangle(std::vector<Point3> vertices, float* coords);
+        //float intersect_triangle(std::vector<Point3> vertices, float* coords);
         Vector3 reflect(const Vector3& normal);
         Vector3 refract(Vector3 normal, float n1, float n2);
 

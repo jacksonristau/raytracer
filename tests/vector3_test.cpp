@@ -4,17 +4,16 @@
 
 #include "../include/math/vector3.h"
 #include "../include/math/point3.h"
-
-constexpr float EPS = 1e-6f;
+#include "../include/math/floatutil.h"
 
 TEST_CASE("Vector3: constructors, equality, negation and assignment") {
 	Vector3 v0; // default
 	REQUIRE(v0 == Vector3(0.0f, 0.0f, 0.0f));
 
 	Vector3 v1(1.5f, -2.0f, 3.25f);
-	REQUIRE(std::fabs(v1.x - 1.5f) <= EPS);
-	REQUIRE(std::fabs(v1.y - -2.0f) <= EPS);
-	REQUIRE(std::fabs(v1.z - 3.25f) <= EPS);
+	REQUIRE(equalf(v1.x, 1.5f));
+	REQUIRE(equalf(v1.y, -2.0f));
+	REQUIRE(equalf(v1.z, 3.25f));
 
 	Vector3 v2(v1); // copy ctor
 	REQUIRE(v2 == v1);
@@ -24,19 +23,19 @@ TEST_CASE("Vector3: constructors, equality, negation and assignment") {
 	REQUIRE(v3 == v1);
 
 	Vector3 vneg = -v1;
-	REQUIRE(std::fabs(vneg.x - -v1.x) <= EPS);
-	REQUIRE(std::fabs(vneg.y - -v1.y) <= EPS);
-	REQUIRE(std::fabs(vneg.z - -v1.z) <= EPS);
+	REQUIRE(equalf(vneg.x, -v1.x));
+	REQUIRE(equalf(vneg.y, -v1.y));
+	REQUIRE(equalf(vneg.z, -v1.z));
 }
 
 TEST_CASE("Vector3: normalize and distance") {
 	Vector3 v(3.0f, 0.0f, 4.0f); // length 5
 	v.normalize();
 	// length should be 1.0
-	REQUIRE(std::fabs(v.distance(Vector3(0.0f, 0.0f, 0.0f)) - 1.0f) <= EPS);
+	REQUIRE(equalf(v.distance(Vector3(0.0f, 0.0f, 0.0f)), 1.0f));
 	// normalized components should be 3/5 and 4/5 where appropriate
-	REQUIRE(std::fabs(v.x - (3.0f / 5.0f)) <= EPS);
-	REQUIRE(std::fabs(v.z - (4.0f / 5.0f)) <= EPS);
+	REQUIRE(equalf(v.x, (3.0f / 5.0f)));
+	REQUIRE(equalf(v.z, (4.0f / 5.0f)));
 }
 
 TEST_CASE("Vector3: cross and dot products") {
@@ -47,13 +46,13 @@ TEST_CASE("Vector3: cross and dot products") {
 	Vector3 cross = i.cross(j);
 	REQUIRE(cross == k);
 
-	REQUIRE(std::fabs(i.dot(j) - 0.0f) <= EPS);
-	REQUIRE(std::fabs(i.dot(i) - 1.0f) <= EPS);
+	REQUIRE(equalf(i.dot(j), 0.0f));
+	REQUIRE(equalf(i.dot(i), 1.0f));
 
 	Point3 p(2.0f, 0.0f, -1.0f);
 	Vector3 v(1.0f, 0.0f, 0.0f);
 	// dot with Point3 delegates to the point coordinates
-	REQUIRE(std::fabs(v.dot(p) - 2.0f) <= EPS);
+	REQUIRE(equalf(v.dot(p), 2.0f));
 }
 
 TEST_CASE("Vector3: arithmetic operators (+, -, scalar *)") {

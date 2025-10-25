@@ -8,5 +8,5 @@
 class IShape {
 	public:
 		virtual float intersect(const Ray& r) const = 0;
-		virtual Vector3 get_normal(const Point3& p) const = 0;
+		virtual Vector3 normal(const Point3& p) const = 0;
 };

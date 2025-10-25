@@ -2,10 +2,21 @@
 #include "../include/math/ray.h"
 #include "../include/math/constants.h"
 
-Ray::Ray() : origin(Point3(0.0f, 0.0f, 0.0f)), direction(Vector3(0.0f, 0.0f, 0.0f)){}
+Ray::Ray() : origin(Point3()), direction(Vector3()){}
 
 Ray::Ray(const Point3& origin, const Vector3& direction) : origin(origin), direction(direction){
     this->direction.normalize();
+}
+
+Ray::Ray(const Ray& r) {
+    origin = r.origin;
+    direction = r.direction;
+}
+
+Ray Ray::operator= (const Ray& r) {
+    origin = r.origin;
+    direction = r.direction;
+    return *this;
 }
 
 Ray::~Ray() {}
@@ -51,66 +62,66 @@ bool operator==(const Ray& r1, const Ray& r2) {
 // }
 
 // check if t is negative if so its behind the ray origin
-float Ray::intersect_plane(const Vector3& normal, const Point3& point) {
-    float denom = normal.dot(direction);
-    // if the ray is parallel to the plane
-    /*if (denom > -0.0000001 && denom < 0.0000001) {
-        return -1.0;
-    }*/
-    if (fabs(denom) < 1e-6f) {
-        return -1.0f;
-    }
-    float D = -normal.dot(point);
-    float t = -(normal.dot(origin) + D) / denom;
-    if (t < Eps) return -1.0f;
-    return t;
-}
+// float Ray::intersect_plane(const Vector3& normal, const Point3& point) {
+//     float denom = normal.dot(direction);
+//     // if the ray is parallel to the plane
+//     /*if (denom > -0.0000001 && denom < 0.0000001) {
+//         return -1.0;
+//     }*/
+//     if (fabs(denom) < 1e-6f) {
+//         return -1.0f;
+//     }
+//     float D = -normal.dot(point);
+//     float t = -(normal.dot(origin) + D) / denom;
+//     if (t < Eps) return -1.0f;
+//     return t;
+// }
 
 // coords expects a 3 element array
-float Ray::intersect_triangle(std::vector<Point3> vertices, float *coords) {
-    Vector3 e1 = vertices[1] - vertices[0];
-    Vector3 e2 = vertices[2] - vertices[0];
+// float Ray::intersect_triangle(std::vector<Point3> vertices, float *coords) {
+//     Vector3 e1 = vertices[1] - vertices[0];
+//     Vector3 e2 = vertices[2] - vertices[0];
     
-    Vector3 n = e1.cross(e2);
+//     Vector3 n = e1.cross(e2);
 
-    float t = intersect_plane(n, vertices[0]);
-    if (t < Eps) {
-        return -1.0f;
-    }
-    // check if the point is inside the triangle
-    else {
-        float d11 = e1.dot(e1);
-        float d12 = e1.dot(e2);
-        float d22 = e2.dot(e2);
-        float det = (d11 * d22) - (d12 * d12);
-        /*if (det > -0.0001 && det < 0.0001) {
-            return -1.0;
-        }*/
-        if (fabs(det) < Eps) {
-            return -1.0f;
-        }
-        Point3 p = get_point(t);
-        Vector3 ep = p - vertices[0];
-        float dp1 = ep.dot(e1);
-        float dp2 = ep.dot(e2);
+//     float t = intersect_plane(n, vertices[0]);
+//     if (t < Eps) {
+//         return -1.0f;
+//     }
+//     // check if the point is inside the triangle
+//     else {
+//         float d11 = e1.dot(e1);
+//         float d12 = e1.dot(e2);
+//         float d22 = e2.dot(e2);
+//         float det = (d11 * d22) - (d12 * d12);
+//         /*if (det > -0.0001 && det < 0.0001) {
+//             return -1.0;
+//         }*/
+//         if (fabs(det) < Eps) {
+//             return -1.0f;
+//         }
+//         Point3 p = get_point(t);
+//         Vector3 ep = p - vertices[0];
+//         float dp1 = ep.dot(e1);
+//         float dp2 = ep.dot(e2);
 
-        float beta = ((d22 * dp1) - (d12 * dp2)) / det;
-        float gamma = ((d11 * dp2) - (d12 * dp1)) / det;
-        float alpha = 1.0f - (beta + gamma);
-        if (alpha > Eps && alpha <= 1.0f && beta > Eps && beta <= 1.0f && gamma > Eps && gamma <= 1.0f) {
-            if (coords == NULL) {
-                return t;
-            }
-            coords[0] = alpha;
-            coords[1] = beta;
-            coords[2] = gamma;
-            return t;
-        }
-        else {
-            return -1.0f;
-        }
-    }
-}
+//         float beta = ((d22 * dp1) - (d12 * dp2)) / det;
+//         float gamma = ((d11 * dp2) - (d12 * dp1)) / det;
+//         float alpha = 1.0f - (beta + gamma);
+//         if (alpha > Eps && alpha <= 1.0f && beta > Eps && beta <= 1.0f && gamma > Eps && gamma <= 1.0f) {
+//             if (coords == NULL) {
+//                 return t;
+//             }
+//             coords[0] = alpha;
+//             coords[1] = beta;
+//             coords[2] = gamma;
+//             return t;
+//         }
+//         else {
+//             return -1.0f;
+//         }
+//     }
+// }
 
 Vector3 Ray::reflect(const Vector3& N) {
     Vector3 I = -direction;

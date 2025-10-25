@@ -10,8 +10,9 @@ include(Catch)
 
 set(
     TEST_LIST
-    vector3_test.cpp
     floatutils_test.cpp
+    vector3_test.cpp
+    point3_test.cpp
 )
 
 add_executable(raytests ${TEST_LIST})
