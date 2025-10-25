@@ -1,9 +1,9 @@
-#include "scene.h"
 #include <fstream>
 #include <sstream>
-#include "math/floatutil.h"
-#include "light/lightp.h"
-#include "light/lightd.h"
+
+#include "../include/math/floatutil.h"
+#include "../include/gfx/lights.h"
+#include "../include/gfx/scene.h"
 
 const float pi = 4.0f * atan(1.0f);
 

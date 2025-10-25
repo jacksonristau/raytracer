@@ -1,8 +1,8 @@
 #pragma once
 #include "intersection.h"
-#include "math/ray.h"
-#include "math/point3.h"
-#include "math/vector3.h"
+#include "../math/ray.h"
+#include "../math/point3.h"
+#include "../math/vector3.h"
 
 // abstract base class for geometry
 class IShape {

@@ -1,0 +1,35 @@
+static Scene load_from_file(const std::string& filename) {
+    std::ifstream input;
+    std::cout << "loading file: " << filename << std::endl
+    input.open(filename);
+    if (!input.is_open()) {
+        std::cout << "failed to open file " << filename << std::endl;
+        return Scene();
+    
+    json scene_json;
+    try {
+        input >> scene_json;
+    } catch (const json::parse_error& e) {
+        std::cerr << "JSON parsing error: " << e.what() << std::endl;
+        return Scene();
+    }
+    try {
+        Point3 eye_pos;
+        Vector3 view_dir;
+        Vector3 up_dir;
+        float hfov;
+        int resolution[2]
+        auto camera_json = scene_json.at("camera");
+        eye_pos = Point3(camera_json.at("eye")[0], camera_json.at("eye")[1], camera_json.at("eye")[2]);
+        view_dir = Vector3(camera_json.at("viewdir")[0], camera_json.at("viewdir")[1], camera_json.at("viewdir")[2]);
+        view_dir.normalize();
+        up_dir = Vector3(camera_json.at("updir")[0], camera_json.at("updir")[1], camera_json.at("updir")[2]);
+        hfov = camera_json.at("hfov");
+        resolution[0] = camera_json.at("resolution")[0];
+        resolution[1] = camera_json.at("resolution")[1];
+    }
+    catch (const json::parse_error& e) {
+        std::cerr << "JSON parsing error: " << e.what() << std::endl;
+        return Scene()
+    }
+}

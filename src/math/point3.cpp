@@ -1,6 +1,6 @@
-#include "point3.h"
-#include "vector3.h"
-#include "floatutil.h"
+#include "../include/math/point3.h"
+#include "../include/math/vector3.h"
+#include "../include/math/floatutil.h"
 
 Point3::Point3() : x(0.0f), y(0.0f), z(0.0f) {}
 

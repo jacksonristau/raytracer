@@ -1,6 +1,6 @@
-#include "sphere.h"
-#include "math/constants.h"
-#include "math/floatutil.h"
+#include "../include/geometry/sphere.h"
+#include "../include/math/constants.h"
+#include "../include/math/floatutil.h"
 
 
 Sphere::Sphere() : center(Point3(0, 0, 0)), radius(1.0) {}

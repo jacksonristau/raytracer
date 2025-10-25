@@ -1,6 +1,7 @@
-#include "vector3.h"
-#include "floatutil.h"
 #include <iostream>
+
+#include "../include/math/vector3.h"
+#include "../include/math/floatutil.h"
 
 static const Vector3 INF = Vector3(INFINITY, INFINITY, INFINITY);
 const Vector3& Vector3::Inf() {

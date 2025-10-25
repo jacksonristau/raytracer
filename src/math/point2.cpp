@@ -1,5 +1,5 @@
-#include "point2.h"
-#include "floatutil.h"
+#include "../include/math/point2.h"
+#include "../include/math/floatutil.h"
 #include <cmath>
 
 Point2::Point2() : x(0.0f), y(0.0f) {}

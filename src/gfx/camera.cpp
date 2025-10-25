@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "../include/gfx/camera.h"
 
 Camera::Camera() {
 	eye_pos = Point3(0.0f, 0.0f, 1.0f);

@@ -8,7 +8,7 @@ FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 
-add_executable(raytests hello_test.cpp)
+add_executable(raytests vector3_test.cpp)
 
 # These help VS recognize it as a runnable target
 set_target_properties(raytests PROPERTIES
@@ -26,4 +26,4 @@ endif()
 catch_discover_tests(raytests)
 
 # link to the main library, as well as Catch2
-target_link_libraries(raytests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(raytests PRIVATE Catch2::Catch2WithMain PRIVATE raytracerlib)

@@ -1,8 +1,8 @@
 #pragma once
 #include "shape.h"
-#include "math/vector3.h"
 #include "intersection.h"
-#include "math/ray.h"
+#include "../math/point3.h"
+#include "../math/ray.h"
 
 class Sphere : public IShape {
     public:

@@ -1,4 +1,4 @@
-#include "material.h"
+#include "../include/gfx/material.h"
 #include <fstream>
 #include <iostream>
 #include <cmath>

@@ -1,6 +1,6 @@
-#include "plane.h"
-#include "math/floatutil.h"
-#include "math/constants.h"
+#include "../include/geometry/plane.h"
+#include "../include/math/floatutil.h"
+#include "../include/math/constants.h"
 
 Plane::Plane() {
     pos = Point3();

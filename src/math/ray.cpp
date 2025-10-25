@@ -1,6 +1,6 @@
-#include "ray.h"
 #include <cmath>
-#include "constants.h"
+#include "../include/math/ray.h"
+#include "../include/math/constants.h"
 
 Ray::Ray() : origin(Point3(0.0f, 0.0f, 0.0f)), direction(Vector3(0.0f, 0.0f, 0.0f)){}
 

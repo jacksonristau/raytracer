@@ -2,14 +2,17 @@
 
 #include <string>
 #include <vector>
-#include "math/vector3.h"
+#include <memory>
+
+#include "../math/vector3.h"
+#include "../geometry/sphere.h"
+
 #include "color.h"
 #include "material.h"
-#include "geometry/sphere.h"
-#include "light/light.h"
+#include "lights.h"
 #include "texture.h"
 #include "camera.h"
-#include <memory>
+
 
 class Scene {
     public:

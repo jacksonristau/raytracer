@@ -1,6 +1,6 @@
 #pragma once
-#include "math/point3.h"
-#include "math/vector3.h"
+#include "../include/math/point3.h"
+#include "../include/math/vector3.h"
 #include "shape.h"
 
 class Plane : public IShape {

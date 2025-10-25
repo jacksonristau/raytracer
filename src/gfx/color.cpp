@@ -1,6 +1,6 @@
-#include "color.h"
-#include "math/constants.h"
-#include "math/floatutil.h"
+#include "../include/gfx/color.h"
+#include "../include/math/constants.h"
+#include "../include/math/floatutil.h"
 
 Color::Color() {
     // nice lil green

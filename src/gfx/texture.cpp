@@ -1,4 +1,4 @@
-#include "texture.h"
+#include "../include/gfx/texture.h"
 #include <fstream>
 #include <iostream>
 #include <cmath>

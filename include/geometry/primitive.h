@@ -1,6 +1,6 @@
 #pragma once
-#include "material.h"
-#include "math/ray.h"
+#include "../gfx/material.h"
+#include "../math/ray.h"
 // the base for objects. 
 class Intersection;
 class IShape;
@@ -12,6 +12,6 @@ class Primitive {
 
 		Intersection intersect(const Ray& r);
 
-		IShape& geometry;
+		IShape* geometry;
 		int mtl_id;
 };
