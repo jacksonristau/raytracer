@@ -5,7 +5,9 @@ set(
   ${PROJECT_SOURCE_DIR}/src/geometry/mesh.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/plane.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/primitive.cpp
+  ${PROJECT_SOURCE_DIR}/src/geometry/triangle.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/sphere.cpp
+  ${PROJECT_SOURCE_DIR}/src/geometry/triangle.cpp
   
   ${PROJECT_SOURCE_DIR}/src/gfx/camera.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/color.cpp
@@ -24,7 +26,7 @@ add_library(raytracerlib ${SOURCE_LIST} ${HEADER_LIST})
 
 target_include_directories(raytracerlib PUBLIC ../include)
 
-target_link_libraries(raytracerlib PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(raytracerlib PUBLIC nlohmann_json::nlohmann_json)
 
 source_group(
   TREE "${PROJECT_SOURCE_DIR}/include"

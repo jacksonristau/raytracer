@@ -4,5 +4,3 @@
 #include "../include/gfx/scene.h"
 
 using json = nlohmann::json;
-
-

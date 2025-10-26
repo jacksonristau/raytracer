@@ -3,11 +3,15 @@
 #include "math/vector3.h"
 #include "math/ray.h"
 #include "color.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class Camera {
 	public:
 		Camera();
 		Camera(int res[], float hfov, Color dc, float alpha[2], float dist[2], Point3 e, Vector3 v, Vector3 u);
+		Camera(json cam);
 		~Camera();
 
 		Ray generate_ray(int x, int y);

@@ -15,8 +15,8 @@ class Sphere : public IShape {
 
         // returns texture coordinates at a point on the sphere using polar coordinates
         int get_uv(const Point3& point, float* uv) const;
-        float intersect(const Ray& r) const override;
-        Vector3 get_normal(const Point3& p) const override;
+        Intersection intersect(const Ray& r) const override;
+        Vector3 normal(const Point3& p) const override;
 
         Point3 center;
         float radius;

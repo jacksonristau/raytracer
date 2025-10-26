@@ -23,7 +23,7 @@ int Sphere::get_uv(const Point3& point, float* uv) const {
     return 1;
 }
 
-float Sphere::intersect(const Ray& r) const {
+Intersection Sphere::intersect(const Ray& r) const {
     float B = 2.0f * (r.direction.x * (r.origin.x - center.x) + 
                      r.direction.y * (r.origin.y - center.y) +
                      r.direction.z * (r.origin.z - center.z));
@@ -33,10 +33,12 @@ float Sphere::intersect(const Ray& r) const {
              std::pow(radius, 2.0f);
     float discrim = (B * B) - (4.0f * C);
     if (discrim < -Eps) {
-        return -1.0f;
+        return Intersection();
     }
     else if (std::abs(discrim) < Eps) {
-        return (-B / 2.0f);
+        float t = (-B / 2.0f);
+        Point3 x_p = r.get_point(t);
+        return Intersection(r, t, *this, x_p, this->normal(x_p));
     }
     else  {
         float t1 = (-B + sqrt(discrim)) / 2.0f;
@@ -60,7 +62,7 @@ float Sphere::intersect(const Ray& r) const {
 }
 
 // expects a point on the surface of the sphere
-Vector3 Sphere::get_normal(const Point3& p) const {
+Vector3 Sphere::normal(const Point3& p) const {
     return p - center;
 }
 

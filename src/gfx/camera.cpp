@@ -49,6 +49,50 @@ Camera::Camera(int res[], float fov, Color dc, float a[2], float d[2], Point3 ey
     deltav = (1.0f / (resolution[1] - 1)) * (ll - ul);
 }
 
+Camera::Camera(json cam) {
+    resolution[0] = cam.at("resolution")[0];
+    resolution[1] = cam.at("resolution")[1];
+
+    json dc = cam.at("depthcueing");
+    depth_color = Color(dc.at("color"));
+    alpha[0] = dc.at("alpha")[0];
+    alpha[1] = dc.at("alpha")[1];
+    dist[0] = dc.at("dist")[0];
+    dist[1] = dc.at("dist")[1];
+
+    eye_pos = Point3(cam.at("eye"));
+
+    view_dir = Vector3(cam.at("view"));
+    view_dir.normalize();
+
+    up_dir = Vector3(cam.at("up"));
+    up_dir.normalize();
+
+    hfov = cam.at("hfov");
+
+    // define the viewing coordinate system
+    Vector3 u = view_dir.cross(up_dir);
+    u.normalize();
+    Vector3 v = u.cross(view_dir);
+
+    float aspect = (float)resolution[0] / (float)resolution[1];
+    float d_val = 2;
+
+    // width is just frustum width for a parallel projection
+    float width = parallel ? frustum_w : 2 * d_val * tan(hfov / 2);
+    float height = width / aspect;
+    std::cout << "camera resolution: " << resolution[0] << " x " << resolution[1] << "\n";
+    // go to view plane then to the left/right edge, then to the top/bottom
+    ul = (eye_pos + d_val * view_dir) - ((width / 2.0f) * u) + ((height / 2.0f) * v);
+    Point3 ur = (eye_pos + d_val * view_dir) + ((width / 2.0f) * u) + ((height / 2.0f) * v);
+
+    Point3 ll = (eye_pos + d_val * view_dir) - ((width / 2.0f) * u) - ((height / 2.0f) * v);
+    Point3 lr = (eye_pos + d_val * view_dir) + ((width / 2.0f) * u) - ((height / 2.0f) * v);
+
+    deltah = (1.0f / (resolution[0] - 1)) * (ur - ul);
+    deltav = (1.0f / (resolution[1] - 1)) * (ll - ul);
+}
+
 Camera::~Camera()
 {
 }

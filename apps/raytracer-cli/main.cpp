@@ -92,7 +92,7 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
         // Ray r = Ray(x_p, l);
         Ray shadow_ray = l->get_shadow_ray(x_p);
 
-        // check if the light source is blocked by any sphere
+        // cast shadow rays
         for (int j = 0; j < scene.num_spheres(); j++) {
             // dont check yourself 
             if (j == o && bary == NULL) { continue; }
@@ -104,7 +104,6 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
                 s_flag = s_flag * (1 - surface_alpha);
             }
         }
-        // check if the light source is blocked by any triangle
         for (int j = 0; j < scene.num_indices(); j++) {
             // dont check yourself 
             if (j == o && bary != NULL) { continue; }
@@ -116,6 +115,7 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
                 s_flag = s_flag * (1 - surface_alpha);
             }
         }
+        
         Vector3 I = -i_ray.direction;
         // no need to calculate diffuse or specular for this light source
         float ndotl = std::max(0.0f, n.dot(shadow_ray.direction));
@@ -133,12 +133,16 @@ Color shade_ray(int m, int o, Vector3 n, Point3 x_p, Ray i_ray, int depth, bool 
         Color specular = powf(ndoth, static_cast<float>(mat.n())) * mat.ks() * mat.specular();
         Color reflection = Color(0, 0, 0);
         Color transparent = Color(0, 0, 0);
+
+        // cast reflected rays
         if (mat.ks() > 0.0) {
             float fr = fresnel(n.dot(I), mat.eta(), 0.0, true);
             Ray reflected_ray = Ray(x_p, i_ray.reflect(n));
             reflected_ray.origin = reflected_ray.origin + (Eps * reflected_ray.direction);
             reflection = fr * trace_ray(reflected_ray, entering, depth + 1, refract_stack);
         }
+
+        // cast transmitted rays
         if (mat.alpha() != 1.0) {
             float ni = refract_stack.back();
             refract_stack.pop_back();

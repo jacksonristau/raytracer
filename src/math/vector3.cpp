@@ -14,7 +14,11 @@ static const Vector3 ZERO = Vector3(0.0f, 0.0f, 0.0f);
 Vector3::Vector3(): x(0.0f), y(0.0f), z(0.0f) {
 }
 
-Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z){
+Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z){}
+Vector3::Vector3(json v) {
+    x = v[0];
+    y = v[1];
+    z = v[2];
 }
 
 Vector3::Vector3(const Vector3& v2) {

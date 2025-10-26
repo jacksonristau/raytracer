@@ -1,5 +1,8 @@
 #pragma once
 #include <ostream>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 class Color {
     public:
@@ -8,6 +11,8 @@ class Color {
         Color(float r, float g, float b);
 
         Color(float c2[3]);
+
+        Color(json color);
 
         Color(const Color& c1);
 

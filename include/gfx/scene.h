@@ -42,10 +42,6 @@ class Scene {
         auto num_materials() const { return materials.size();}
         auto num_spheres() const { return spheres.size();}
         auto num_lights() const { return lights.size();}
-        auto num_vertices() const { return vertices.size();}
-        auto num_normals() const { return normals.size();}
-        auto num_indices() const { return vertex_indices.size();}
-        auto num_uvs() const { return uvs.size();}
 
     private:
         static std::vector<std::string> split(std::string in, char delim);
@@ -55,17 +51,17 @@ class Scene {
         std::vector<Sphere> spheres;
         std::vector<ILight*> lights;
 
-        // these all have the same length
-        std::vector<Point3> vertices;
-        std::vector<Vector3> normals;
-        std::vector<std::vector<float>> uvs;
+        //// these all have the same length
+        //std::vector<Point3> vertices;
+        //std::vector<Vector3> normals;
+        //std::vector<std::vector<float>> uvs;
 
-        // these all have the same length and correspond at each index i
-        std::vector<std::vector<int>> vertex_indices;
-        std::vector<std::vector<int>> texture_indices;
-        std::vector<std::vector<int>> normal_indices;
-        // act like the material field in a sphere but for triangles
-        std::vector<int> material_indices;
+        //// these all have the same length and correspond at each index i
+        //std::vector<std::vector<int>> vertex_indices;
+        //std::vector<std::vector<int>> texture_indices;
+        //std::vector<std::vector<int>> normal_indices;
+        //// act like the material field in a sphere but for triangles
+        //std::vector<int> material_indices;
 
         Camera camera;
 

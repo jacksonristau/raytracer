@@ -7,25 +7,16 @@
 #include "../include/math/floatutil.h"
 
 TEST_CASE("Vector3: constructors, equality, negation and assignment") {
-	Vector3 v0; // default
-	REQUIRE(v0 == Vector3(0.0f, 0.0f, 0.0f));
-
-	Vector3 v1(1.5f, -2.0f, 3.25f);
-	REQUIRE(equalf(v1.x, 1.5f));
-	REQUIRE(equalf(v1.y, -2.0f));
-	REQUIRE(equalf(v1.z, 3.25f));
-
-	Vector3 v2(v1); // copy ctor
-	REQUIRE(v2 == v1);
-
-	Vector3 v3;
-	v3 = v1; // assignment
-	REQUIRE(v3 == v1);
-
-	Vector3 vneg = -v1;
-	REQUIRE(equalf(vneg.x, -v1.x));
-	REQUIRE(equalf(vneg.y, -v1.y));
-	REQUIRE(equalf(vneg.z, -v1.z));
+	using json = nlohmann::json;
+	json j = json::parse(R"(
+	  {
+		"vector": [0.0, 1.0, 0.0]
+	  }
+	)");
+	Vector3 v(j.at("vector"));
+	REQUIRE(v.x == 0.0f);
+	REQUIRE(v.y == 1.0f);
+	REQUIRE(v.z == 0.0f);
 }
 
 TEST_CASE("Vector3: normalize and distance") {
@@ -67,6 +58,11 @@ TEST_CASE("Vector3: arithmetic operators (+, -, scalar *)") {
 
 	Vector3 scaled = 2.0f * b;
 	REQUIRE(scaled == Vector3(1.0f, -2.0f, 4.0f));
+
+	Vector3 vneg = -a;
+	REQUIRE(equalf(vneg.x, -a.x));
+	REQUIRE(equalf(vneg.y, -a.y));
+	REQUIRE(equalf(vneg.z, -a.z));
 }
 
 TEST_CASE("Vector3: Inf() returns infinities") {

@@ -23,6 +23,12 @@ Color::Color(const Color& c1) {
     b = c1.b;
 }
 
+Color::Color(json color) {
+    r = color[0];
+    g = color[1];
+    b = color[2];
+}
+
 Color::~Color() {}
 
 // equality

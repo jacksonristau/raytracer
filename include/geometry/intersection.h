@@ -9,7 +9,7 @@
 
 class Intersection {
     public:
-        Intersection() : x_ray(Ray()), t(-1.0f), object(NULL), pos(Point3()), normal(Vector3()) {}
+        Intersection() : x_ray(Ray()), t(-1.0f), object(nullptr), pos(Point3()), normal(Vector3()) {}
         Intersection(Ray r, float t, Primitive* o, Point3 p, Vector3 n) :  x_ray(r), t(t), object(o), pos(p), normal(n) {}
 
         Intersection(const Intersection& i) {

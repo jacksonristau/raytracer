@@ -12,6 +12,12 @@ Point3::Point3(const Point3& p1) {
 	z = p1.z;
 }
 
+Point3::Point3(json p) {
+	x = p[0];
+	y = p[1];
+	z = p[2];
+}
+
 Point3::~Point3(){}
 
 Point3 Point3::operator=(const Point3& p1) {
