@@ -1,17 +1,19 @@
 #pragma once
 
+#include "hit.h"
+#include "shape.h"
+#include "mesh.h"
 #include "../math/vector3.h"
 #include "../math/ray.h"
-#include "mesh.h"
 
 class Triangle : IShape {
 	public:
-		Triangle(const Mesh* mesh, int i0, int i1, int i2) : mesh(mesh), i0(i0), i1(i1), i2(i2) {}
+		Triangle(const Mesh* mesh, int index) : mesh(mesh), index(index){}
 
-		bool intersect(const Ray& r, Hit& out) const;
+		Hit intersect(const Ray& r) const override;
 
-		Vector3 normal(const Hit& h, const Point3& p) const;
+		Vector3 normal(const Hit& h, const Point3& p) const override;
 
 		const Mesh* mesh;
-		int i0, i1, i2;
+		int index;
 };

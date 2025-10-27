@@ -30,11 +30,17 @@ class Vector3 {
 
         Vector3 cross(const Vector3& v1) const;
 
+        float magnitude() const;
+
         float distance(const Vector3& v1) const;
 
-        float dot(const Vector3& v1) const;
+        inline float dot(const Vector3& v1) const {
+            return (x * v1.x) + (y * v1.y) + (z * v1.z);
+        }
 
-        float dot(const Point3& p1) const;
+        inline float dot(const Point3& p1) const {
+            return (x * p1.x) + (y * p1.y) + (z * p1.z);
+        }
 
         static const Vector3& Inf();
 

@@ -8,6 +8,6 @@
 // abstract base class for geometry
 class IShape {
 	public:
-		virtual bool intersect(const Ray& r, const Hit& out) const = 0;
+		virtual Hit intersect(const Ray& r) const = 0;
 		virtual Vector3 normal(const Hit& h, const Point3& p) const = 0;
 };

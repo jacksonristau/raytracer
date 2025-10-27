@@ -5,18 +5,28 @@
 #include <vector>
 
 class Texture {
-public:
-        Texture(const std::string& filename);
+    public:
+        Texture();
 
+        virtual Color get_pixel(float u, float v) const = 0;
+
+};
+
+class ImageTexture {
+    public:
+        ImageTexture(const std::string& filename);
         Color get_pixel(float u, float v) const;
-        int get_width() const { return width; }
-        int get_height() const { return height; }
 
-        void write_to_file(const std::string& filename) const;
-
-    private:
         std::string filename;
-        int width;
-        int height;
+        int width, height;
+    private:
         std::vector<Color> data;
+};
+
+class BPColorTexture {
+    public:
+        BPColorTexture(Color diffuse, Color specular);
+        Color get_pixel(float u, float v) const;
+
+        Color diffuse, specular;
 };

@@ -23,40 +23,42 @@ int Sphere::get_uv(const Point3& point, float* uv) const {
     return 1;
 }
 
-Intersection Sphere::intersect(const Ray& r) const {
-    float B = 2.0f * (r.direction.x * (r.origin.x - center.x) + 
-                     r.direction.y * (r.origin.y - center.y) +
-                     r.direction.z * (r.origin.z - center.z));
-    float C = std::pow(r.origin.x - center.x, 2.0f) + 
-             std::pow(r.origin.y - center.y, 2.0f) +
-             std::pow(r.origin.z - center.z, 2.0f) - 
-             std::pow(radius, 2.0f);
+Hit Sphere::intersect(const Ray& r) const {
+    Vector3 oc = r.origin - center;
+    float B = 2.0f * r.direction.dot(oc);
+    float C = oc.dot(oc) - (radius * radius);
     float discrim = (B * B) - (4.0f * C);
-    if (discrim < -Eps) {
-        return Intersection();
+
+    if (is_negative(discrim)) {
+        return Hit();
     }
-    else if (std::abs(discrim) < Eps) {
+    else if (is_near_zero(discrim)) {
         float t = (-B / 2.0f);
         Point3 x_p = r.get_point(t);
-        return Intersection(r, t, *this, x_p, this->normal(x_p));
+        return Hit(t, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
     }
     else  {
-        float t1 = (-B + sqrt(discrim)) / 2.0f;
-        float t2 = (-B - sqrt(discrim)) / 2.0f;
+        float sqrt_discrim = sqrt(discrim);
+        float t1 = (-B + sqrt_discrim) / 2.0f;
+        float t2 = (-B - sqrt_discrim) / 2.0f;
         
-        if (t1 < Eps && t2 > Eps) {
-            return t2;
+        if (is_negative(t1) && !is_negative(t2)) {
+            Point3 x_p = r.get_point(t2);
+            return Hit(t2, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
         }
-        else if (t1 > Eps && t2 < Eps) {
-            return t1;
+        else if (is_negative(t2) && !is_negative(t1)) {
+            Point3 x_p = r.get_point(t1);
+            return Hit(t1, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
         }
         // regardless trace_ray ignores negative values
-        else if (t1 < Eps && t2 <= Eps) {
-            return -1.0;
+        else if (is_negative(t2) && is_negative(t1)) {
+            return Hit();
         }
         // (t1 > 0 && t2 > 0)
         else {
-            return std::min(t1, t2);
+            float mint = std::min(t1, t2);
+            Point3 x_p = r.get_point(mint);
+            return Hit(mint, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
         }
     }
 }

@@ -2,7 +2,6 @@ file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/*
 
 set(
   SOURCE_LIST
-  ${PROJECT_SOURCE_DIR}/src/geometry/mesh.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/plane.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/primitive.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/triangle.cpp
@@ -14,6 +13,7 @@ set(
   ${PROJECT_SOURCE_DIR}/src/gfx/material.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/sceneparser.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/texture.cpp
+  ${PROJECT_SOURCE_DIR}/src/gfx/raytracer.cpp
 
   ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
   ${PROJECT_SOURCE_DIR}/src/math/point2.cpp

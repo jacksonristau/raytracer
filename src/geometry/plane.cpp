@@ -4,19 +4,26 @@
 
 Plane::Plane() {
     pos = Point3();
-    normal = Vector3();
+    n = Vector3();
 }
 
-Plane::Plane(Point3 p, Vector3 n) : pos(p), normal(n) {}
+Plane::Plane(Point3 p, Vector3 n) : pos(p), n(n) {}
 
-float Plane::intersect(const Ray& r) const {
-    float denom = normal.dot(r.direction);
+Hit Plane::intersect(const Ray& r) const {
+    float denom = n.dot(r.direction);
     // if the ray is parallel to the plane
     if (is_near_zero(denom)) {
-        return -1.0f;
+        return Hit();
     }
-    float D = -normal.dot(pos);
-    float t = -(normal.dot(r.origin) + D) / denom;
-    if (t < Eps) return -1.0f;
-    return t;
+    float D = -n.dot(pos);
+    float t = -(n.dot(r.origin) + D) / denom;
+    if (is_negative(t)) {
+        return Hit();
+    }
+    else {
+        float mag = n.magnitude();
+        Vector3 normal = (n.x * mag, n.y * mag, n.z * mag);
+
+        return Hit(t, 0.0f, 0.0f, r.get_point(t), normal, nullptr);
+    }
 }

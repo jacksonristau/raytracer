@@ -62,6 +62,10 @@ Vector3 Vector3::cross(const Vector3& v1) const {
                     (x * v1.y - y * v1.x));
 }
 
+float Vector3::magnitude() const {
+    return 1.0f / sqrt(x * x + y * y + z * z);
+}
+
 float Vector3::distance(const Vector3& v1) const {
     return sqrt(
         (x - v1.x) * (x - v1.x) +
@@ -70,15 +74,6 @@ float Vector3::distance(const Vector3& v1) const {
     );
 }
 
-float Vector3::dot(const Vector3& v1) const {
-    return (x * v1.x) + (y * v1.y) + (z * v1.z);
-}
-
-float Vector3::dot(const Point3& p1) const {
-    return (x * p1.x) + (y * p1.y) + (z * p1.z);
-}
-
-// good practice to check if w is not 1 or 0
 Vector3 operator+(const Vector3& v1, const Vector3& v2) {
     return Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }

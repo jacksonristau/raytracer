@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cmath>
 
-Texture::Texture(const std::string& filename) : filename(filename) {
+ImageTexture::ImageTexture(const std::string& filename) : filename(filename) {
     std::ifstream input;
     std::cout << "loading file: " << filename << std::endl;
 
@@ -30,20 +30,7 @@ Texture::Texture(const std::string& filename) : filename(filename) {
     input.close();
 }
 
-// just for testing if the texture loaded correctly
-void Texture::write_to_file(const std::string& filename) const {
-    std::ofstream output;
-    output.open(filename);
-    if (!output.is_open()) {
-        throw std::runtime_error("failed to write file " + filename);
-    }
-    output << "P3\n" << width << " " << height << "\n255\n";
-    for (int i = 0; i < width * height; i++) {
-        output << (int)(data[i].r * 255) << " " << (int)(data[i].g * 255) << " " << (int)(data[i].b * 255) << "\n";
-    }
-}
-
-Color Texture::get_pixel(float u, float v) const {
+Color ImageTexture::get_pixel(float u, float v) const {
     int x, y;
     float temp;
     if (u > 1){
@@ -59,3 +46,4 @@ Color Texture::get_pixel(float u, float v) const {
     }
     return data[y * width + x];
 }
+
