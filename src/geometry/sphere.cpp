@@ -35,7 +35,7 @@ Hit Sphere::intersect(const Ray& r) const {
     else if (is_near_zero(discrim)) {
         float t = (-B / 2.0f);
         Point3 x_p = r.get_point(t);
-        return Hit(t, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
+        return Hit(t, 0.0f, 0.0f, r, x_p, Vector3(), nullptr);
     }
     else  {
         float sqrt_discrim = sqrt(discrim);
@@ -44,11 +44,11 @@ Hit Sphere::intersect(const Ray& r) const {
         
         if (is_negative(t1) && !is_negative(t2)) {
             Point3 x_p = r.get_point(t2);
-            return Hit(t2, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
+            return Hit(t2, 0.0f, 0.0f, r, x_p, this->normal(Hit(), x_p), nullptr);
         }
         else if (is_negative(t2) && !is_negative(t1)) {
             Point3 x_p = r.get_point(t1);
-            return Hit(t1, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
+            return Hit(t1, 0.0f, 0.0f, r, x_p, this->normal(Hit(), x_p), nullptr);
         }
         // regardless trace_ray ignores negative values
         else if (is_negative(t2) && is_negative(t1)) {
@@ -56,15 +56,15 @@ Hit Sphere::intersect(const Ray& r) const {
         }
         // (t1 > 0 && t2 > 0)
         else {
-            float mint = std::min(t1, t2);
-            Point3 x_p = r.get_point(mint);
-            return Hit(mint, 0.0f, 0.0f, x_p, this->normal(x_p), nullptr);
+            float min_t = std::min(t1, t2);
+            Point3 x_p = r.get_point(min_t);
+            return Hit(min_t, 0.0f, 0.0f, r, x_p, this->normal(Hit(), x_p), nullptr);
         }
     }
 }
 
 // expects a point on the surface of the sphere
-Vector3 Sphere::normal(const Point3& p) const {
+Vector3 Sphere::normal(const Hit& h, const Point3& p) const {
     return p - center;
 }
 

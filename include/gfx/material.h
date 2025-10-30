@@ -5,40 +5,40 @@
 #include <string>
 #include "color.h"
 #include "texture.h"
+#include "../geometry/hit.h"
 
 // holds information for doing blinn-phong lighting calculations
 class Material {
     public:
-        Material();
-
-        Material(Color diffuse, Color specular, float ka, float kd, float ks, int n, float alpha, float eta);
-
-        Material(int texture);
-
-        Material(const Material& m2);
-
-        virtual ~Material();
-
-        Material operator=(const Material& m1);
-
-        static std::vector<std::string> split(std::string in, char delim);
-
-        float ka() const {return k[0];}
-        float kd() const {return k[1];}
-        float ks() const {return k[2];}
-        int n() const {return n_val;}
-        float alpha() const {return a;}
-        float eta() const {return index_of_refraction;}
-        bool is_glossy() { return k[2] > 0.0f; }
-        bool is_transparent() { return a < 1.0f; }
-
-    private:
-        Texture* texture;
-        float k[3];
-        float a;
-        float index_of_refraction;
-        int n_val;
+        virtual Color evaluate(const Hit& hit, Color reflection, Color transmission) const = 0;
+        virtual float alpha() const = 0;
+        virtual float eta() const = 0;
+        virtual bool is_glossy() const = 0;
+        virtual bool is_transparent() const = 0;
 };
 
+class BPMaterial : public Material {
+    public:
+        BPMaterial();
+        BPMaterial(std::shared_ptr<Texture> t, float ka, float kd, float ks, int n, float alpha, float eta);
 
-std::ostream & operator<< ( std::ostream &os, const Material &m1);
+        BPMaterial operator=(const BPMaterial& m1);
+
+        Color evaluate(const Hit& hit, Color reflected, Color refracted) const override;
+        float alpha() const override { return a; };
+        float eta() const override { return index_of_refraction; }
+        bool is_glossy() const override { return k[2] > 0.0f; }
+        bool is_transparent() const override { return a < 1.0f; }
+
+        Color get_diffuse(const Hit& hit, float ndotl) const;
+
+    private:
+        std::shared_ptr<Texture> texture;
+        Color specular;
+        float k[3];
+        Color precomp[3];
+        float index_of_refraction;
+        float a;
+        int n_val;
+
+};

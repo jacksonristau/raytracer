@@ -13,6 +13,12 @@ class Primitive {
 
 		Hit intersect(const Ray& r);
 
+
 		IShape* geometry;
 		Material* material;
+		int id;
+
+		bool operator==(const Primitive& other) const {
+			return id == other.id;
+		}
 };

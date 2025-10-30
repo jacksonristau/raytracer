@@ -15,7 +15,6 @@ set(
   ${PROJECT_SOURCE_DIR}/src/gfx/texture.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/raytracer.cpp
 
-  ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
   ${PROJECT_SOURCE_DIR}/src/math/point2.cpp
   ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
   ${PROJECT_SOURCE_DIR}/src/math/ray.cpp

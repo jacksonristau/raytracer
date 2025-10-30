@@ -5,11 +5,12 @@
 class Hit {
     public: 
         Hit();
-        Hit(float t, float u, float v, Point3 p, Vector3 n, Primitive* prim);
+        Hit(float t, float u, float v, Ray r, Point3 p, Vector3 n, Primitive* prim);
         float t = -1.0f;
         float u = 0.0f;
         float v = 0.0f;
 
+        Ray r;
         Point3 x_pos;
         Vector3 normal;
         Primitive* primitive;

@@ -1,5 +1,4 @@
 #pragma once
-#include "intersection.h"
 #include "hit.h"
 #include "../math/ray.h"
 #include "../math/point3.h"

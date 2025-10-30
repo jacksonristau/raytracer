@@ -22,7 +22,7 @@ class Scene {
         int load_from_file(const std::string& filename);
         Color get_texture_color(int index, float u, float v) const;
         
-        Material get_material(int index) const { return materials[index]; }
+        //Material get_material(int index) const { return materials[index]; }
         ILight* get_light(int index) const { return lights[index];}
 
 
@@ -33,17 +33,17 @@ class Scene {
         //std::vector<Vector3> get_normals(int index) const;
         //std::vector<std::vector<float>> get_uvs(int index) const;
         
-        Camera camera;
+        static Camera camera;
 
-        static Color bkgcolor;
-        float bkgeta;
+        static const Color bkgcolor;
+        static const float bkgeta;
+        static std::vector<ILight*> lights;
         static std::vector<Primitive> primitives;
     private:
         static std::vector<std::string> split(std::string in, char delim);
 
         std::vector<Material> materials;
         std::vector<std::shared_ptr<Texture>> textures;
-        std::vector<ILight*> lights;
 
         //// these all have the same length
         //std::vector<Point3> vertices;

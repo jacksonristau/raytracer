@@ -7,7 +7,15 @@
 class Ray {
     public:
         Ray();
-        Ray(const Point3& origin, const Vector3& direction);
+        Ray(Point3 origin, Vector3 direction);
+        Ray(Point3 origin, Vector3 direction, bool entering, float eta, Primitive* p) :
+            origin(origin),
+            direction(direction),
+            entering(entering),
+            eta(eta),
+            o_primitive(p) {
+            direction.normalize();
+        }
 
         // copy
         Ray(const Ray& r);
@@ -16,16 +24,18 @@ class Ray {
         Ray operator= (const Ray& r);
 
         virtual ~Ray();
-        //float intersect_plane(const Vector3& normal, const Point3& point);
-        // returns fills the array coords with the barycentric coordinates of the intersection
-        //float intersect_triangle(std::vector<Point3> vertices, float* coords);
-        Vector3 reflect(const Vector3& normal);
-        Vector3 refract(Vector3 normal, float n1, float n2);
+        Vector3 reflect(const Vector3& normal) const;
+        Vector3 refract(Vector3 normal, float ndotv, float n1, float n2) const;
+        Hit intersect_scene_naive() const ;
+        float intersect_scene_naive_shadow() const;
 
         Point3 get_point(float t) const;
 
         Point3 origin;
         Vector3 direction;
+        bool entering;
+        float eta;
+        Primitive* o_primitive;
 };
 
 // equality

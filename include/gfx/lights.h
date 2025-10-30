@@ -44,7 +44,7 @@ public:
     float intensity() const override { return i; }
 
     float atten(float d) {
-        return 1.0f / (c0 + c1 * d + c2 * d * d);
+        return 1.0f;
     }
 
 private:
