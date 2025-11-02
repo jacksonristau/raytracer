@@ -22,7 +22,7 @@ Hit Plane::intersect(const Ray& r) const {
     }
     else {
         float mag = n.magnitude();
-        Vector3 normal = (n.x * mag, n.y * mag, n.z * mag);
+        Vector3 normal(n.x * mag, n.y * mag, n.z * mag);
 
         return Hit(t, 0.0f, 0.0f, r, r.get_point(t), normal, nullptr);
     }

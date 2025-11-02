@@ -5,7 +5,8 @@
 #include <string>
 #include "color.h"
 #include "texture.h"
-#include "../geometry/hit.h"
+class Color;
+class Hit;
 
 // holds information for doing blinn-phong lighting calculations
 class Material {

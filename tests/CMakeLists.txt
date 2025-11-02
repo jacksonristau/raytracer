@@ -13,6 +13,7 @@ set(
     floatutils_test.cpp
     vector3_test.cpp
     point3_test.cpp
+    scene_test.cpp
 )
 
 add_executable(raytests ${TEST_LIST})

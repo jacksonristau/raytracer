@@ -1,11 +1,19 @@
 #include "../include/geometry/sphere.h"
 #include "../include/math/constants.h"
 #include "../include/math/floatutil.h"
+#include "../include/geometry/hit.h"
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 
 Sphere::Sphere() : center(Point3(0, 0, 0)), radius(1.0) {}
 
 Sphere::Sphere(const Point3& center, float radius) : center(center), radius(radius) {}
+
+Sphere::Sphere(json sphere_json) {
+    center = Point3(sphere_json.at("center"));
+    radius = sphere_json.at("radius");
+}
 
 Sphere::~Sphere() {}
 

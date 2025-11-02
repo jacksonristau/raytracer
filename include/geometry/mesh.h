@@ -4,6 +4,7 @@
 #include "../include/math/vector3.h"
 #include "../include/math/point2.h"
 
+class Triangle;
 class Mesh {
 public:
 	Mesh(

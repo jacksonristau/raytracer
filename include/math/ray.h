@@ -4,6 +4,7 @@
 #include "point3.h"
 #include <vector>
 
+class Primitive;
 class Ray {
     public:
         Ray();
@@ -24,10 +25,8 @@ class Ray {
         Ray operator= (const Ray& r);
 
         virtual ~Ray();
-        Vector3 reflect(const Vector3& normal) const;
-        Vector3 refract(Vector3 normal, float ndotv, float n1, float n2) const;
-        Hit intersect_scene_naive() const ;
-        float intersect_scene_naive_shadow() const;
+        Vector3 reflect(const Vector3& n) const;
+        Vector3 refract(Vector3 n, float ndotv, float n1, float n2) const;
 
         Point3 get_point(float t) const;
 

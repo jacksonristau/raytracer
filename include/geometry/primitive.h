@@ -1,10 +1,10 @@
 #pragma once
-#include "../gfx/material.h"
-#include "../math/ray.h"
-#include "hit.h"
-// the base for objects. 
-class Intersection;
+
+
 class IShape;
+class Hit;
+class Material;
+class Ray;
 
 class Primitive {
 	public:

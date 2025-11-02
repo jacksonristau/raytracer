@@ -15,6 +15,7 @@ set(
   ${PROJECT_SOURCE_DIR}/src/gfx/texture.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/raytracer.cpp
 
+  ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
   ${PROJECT_SOURCE_DIR}/src/math/point2.cpp
   ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
   ${PROJECT_SOURCE_DIR}/src/math/ray.cpp
@@ -26,6 +27,14 @@ add_library(raytracerlib ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(raytracerlib PUBLIC ../include)
 
 target_link_libraries(raytracerlib PUBLIC nlohmann_json::nlohmann_json)
+
+if (MSVC)
+    # warning level 4
+    add_compile_options(/W4)
+else()
+    # additional warnings
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 source_group(
   TREE "${PROJECT_SOURCE_DIR}/include"

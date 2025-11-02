@@ -24,24 +24,14 @@ class Scene {
         
         //Material get_material(int index) const { return materials[index]; }
         ILight* get_light(int index) const { return lights[index];}
-
-
-        // these return lists of vertices, normals, and uvs 
-        // for a given index into the indices array
-        
-        //std::vector<Point3> get_vertices(int index) const;
-        //std::vector<Vector3> get_normals(int index) const;
-        //std::vector<std::vector<float>> get_uvs(int index) const;
         
         static Camera camera;
 
-        static const Color bkgcolor;
-        static const float bkgeta;
+        static Color bkgcolor;
+        static float bkgeta;
         static std::vector<ILight*> lights;
         static std::vector<Primitive> primitives;
     private:
-        static std::vector<std::string> split(std::string in, char delim);
-
         std::vector<Material> materials;
         std::vector<std::shared_ptr<Texture>> textures;
 

@@ -8,4 +8,5 @@
 #define PiOver4 0.78539816339744830961f
 #define Sqrt2 1.41421356237309504880f
 #define TwoPi 6.28318530718f
-#define Eps 1e-8f
+#define Eps 128 * __FLT_EPSILON__
+#define Min __FLT_MIN__

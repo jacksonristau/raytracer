@@ -28,9 +28,10 @@ bool operator==(const Ray& r1, const Ray& r2) {
     return r1.origin == r2.origin && r1.direction == r2.direction;
 }
 
-Vector3 Ray::reflect(const Vector3& N) const {
-    Vector3 I = -direction;
-    Vector3 R = (2 * N.dot(I) * N) - I;
+Vector3 Ray::reflect(const Vector3& n) const {
+    Vector3 v = direction;
+    v = -v;
+    Vector3 R = (2 * n.dot(v) * n) - v;
     R.normalize();
     return R;
 }

@@ -1,13 +1,14 @@
 #pragma once
 #include "shape.h"
-#include "intersection.h"
-#include "../math/point3.h"
-#include "../math/ray.h"
+
+class Ray;
+class Hit;
 
 class Sphere : public IShape {
     public:
         Sphere();
         Sphere(const Point3& center, float radius);
+        Sphere(json sphere_json);
         virtual ~Sphere();
 
         // equality

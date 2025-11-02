@@ -1,6 +1,9 @@
 #pragma once
 #include "../math/floatutil.h"
-#include "primitive.h"
+#include "../math/ray.h"
+
+class Primitive;
+class Ray;
 
 class Hit {
     public: 
@@ -14,6 +17,8 @@ class Hit {
         Point3 x_pos;
         Vector3 normal;
         Primitive* primitive;
+
+        Hit operator=(const Hit& h);
 
         bool valid() const { return ! is_negative(t); }
 };

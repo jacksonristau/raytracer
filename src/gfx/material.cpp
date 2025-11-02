@@ -1,10 +1,12 @@
-#include "../include/gfx/material.h"
 #include <fstream>
 #include <iostream>
 #include <cmath>
+
+#include "../include/gfx/material.h"
 #include "../include/gfx/lights.h"
 #include "../include/gfx/scene.h"
 #include "../include/gfx/raytracer.h"
+#include "../include/geometry/hit.h"
 
 BPMaterial::BPMaterial() {
     texture = std::shared_ptr<BPColorTexture>(new BPColorTexture(Color()));
@@ -33,24 +35,6 @@ BPMaterial::BPMaterial(std::shared_ptr<Texture> t, float ka, float kd, float ks,
         precomp[1] = k[1] * texture->get_pixel(0.0f, 0.0f);
         precomp[2] = k[2] * specular;
     }
-}
-
-BPMaterial::BPMaterial(const BPMaterial& m2) {
-    texture = m2.texture;
-    k[0] = m2.k[0];
-    k[1] = m2.k[1];
-    k[2] = m2.k[2];
-    n_val = m2.n_val;
-    a = m2.a;
-    index_of_refraction = m2.index_of_refraction;
-    if (texture->is_uniform()) {
-        precomp[0] = m2.precomp[0];
-        precomp[1] = m2.precomp[1];
-        precomp[2] = m2.precomp[2];
-    }
-}
-
-BPMaterial::~BPMaterial() {
 }
 
 BPMaterial BPMaterial::operator=(const BPMaterial& m1) {
