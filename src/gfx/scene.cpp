@@ -54,7 +54,6 @@ Scene::Scene() {
             BPMaterial m(material_json);
             materials.push_back(&m);
             std::string name = material_json.at("name");
-            std::cout << name << '\n';
             material_map.insert(std::make_pair(name, i++));
         }
     }

@@ -83,7 +83,6 @@ Camera::Camera(json cam) {
     // width is just frustum width for a parallel projection
     float width = parallel ? frustum_w : 2 * d_val * tan(hfov / 2);
     float height = width / aspect;
-    std::cout << "camera resolution: " << resolution[0] << " x " << resolution[1] << "\n";
     // go to view plane then to the left/right edge, then to the top/bottom
     ul = (eye_pos + d_val * view_dir) - ((width / 2.0f) * u) + ((height / 2.0f) * v);
     Point3 ur = (eye_pos + d_val * view_dir) + ((width / 2.0f) * u) + ((height / 2.0f) * v);

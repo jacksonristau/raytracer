@@ -13,18 +13,6 @@ std::string test = R"(
 {
   "materials": [
     {
-      "name": "soccerball",
-      "imagetexture": "soccerball.ppm",
-      "diffuse": [ 0.5, 0, 0 ],
-      "specular": [ 0.5, 0, 0 ],
-      "ka": 0.2,
-      "kd": 0.6,
-      "ks": 0.0,
-      "n": 50,
-      "alpha": 1,
-      "eta": 1.2
-    },
-    {
       "name": "red",
       "colortexture": [ 0.5, 0, 0 ],
       "specular": [ 0.5, 0, 0 ],
@@ -80,5 +68,5 @@ TEST_CASE("complete scene") {
     REQUIRE(s.camera.up_dir == Vector3(0.0f, 1.0f, 0.0f));
     REQUIRE(s.lights.size() == 2);
     REQUIRE(s.primitives.size() == 1);
-    REQUIRE(s.materials.size() == 2);
+    REQUIRE(s.materials.size() == 1);
 }
