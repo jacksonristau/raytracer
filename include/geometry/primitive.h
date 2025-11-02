@@ -8,8 +8,9 @@ class Ray;
 
 class Primitive {
 	public:
-		Primitive();
-		~Primitive();
+		Primitive() : geometry(nullptr), material(nullptr), id(-1) {}
+		Primitive(IShape* geometry, Material* material) : geometry(geometry), material(material) {}
+		~Primitive() {}
 
 		Hit intersect(const Ray& r);
 

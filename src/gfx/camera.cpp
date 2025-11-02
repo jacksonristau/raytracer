@@ -50,15 +50,17 @@ Camera::Camera(int res[], float fov, Color dc, float a[2], float d[2], Point3 ey
 }
 
 Camera::Camera(json cam) {
-    resolution[0] = cam.at("resolution")[0];
-    resolution[1] = cam.at("resolution")[1];
+    resolution[0] = cam.at("imsize")[0];
+    resolution[1] = cam.at("imsize")[1];
 
-    json dc = cam.at("depthcueing");
-    depth_color = Color(dc.at("color"));
-    alpha[0] = dc.at("alpha")[0];
-    alpha[1] = dc.at("alpha")[1];
-    dist[0] = dc.at("dist")[0];
-    dist[1] = dc.at("dist")[1];
+    if (cam.contains("depthcueing")) {
+        json dc = cam.at("depthcueing");
+        depth_color = Color(dc.at("color"));
+        alpha[0] = dc.at("alpha")[0];
+        alpha[1] = dc.at("alpha")[1];
+        dist[0] = dc.at("dist")[0];
+        dist[1] = dc.at("dist")[1];
+    }
 
     eye_pos = Point3(cam.at("eye"));
 

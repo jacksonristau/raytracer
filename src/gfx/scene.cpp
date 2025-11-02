@@ -1,31 +1,90 @@
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "../include/math/floatutil.h"
 #include "../include/gfx/lights.h"
 #include "../include/gfx/scene.h"
 #include "../include/geometry/triangle.h"
+#include "../include/geometry/sphere.h"
+
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
+
+Camera Scene::camera;
+std::vector<ILight*> Scene::lights;
+std::vector<Primitive> Scene::primitives;
+
 Scene::Scene() {
-    materials = std::vector<Material>();
+    materials = std::vector<Material*>();
     lights = std::vector<ILight*>();
     primitives = std::vector<Primitive>();
-    textures = std::vector<std::shared_ptr<Texture>>();
     camera = Camera();
     bkgcolor = Color();
-    bkgeta = 1.0003f;
 }
 
-// Scene::Scene(json scene_desc) {
-//     try {
-//         for (const json sphere : scene_desc.at("spheres")){
-            
-//         }
-//     }
-//     catch ()
-// }
+ Scene::Scene(json scene_desc) {
+    std::unordered_map<std::string, int> material_map;
+    bkgcolor = scene_desc.contains("bkgcolor") ? Color(scene_desc.at("bkgcolor")) : Color();
+    bkgeta = scene_desc.contains("bkgeta") ? scene_desc.at("bkgeta") : 1.000293;
+    if (!scene_desc.contains("camera")) {
+        std::cout << "camera settings must be provided, see example.json" << '\n';
+        throw std::runtime_error("Failed to create scene, no camera was provided");
+    }
+    camera = Camera(scene_desc.at("camera"));
 
+    lights = std::vector<ILight*>();
+    if (!scene_desc.contains("lights")) {
+        std::cout << "warning: no lights provided" << '\n';
+    }
+    else {
+        for (const json& light_json : scene_desc.at("lights")) {
+            ILight* light = LightFactory::create(light_json);
+            if (light) lights.push_back(light);
+        }
+    }
+         
+    materials = std::vector<Material*>();
+    if (!scene_desc.contains("materials")) {
+        std::cout << "warning: no materials provided" << '\n';
+    }
+    else {
+        int i = 0;
+        for (const json& material_json : scene_desc.at("materials")) {
+            BPMaterial m(material_json);
+            materials.push_back(&m);
+            std::string name = material_json.at("name");
+            std::cout << name << '\n';
+            material_map.insert(std::make_pair(name, i++));
+        }
+    }
+
+    primitives = std::vector<Primitive>();
+    if (scene_desc.contains("spheres")) {
+        for (const json& sphere_json : scene_desc.at("spheres")) {
+            Sphere s(sphere_json);
+            if (!sphere_json.contains("material")) {
+                if (materials.size() > 0) {
+                    primitives.push_back(Primitive(&s, materials[0]));
+                }
+                else {
+                    materials.push_back(&BPMaterial());
+                    primitives.push_back(Primitive(&s, materials[0]));
+                }
+            }
+            else {
+                std::string name = sphere_json.at("material");
+                if (material_map.count(name) > 0) {
+                    Material* m = materials[material_map.at(name)];
+                    primitives.push_back(Primitive(&s, m));
+                }
+                else {
+                    throw std::runtime_error("Failed to create scene, unknown material: " +  name);
+                }
+            }
+        }
+    }
+ }
 
 
 Scene::~Scene() {}

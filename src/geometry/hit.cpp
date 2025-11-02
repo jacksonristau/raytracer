@@ -1,10 +1,13 @@
 #include "../include/geometry/hit.h"
 
 Hit::Hit() {
-    r = Ray()
+    r = Ray();
+    x_pos = Point3();
+    normal = Vector3();
+    primitive = nullptr;
 }
 
-Hit::Hit operator=(const Hit& h) {
+Hit Hit::operator=(const Hit& h) {
     t = h.t,
     u = h.u;
     v = h.v;

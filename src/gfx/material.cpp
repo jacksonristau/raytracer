@@ -16,7 +16,7 @@ BPMaterial::BPMaterial() {
     k[2] = 0.3f;
     n_val = 50;
     a = 1.0f;
-    index_of_refraction = 1.0f;
+    refractive_index = 1.0f;
     precomp[0] = k[0] * texture->get_pixel(0.0f, 0.0f);
     precomp[1] = k[1] * texture->get_pixel(0.0f, 0.0f);
     precomp[2] = k[2] * specular;
@@ -29,10 +29,58 @@ BPMaterial::BPMaterial(std::shared_ptr<Texture> t, float ka, float kd, float ks,
     k[2] = ks;
     n_val = n;
     a = alpha;
-    index_of_refraction = eta;
+    refractive_index = eta;
     if (texture->is_uniform()) {
         precomp[0] = k[0] * texture->get_pixel(0.0f, 0.0f);
         precomp[1] = k[1] * texture->get_pixel(0.0f, 0.0f);
+        precomp[2] = k[2] * specular;
+    }
+}
+
+BPMaterial::BPMaterial(json material_json) {
+    specular = Color(1.0f, 1.0f, 1.0f);
+    k[0] = 0.3f;
+    k[1] = 0.6f;
+    k[2] = 0.3f;
+    n_val = 50;
+    a = 1.0f;
+    refractive_index = 1.0f;
+    try {
+        if (material_json.contains("imagetexture")) {
+            std::string fn = material_json.at("imagetexture");
+            texture = std::make_shared<ImageTexture>(fn);
+        }
+        else if (material_json.contains("colortexture")) {
+            Color c(material_json.at("colortexture"));
+            texture = std::make_shared<BPColorTexture>(c);
+        }
+        else if (material_json.contains("diffuse")) {
+            Color c(material_json.at("diffuse"));
+            texture = std::make_shared<BPColorTexture>(c);
+        }
+        else {
+            // fallback to a uniform black/zero diffuse
+            texture = std::make_shared<BPColorTexture>(Color());
+        }
+
+        if (material_json.contains("specular")) {
+            specular = Color(material_json.at("specular"));
+        }
+
+        if (material_json.contains("ka")) k[0] = material_json.at("ka");
+        if (material_json.contains("kd")) k[1] = material_json.at("kd");
+        if (material_json.contains("ks")) k[2] = material_json.at("ks");
+        if (material_json.contains("n")) n_val = material_json.at("n");
+        if (material_json.contains("alpha")) a = material_json.at("alpha");
+        if (material_json.contains("eta")) refractive_index = material_json.at("eta");
+    }
+    catch (const json::exception& e) {
+        std::cerr << "warning: malformed material json: " << e.what() << '\n';
+    }
+    if (texture && texture->is_uniform()) {
+        Color base = texture->get_pixel(0.0f, 0.0f);
+        precomp[0] = k[0] * base;
+        precomp[1] = k[1] * base;
         precomp[2] = k[2] * specular;
     }
 }
@@ -44,7 +92,7 @@ BPMaterial BPMaterial::operator=(const BPMaterial& m1) {
     k[2] = m1.k[2];
     n_val = m1.n_val;
     a = m1.a;
-    index_of_refraction = m1.index_of_refraction;
+    refractive_index = m1.refractive_index;
     if (texture->is_uniform()) {
         precomp[0] = m1.precomp[0];
         precomp[1] = m1.precomp[1];

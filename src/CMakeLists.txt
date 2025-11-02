@@ -7,11 +7,13 @@ set(
   ${PROJECT_SOURCE_DIR}/src/geometry/triangle.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/sphere.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/triangle.cpp
+  ${PROJECT_SOURCE_DIR}/src/geometry/hit.cpp
   
   ${PROJECT_SOURCE_DIR}/src/gfx/camera.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/color.cpp
+  ${PROJECT_SOURCE_DIR}/src/gfx/lights.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/material.cpp
-  ${PROJECT_SOURCE_DIR}/src/gfx/sceneparser.cpp
+  ${PROJECT_SOURCE_DIR}/src/gfx/scene.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/texture.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/raytracer.cpp
 

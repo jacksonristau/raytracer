@@ -36,7 +36,7 @@ FetchContent_MakeAvailable(json)
 add_subdirectory(src)
 
 # executable code
-add_subdirectory(apps)
+# add_subdirectory(apps)
 
 # Testing only available if this is the main app
 # Emergency override MODERN_CMAKE_BUILD_TESTING provided as well

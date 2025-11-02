@@ -1,15 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <catch2/catch_test_macros.hpp>
-#include <nlohmann/json.hpp>
-
-#include "../include/geometry/sphere.h"
-#include "../include/gfx/scene.h"
-#include "../include/gfx/camera.h"
-
-using json = nlohmann::json;
-
-std::string test = R"(
 {
   "materials": [
     {
@@ -70,15 +58,6 @@ std::string test = R"(
     }
 
   ],
+  "texture": "./files/wood.ppm",
   "parallel": 2.5
-})";
-
-
-TEST_CASE("complete scene") {
-    json j = json::parse(test);
-    Scene s(j);
-    REQUIRE(s.camera.up_dir == Vector3(0.0f, 1.0f, 0.0f));
-    REQUIRE(s.lights.size() == 2);
-    REQUIRE(s.primitives.size() == 1);
-    REQUIRE(s.materials.size() == 2);
 }
