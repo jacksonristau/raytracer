@@ -7,6 +7,8 @@
 #include "../include/gfx/scene.h"
 #include "../include/geometry/triangle.h"
 #include "../include/geometry/sphere.h"
+#include "../include/gfx/tiny_obj_loader.h"
+
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -14,11 +16,14 @@ using json = nlohmann::json;
 Camera Scene::camera;
 std::vector<ILight*> Scene::lights;
 std::vector<Primitive> Scene::primitives;
+std::vector<Mesh> Scene::meshes;
 
 Scene::Scene() {
-    materials = std::vector<Material*>();
+    materials = std::vector<std::shared_ptr<Material>>();
     lights = std::vector<ILight*>();
     primitives = std::vector<Primitive>();
+    meshes = std::vector<Mesh>();
+    attribs = std::vector<tinyobj::attrib_t>();
     camera = Camera();
     bkgcolor = Color();
 }
@@ -44,42 +49,92 @@ Scene::Scene() {
         }
     }
          
-    materials = std::vector<Material*>();
+    materials = std::vector<std::shared_ptr<Material>>();
     if (!scene_desc.contains("materials")) {
         std::cout << "warning: no materials provided" << '\n';
     }
     else {
         int i = 0;
         for (const json& material_json : scene_desc.at("materials")) {
-            BPMaterial m(material_json);
-            materials.push_back(&m);
+            auto m = std::make_shared<BPMaterial>(material_json);
+            materials.push_back(m);
             std::string name = material_json.at("name");
             material_map.insert(std::make_pair(name, i++));
         }
     }
 
     primitives = std::vector<Primitive>();
+    int id = 0;
     if (scene_desc.contains("spheres")) {
         for (const json& sphere_json : scene_desc.at("spheres")) {
-            Sphere s(sphere_json);
+			auto s = std::make_shared<Sphere>(sphere_json);
+			std::shared_ptr<Material> m;
             if (!sphere_json.contains("material")) {
-                if (materials.size() > 0) {
-                    primitives.push_back(Primitive(&s, materials[0]));
+                if (!materials.empty()) {
+					m = materials[0];
                 }
                 else {
-                    materials.push_back(&BPMaterial());
-                    primitives.push_back(Primitive(&s, materials[0]));
+					m = std::make_shared<BPMaterial>();
+                    materials.push_back(m);
                 }
             }
             else {
                 std::string name = sphere_json.at("material");
                 if (material_map.count(name) > 0) {
-                    Material* m = materials[material_map.at(name)];
-                    primitives.push_back(Primitive(&s, m));
+                    m = materials[material_map.at(name)];
                 }
                 else {
                     throw std::runtime_error("Failed to create scene, unknown material: " +  name);
                 }
+            }
+			primitives.emplace_back(s, m, id++);
+        }
+    }
+    meshes = std::vector<Mesh>();
+    attribs = std::vector<tinyobj::attrib_t>();
+    if (scene_desc.contains("meshes")) {
+        for (json & mesh_json : scene_desc.at("meshes")) {
+            tinyobj::ObjReaderConfig reader_config;
+            reader_config.mtl_search_path = "./";
+            tinyobj::ObjReader reader;
+            std::string file = mesh_json.at("file");
+
+            if (!reader.ParseFromFile(file, reader_config)) {
+                if (!reader.Error().empty()) {
+                    std::cerr << "tinyobj: " << reader.Error();
+                }
+                throw reader.Error();
+            }
+
+            if (!reader.Warning().empty()) {
+                std::cout << "tinyobj: " << reader.Warning();
+            }
+            attribs.push_back(reader.GetAttrib());
+            for (const auto& shape : reader.GetShapes()) {
+                meshes.emplace_back(attribs.back(), shape);
+            }
+            for (size_t i = 0; i < meshes.back().ntris; i++) {
+                std::shared_ptr<Material> m;
+                if (!mesh_json.contains("material")) {
+                    if (!materials.empty()) {
+                        m = materials[0];
+                    }
+                    else {
+                        m = std::make_shared<BPMaterial>();
+                        materials.push_back(m);
+                    }
+                }
+                else {
+                    std::string name = mesh_json.at("material");
+                    if (material_map.count(name) > 0) {
+                        m = materials[material_map.at(name)];
+                    }
+                    else {
+                        throw std::runtime_error("Failed to create scene, unknown material: " + name);
+                    }
+                }
+                auto tri = std::make_shared<Triangle>(&meshes.back(), int(i * 3));
+                primitives.emplace_back(tri, m, id++);
             }
         }
     }

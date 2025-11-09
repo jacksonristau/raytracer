@@ -115,7 +115,7 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
     Color dlambda = texture->get_pixel(hit.u, hit.v);
     Color final_color = texture->is_uniform() ? precomp[0] : k[0] * dlambda;
     for (const ILight* light : Scene::lights) {
-        Ray shadow_ray = light->get_shadow_ray(hit.x_pos);
+        Ray shadow_ray = light->get_shadow_ray(hit);
         float d = light->dist(hit.x_pos);
         float shadow_mask = Raytracer::trace_shadow_ray_naive(shadow_ray, light, d);
         

@@ -12,6 +12,8 @@
 #include "lights.h"
 #include "texture.h"
 #include "camera.h"
+#include "../geometry/mesh.h"
+#include "tiny_obj_loader.h"
 
 class Scene {
     public:
@@ -26,5 +28,8 @@ class Scene {
         static Camera camera;
         static std::vector<ILight*> lights;
         static std::vector<Primitive> primitives;
-        std::vector<Material*> materials;
+        static std::vector<Mesh> meshes;
+        std::vector<std::shared_ptr<Material>> materials;
+    private:
+        std::vector<tinyobj::attrib_t> attribs;
 };

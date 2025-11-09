@@ -1,0 +1,43 @@
+{
+  "materials": [
+    {
+      "name": "red",
+      "colortexture": [ 1, 0, 0 ],
+      "specular": [ 0, 0, 1 ],
+      "ka": 0.2,
+      "kd": 0.6,
+      "ks": 0.8,
+      "n": 50,
+      "alpha": 1,
+      "eta": 1.2
+    }
+  ],
+  "camera": {
+    "eye": [ 0, 0, 0 ],
+    "view": [ 0, 0, -1 ],
+    "up": [ 0, 1, 0 ],
+    "hfov": 60,
+    "imsize": [ 512, 512 ],
+    "depthcueing": {
+      "color": [ 0.5, 0.0, 0.1 ],
+      "alpha": [ 0.1, 1 ],
+      "dist": [ 1, 10 ]
+    }
+  },
+  "bkgcolor": [ 0.2, 0.2, 0.2 ],
+  "spheres": [
+    {
+      "center": [ 0, 0, -8 ],
+      "radius": 2,
+      "material": "red"
+    }
+  ],
+  "lights": [
+    {
+      "l": [ 0, 5, -4 ],
+      "type": "point",
+      "i": 1
+    }
+
+  ]
+}

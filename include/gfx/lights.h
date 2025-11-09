@@ -1,6 +1,7 @@
 #pragma once
 #include "math/vector3.h"
 #include "math/ray.h"
+#include "geometry/hit.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -10,7 +11,7 @@ class ILight {
 
         virtual float atten(float d) const = 0;
 
-        virtual Ray get_shadow_ray(const Point3& x_p) const = 0;
+        virtual Ray get_shadow_ray(const Hit& hit) const = 0;
         virtual void print(std::ostream& os) const = 0;
         virtual bool is_point() const = 0;
         virtual float dist(const Point3& p) const = 0;
@@ -39,7 +40,7 @@ public:
         os << "directional light: <" << l.x << ", " << l.y << ", " << l.z << ">, i: " << i;
     }
 
-    Ray get_shadow_ray(const Point3& x_p) const override { return Ray(x_p, l); }
+    Ray get_shadow_ray(const Hit& hit) const override { return Ray(hit.x_pos, l, true, 1, hit.primitive); }
     bool is_point() const override { return false; }
     float dist(const Point3& p) const override { return INFINITY; }
     float intensity() const override { return i; }
@@ -73,7 +74,7 @@ public:
     float dist(const Point3& x_p) const override { return distance(x_p, l); }
     bool is_point() const override { return true; }
     float intensity() const override { return i; }
-    Ray get_shadow_ray(const Point3& x_p) const override { return Ray(x_p, l - x_p); }
+    Ray get_shadow_ray(const Hit& hit) const override { return Ray(hit.x_pos, l - hit.x_pos, true, 1, hit.primitive); }
 
     float atten(float d) const override {
         return 1.0f / (c0 + c1 * d + c2 * d * d);

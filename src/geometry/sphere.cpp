@@ -73,7 +73,9 @@ Hit Sphere::intersect(const Ray& r) const {
 
 // expects a point on the surface of the sphere
 Vector3 Sphere::normal(const Hit& h, const Point3& p) const {
-    return p - center;
+    Vector3 v = p - center;
+    v.normalize();
+    return v;
 }
 
 bool Sphere::operator==(const Sphere& s1) const {

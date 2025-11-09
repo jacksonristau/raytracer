@@ -35,10 +35,3 @@ catch_discover_tests(raytests)
 
 # link to the main library, as well as Catch2
 target_link_libraries(raytests PRIVATE Catch2::Catch2WithMain PUBLIC raytracerlib)
-
-add_custom_command(
-    TARGET raytests POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/files"
-        "$<TARGET_FILE_DIR:raytests>"
-)

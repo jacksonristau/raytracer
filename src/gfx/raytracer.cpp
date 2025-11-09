@@ -8,7 +8,7 @@ namespace Raytracer {
 	Hit intersect_scene_naive(const Ray& r) {
 		Hit nearest = Hit();
 		for (Primitive& prim : Scene::primitives) {
-			if (prim == *r.o_primitive)
+			if (r.o_primitive != nullptr && prim == *r.o_primitive)
 				continue;
 			Hit hit = prim.intersect(r);
 			if (!hit.valid())
@@ -28,7 +28,7 @@ namespace Raytracer {
 	float trace_shadow_ray_naive(const Ray& r, const ILight* l, float d) {
 		float s = 1.0f;
 		for (Primitive& prim : Scene::primitives) {
-			if (prim == *r.o_primitive)
+			if (r.o_primitive != nullptr && prim == *r.o_primitive)
 				continue;
 			Hit hit = prim.intersect(r);
 			if (!hit.valid() || !is_greater_than_zero(hit.t))
@@ -63,7 +63,8 @@ namespace Raytracer {
 		v = -v;
 		float ndotv = hit.normal.dot(v);
 
-		Material* material = hit.primitive->material;
+		auto material = hit.primitive->material;
+		bool tex_color = material->get_color();
 
 		Color reflection = Color(0, 0, 0);
 		Color transmission = Color(0, 0, 0);

@@ -1,4 +1,5 @@
 #include "../include/gfx/camera.h"
+#include "../include/math/floatutil.h"
 
 Camera::Camera() {
 	eye_pos = Point3(0.0f, 0.0f, 1.0f);
@@ -71,6 +72,7 @@ Camera::Camera(json cam) {
     up_dir.normalize();
 
     hfov = cam.at("hfov");
+	hfov = hfov * (Pi / 180.0f); // degrees to radians
 
     // define the viewing coordinate system
     Vector3 u = view_dir.cross(up_dir);

@@ -15,7 +15,7 @@ class Ray {
             entering(entering),
             eta(eta),
             o_primitive(p) {
-            direction.normalize();
+            this->direction.normalize();
         }
 
         // copy

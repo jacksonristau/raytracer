@@ -8,17 +8,24 @@ Ray::Ray() : origin(Point3()), direction(Vector3()){}
 Ray::Ray(Point3 origin, Vector3 direction) : origin(origin), direction(direction){
     entering = true;
     eta = Scene::bkgeta;
+	o_primitive = nullptr;
     this->direction.normalize();
 }
 
 Ray::Ray(const Ray& r) {
     origin = r.origin;
     direction = r.direction;
+	entering = r.entering;
+    eta = r.eta;
+	o_primitive = r.o_primitive;
 }
 
 Ray Ray::operator= (const Ray& r) {
     origin = r.origin;
     direction = r.direction;
+	entering = r.entering;
+	eta = r.eta;
+	o_primitive = r.o_primitive;
     return *this;
 }
 
