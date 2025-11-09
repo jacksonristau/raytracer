@@ -40,7 +40,7 @@ public:
         os << "directional light: <" << l.x << ", " << l.y << ", " << l.z << ">, i: " << i;
     }
 
-    Ray get_shadow_ray(const Hit& hit) const override { return Ray(hit.x_pos, l, true, 1, hit.primitive); }
+    Ray get_shadow_ray(const Hit& hit) const override { return Ray(hit.x_pos, Vector3(-l.x, -l.y, -l.z), true, 1, hit.primitive); }
     bool is_point() const override { return false; }
     float dist(const Point3& p) const override { return INFINITY; }
     float intensity() const override { return i; }

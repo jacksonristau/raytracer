@@ -27,7 +27,7 @@
   "bkgcolor": [ 0.5, 0.7, 0.9 ],
   "spheres": [
     {
-      "center": [ 0, 0, 0 ],
+      "center": [ -10, 3, -0.5 ],
       "radius": 2,
       "material": "earth"
     }

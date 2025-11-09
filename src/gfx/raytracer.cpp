@@ -59,9 +59,8 @@ namespace Raytracer {
 		if (!hit.valid())
 			return Scene::bkgcolor;
 
-		Vector3 v(r.direction);
-		v = -v;
-		float ndotv = hit.normal.dot(v);
+		Vector3 i = -r.direction;
+		float ndoti = hit.normal.dot(i);
 
 		auto material = hit.primitive->material;
 		bool tex_color = material->get_color();
@@ -69,14 +68,14 @@ namespace Raytracer {
 		Color reflection = Color(0, 0, 0);
 		Color transmission = Color(0, 0, 0);
 		if (material->is_glossy() && depth < 6) {
-			float fr = fresnel(ndotv, material->eta(), 0.0, true);
+			float fr = fresnel(ndoti, material->eta(), 0.0, true);
 			Ray reflected_ray(hit.x_pos, r.reflect(hit.normal), r.entering, r.eta, hit.primitive);
 			reflection = fr * trace_ray(reflected_ray, depth + 1);
 		}
 		if (material->is_transparent() && depth < 6) {
 			float nt = r.entering ? material->eta() : Scene::bkgeta;
-			float fr = fresnel(ndotv, r.eta, nt, false);
-			Ray refracted_ray(hit.x_pos, r.refract(hit.normal, ndotv, r.eta, nt), !r.entering, nt, hit.primitive);
+			float fr = fresnel(ndoti, r.eta, nt, false);
+			Ray refracted_ray(hit.x_pos, r.refract(hit.normal, ndoti, r.eta, nt), !r.entering, nt, hit.primitive);
 			transmission = (1 - fr) * (1 - material->alpha()) * trace_ray(refracted_ray, depth + 1);
 		}
 		

@@ -119,8 +119,8 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
         float d = light->dist(hit.x_pos);
         float shadow_mask = Raytracer::trace_shadow_ray_naive(shadow_ray, light, d);
         
-        Vector3 v(hit.r.direction);
-        v = -v;
+        Vector3 v(hit.r.origin - hit.x_pos);
+        v.normalize();
         Vector3 l(shadow_ray.direction);
         
 
