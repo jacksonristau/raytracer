@@ -17,7 +17,8 @@ class Plane : public IShape {
         Plane();
         Plane(Point3 p, Vector3 n);
 
-        Hit intersect(const Ray& r) const override;
+        int get_type() const override {return 2;}
+        Hit intersect(const Ray& r, bool with_uv = false) const override;
         Vector3 normal(const Hit& h, const Point3& p) const override { return n; }
 
         Point3 pos;

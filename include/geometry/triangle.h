@@ -13,10 +13,10 @@ class Triangle : public IShape {
 
 		Point3 get_vertex(int v) const;
 		Vector3 get_normal(int n) const;
-		Point2 Triangle::get_uv(int t) const;
+		Point2 get_uv(int t) const;
 
-		Hit intersect(const Ray& r) const override;
-
+		int get_type() const override {return 1;}
+		Hit intersect(const Ray& r, bool with_uv = false) const override;
 		Vector3 normal(const Hit& h, const Point3& p) const override;
 
 		const Mesh* mesh;

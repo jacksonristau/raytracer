@@ -30,8 +30,14 @@ Scene::Scene() {
 
  Scene::Scene(json scene_desc) {
     std::unordered_map<std::string, int> material_map;
-    bkgcolor = scene_desc.contains("bkgcolor") ? Color(scene_desc.at("bkgcolor")) : Color();
-    bkgeta = scene_desc.contains("bkgeta") ? scene_desc.at("bkgeta") : 1.000293;
+    bkgcolor = Color();
+    if (scene_desc.contains("bkgcolor")){
+        bkgcolor = Color(scene_desc.at("bkgcolor"));
+    }
+    bkgeta = 1.000293;
+    if (scene_desc.contains("bkgeta")){
+        bkgeta = scene_desc.at("bkgeta");
+    }
     if (!scene_desc.contains("camera")) {
         std::cout << "camera settings must be provided, see example.json" << '\n';
         throw std::runtime_error("Failed to create scene, no camera was provided");
@@ -91,7 +97,6 @@ Scene::Scene() {
         }
     }
     meshes = std::vector<Mesh>();
-    attribs = std::vector<tinyobj::attrib_t>();
     if (scene_desc.contains("meshes")) {
         for (json & mesh_json : scene_desc.at("meshes")) {
             tinyobj::ObjReaderConfig reader_config;
@@ -109,9 +114,9 @@ Scene::Scene() {
             if (!reader.Warning().empty()) {
                 std::cout << "tinyobj: " << reader.Warning();
             }
-            attribs.push_back(reader.GetAttrib());
             for (const auto& shape : reader.GetShapes()) {
-                meshes.emplace_back(attribs.back(), shape);
+                auto attrib_ptr = std::make_shared<tinyobj::attrib_t>(reader.GetAttrib());
+                meshes.emplace_back(attrib_ptr, shape);
             }
             for (size_t i = 0; i < meshes.back().ntris; i++) {
                 std::shared_ptr<Material> m;

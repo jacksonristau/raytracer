@@ -1,0 +1,43 @@
+{
+  "materials": [
+    {
+      "name": "teal",
+      "colortexture": [ 0, 1, 1 ],
+      "specular": [ 1, 1, 1 ],
+      "ka": 0.2,
+      "kd": 0.6,
+      "ks": 0.2,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    }
+  ],
+  "camera": {
+    "eye": [ 0, 0, 0 ],
+    "view": [ 0, 0, -1 ],
+    "up": [ 0, 1, 0 ],
+    "hfov": 90,
+    "imsize": [ 512, 256 ],
+    "depthcueing": {
+      "color": [ -1, -1, -1 ],
+      "alpha": [ 0.1, 1 ],
+      "dist": [ 1, 10 ]
+    }
+  },
+  "bkgcolor": [ 0.1, 0.1, 0.1 ],
+  "spheres": [],
+  "meshes": [
+    {
+      "material": "teal",
+      "file": "square_flat.obj"
+    }
+  ],
+  "lights": [
+    {
+      "l": [ -2, 1, 0 ],
+      "type": "point",
+      "i": 1
+    }
+
+  ]
+}

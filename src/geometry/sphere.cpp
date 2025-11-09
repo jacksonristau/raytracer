@@ -2,6 +2,7 @@
 #include "../include/math/constants.h"
 #include "../include/math/floatutil.h"
 #include "../include/geometry/hit.h"
+#include "../include/math/point2.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -17,21 +18,17 @@ Sphere::Sphere(json sphere_json) {
 
 Sphere::~Sphere() {}
 
-// expects a float array of size 2
-int Sphere::get_uv(const Point3& point, float* uv) const {
-    if (uv == NULL) {
-        return 0;
-    }
+Point2 Sphere::get_uv(const Point3& point) const {
     Vector3 n = point - center;
     n = (1 / radius) * n;
     float theta = atan2(n.y, n.x);
     float phi = acos(n.z);
-    uv[0] = std::max(theta / TwoPi, ((theta + TwoPi) / TwoPi));
-    uv[1] = phi / Pi;
-    return 1;
+    float u = std::max(theta / TwoPi, ((theta + TwoPi) / TwoPi));
+    float v = phi / Pi;
+    return Point2(u, v);
 }
 
-Hit Sphere::intersect(const Ray& r) const {
+Hit Sphere::intersect(const Ray& r, bool with_uv) const {
     Vector3 oc = r.origin - center;
     float B = 2.0f * r.direction.dot(oc);
     float C = oc.dot(oc) - (radius * radius);
@@ -43,7 +40,8 @@ Hit Sphere::intersect(const Ray& r) const {
     else if (is_near_zero(discrim)) {
         float t = (-B / 2.0f);
         Point3 x_p = r.get_point(t);
-        return Hit(t, 0.0f, 0.0f, r, x_p, Vector3(), nullptr);
+        Point2 uv = with_uv ? get_uv(x_p) : Point2(0.0f, 0.0f);
+        return Hit(t, uv.x, uv.y, r, x_p, Vector3(), nullptr);
     }
     else  {
         float sqrt_discrim = sqrt(discrim);
@@ -52,11 +50,13 @@ Hit Sphere::intersect(const Ray& r) const {
         
         if (is_negative(t1) && !is_negative(t2)) {
             Point3 x_p = r.get_point(t2);
-            return Hit(t2, 0.0f, 0.0f, r, x_p, this->normal(Hit(), x_p), nullptr);
+            Point2 uv = with_uv ? get_uv(x_p) : Point2(0.0f, 0.0f);
+            return Hit(t2, uv.x, uv.y, r, x_p, this->normal(Hit(), x_p), nullptr);
         }
         else if (is_negative(t2) && !is_negative(t1)) {
             Point3 x_p = r.get_point(t1);
-            return Hit(t1, 0.0f, 0.0f, r, x_p, this->normal(Hit(), x_p), nullptr);
+            Point2 uv = with_uv ? get_uv(x_p) : Point2(0.0f, 0.0f);
+            return Hit(t1, uv.x, uv.y, r, x_p, this->normal(Hit(), x_p), nullptr);
         }
         // regardless trace_ray ignores negative values
         else if (is_negative(t2) && is_negative(t1)) {
@@ -66,7 +66,8 @@ Hit Sphere::intersect(const Ray& r) const {
         else {
             float min_t = std::min(t1, t2);
             Point3 x_p = r.get_point(min_t);
-            return Hit(min_t, 0.0f, 0.0f, r, x_p, this->normal(Hit(), x_p), nullptr);
+            Point2 uv = with_uv ? get_uv(x_p) : Point2(0.0f, 0.0f);
+            return Hit(min_t, uv.x, uv.y, r, x_p, this->normal(Hit(), x_p), nullptr);
         }
     }
 }

@@ -3,6 +3,7 @@
 
 class Ray;
 class Hit;
+class Point2;
 
 class Sphere : public IShape {
     public:
@@ -14,9 +15,10 @@ class Sphere : public IShape {
         // equality
         bool operator==(const Sphere& s1) const;
 
-        // returns texture coordinates at a point on the sphere using polar coordinates
-        int get_uv(const Point3& point, float* uv) const;
-        Hit intersect(const Ray& r) const override;
+        Point2 get_uv(const Point3& point) const;
+
+        int get_type() const override {return 0;}
+        Hit intersect(const Ray& r, bool with_uv = false) const override;
         Vector3 normal(const Hit& h, const Point3& p) const override;
 
         Point3 center;

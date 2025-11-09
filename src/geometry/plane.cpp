@@ -9,7 +9,7 @@ Plane::Plane() {
 
 Plane::Plane(Point3 p, Vector3 n) : pos(p), n(n) {}
 
-Hit Plane::intersect(const Ray& r) const {
+Hit Plane::intersect(const Ray& r, bool with_uv) const {
     float denom = n.dot(r.direction);
     // if the ray is parallel to the plane
     if (is_near_zero(denom)) {

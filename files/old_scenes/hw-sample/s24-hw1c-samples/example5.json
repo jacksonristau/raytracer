@@ -1,0 +1,43 @@
+{
+  "materials": [
+    {
+      "name": "earth",
+      "imagetexture": "earthtexture.ppm",
+      "specular": [ 1, 1, 1 ],
+      "ka": 0.2,
+      "kd": 0.8,
+      "ks": 0.1,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    }
+  ],
+  "camera": {
+    "eye": [ 2, -6, 1 ],
+    "view": [ -1, 3, -0.5 ],
+    "up": [ 0, 0, 1 ],
+    "hfov": 45,
+    "imsize": [ 512, 512 ],
+    "depthcueing": {
+      "color": [ -1, -1, -1 ],
+      "alpha": [ 0.1, 1 ],
+      "dist": [ 1, 10 ]
+    }
+  },
+  "bkgcolor": [ 0.5, 0.7, 0.9 ],
+  "spheres": [
+    {
+      "center": [ 0, 0, 0 ],
+      "radius": 2,
+      "material": "earth"
+    }
+  ],
+  "meshes": [],
+  "lights": [
+    {
+      "l": [ 0, 1, 11 ],
+      "type": "directional",
+      "i": 1
+    }
+  ]
+}

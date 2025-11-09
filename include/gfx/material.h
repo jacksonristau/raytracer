@@ -14,6 +14,7 @@ class Material {
         virtual Color evaluate(const Hit& hit, Color reflection, Color transmission) const = 0;
         virtual float alpha() const = 0;
         virtual float eta() const = 0;
+        virtual bool is_uniform() const = 0;
         virtual bool is_glossy() const = 0;
         virtual bool is_transparent() const = 0;
         virtual bool get_color() const = 0;
@@ -32,6 +33,7 @@ class BPMaterial : public Material {
         float eta() const override { return refractive_index; }
         bool is_glossy() const override { return k[2] > 0.0f; }
         bool is_transparent() const override { return a < 1.0f; }
+        bool is_uniform() const override {return texture->is_uniform();}
         bool get_color() const override { return texture->get_pixel(0.0f, 0.0f).g == 1.0; }
 
         Color get_diffuse(const Hit& hit, float ndotl) const;

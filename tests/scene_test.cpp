@@ -56,9 +56,7 @@ std::string test = R"(
       "type": "directional",
       "i": 1
     }
-
-  ],
-  "parallel": 2.5
+  ]
 })";
 
 
