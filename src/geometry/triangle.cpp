@@ -11,35 +11,35 @@ Point3 Triangle::get_vertex(int v) const {
     return Point3(vx, vy, vz);
 }
 
-Vector3 Triangle::get_normal(int n) const {
-    tinyobj::index_t idx = mesh->indices[index + n];
-    if (idx.normal_index < 0)
-        throw "no normal data";
+bool Triangle::has_normal() const {
+    tinyobj::index_t idx = mesh->indices[index];
+    return idx.normal_index >= 0;
+}
 
+bool Triangle::has_uv() const {
+    tinyobj::index_t idx = mesh->indices[index];
+    return idx.texcoord_index >= 0;
+}
+
+Vector3 Triangle::get_normal(int n) const {
     std::vector<tinyobj::real_t> normals = mesh->get_normals();
 
+    tinyobj::index_t idx = mesh->indices[index + n];
     tinyobj::real_t nx = normals.at(3 * size_t(idx.normal_index) + 0);
     tinyobj::real_t ny = normals.at(3 * size_t(idx.normal_index) + 1);
     tinyobj::real_t nz = normals.at(3 * size_t(idx.normal_index) + 2);
+
     return Vector3(nx, ny, nz);
 }
 
 Point2 Triangle::get_uv(int t) const {
-    tinyobj::index_t idx = mesh->indices[index + t];
-
-    if (idx.texcoord_index < 0)
-        throw "no uv data";
-
     std::vector<tinyobj::real_t> uvs = mesh->get_uvs();
 
-    if (idx.texcoord_index >= 0) {
-        tinyobj::real_t u = uvs.at(2 * size_t(idx.texcoord_index) + 0);
-        tinyobj::real_t v = uvs.at(2 * size_t(idx.texcoord_index) + 1);
-        return Point2(u, v);
-	}
-    else {
-		throw "no uvs defined for this mesh";
-    }
+    tinyobj::index_t idx = mesh->indices[index + t];
+    tinyobj::real_t u = uvs.at(2 * size_t(idx.texcoord_index) + 0);
+    tinyobj::real_t v = uvs.at(2 * size_t(idx.texcoord_index) + 1);
+    
+    return Point2(u, v);
 }
 
 Hit Triangle::intersect(const Ray& r, bool with_uv) const {
@@ -69,28 +69,52 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     float dp1 = ep.dot(e1);
     float dp2 = ep.dot(e2);
 
-    h.u     = ((d22 * dp1) - (d12 * dp2)) / det;
-    h.v     = ((d11 * dp2) - (d12 * dp1)) / det;
-    float a = 1.0f - (h.u + h.v);
+    float beta     = (((d22 * dp1) - (d12 * dp2)) / det);
+    float gamma    = (((d11 * dp2) - (d12 * dp1)) / det);
+    float alpha = 1.0f - (beta + gamma);
 
-    if (is_negative(a) || a >= 1.0f || is_negative(h.u) || h.u >= 1.0f || is_negative(h.v) || h.v >= 1.0f)
+    // exit if the point is outside the triangle
+    if (is_negative(alpha) || alpha >= 1.0f || is_negative(beta) || beta >= 1.0f || is_negative(gamma) || gamma >= 1.0f)
         return Hit();
-    h.normal = normal(h, h.x_pos);
-    return h;
-}
 
-Vector3 Triangle::normal(const Hit& h, const Point3& p) const {
-    try {
+    if (!has_uv()) {
+        Point2 uv = compute_planar_uv(h.x_pos, h.normal);
+        h.u = uv.x;
+        h.v = uv.y;
+    } else {
+        Point2 uv0 = get_uv(0);
+        Point2 uv1 = get_uv(1);
+        Point2 uv2 = get_uv(2);
+
+        h.u = alpha * uv0.x + beta * uv1.x + gamma * uv2.x;
+        h.v = alpha * uv0.y + beta * uv1.y + gamma * uv2.y;
+    }
+    if (has_normal()){
         Vector3 n0 = get_normal(0);
         Vector3 n1 = get_normal(1);
         Vector3 n2 = get_normal(2);
 
-        float a = 1.0f - (h.u + h.v);
-        Vector3 n = a * n0 + h.u * n1 + h.v * n2;
+        Vector3 n = alpha * n0 + beta * n1 + gamma * n2;
         n.normalize();
-        return n;
+        h.normal = n;
     }
-    catch (const char* e) {
-        return h.normal;
+    // simple planar normal already set for h.normal
+
+    return h;
+}
+
+Point2 Triangle::compute_planar_uv(const Point3& p, const Vector3& normal) const {
+    Vector3 abs_n(std::abs(normal.x), std::abs(normal.y), std::abs(normal.z));
+
+    // Choose projection plane based on dominant axis
+    if (abs_n.x > abs_n.y && abs_n.x > abs_n.z) {
+        // Project onto YZ plane
+        return Point2(p.y, p.z);
+    } else if (abs_n.y > abs_n.z) {
+        // Project onto XZ plane
+        return Point2(p.x, p.z);
+    } else {
+        // Project onto XY plane
+        return Point2(p.x, p.y);
     }
 }

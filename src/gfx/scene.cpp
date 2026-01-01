@@ -116,6 +116,15 @@ Scene::Scene() {
             }
             for (const auto& shape : reader.GetShapes()) {
                 auto attrib_ptr = std::make_shared<tinyobj::attrib_t>(reader.GetAttrib());
+                for (size_t i = 0; i < shape.mesh.indices.size(); i++) {
+                    tinyobj::index_t idx = shape.mesh.indices[i];
+                    if (idx.texcoord_index >= 0) {
+                        float u = attrib_ptr->texcoords[2 * idx.texcoord_index + 0];
+                        float v = attrib_ptr->texcoords[2 * idx.texcoord_index + 1];
+                        std::cout << "Index " << i << ": texcoord_index=" << idx.texcoord_index 
+                                  << ", u=" << u << ", v=" << v << '\n';
+                    }
+                }
                 meshes.emplace_back(attrib_ptr, shape);
             }
             for (size_t i = 0; i < meshes.back().ntris; i++) {

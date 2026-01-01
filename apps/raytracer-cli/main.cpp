@@ -57,7 +57,10 @@ int main(int argc, char *argv[]) {
                 std::cout << e.what() << std::endl;
                 return 0;
             }
-            
+            catch(const std::string* str){
+                std::cout << "failed to trace ray: " << j << ", " << i << '\n' << str << '\n';
+                return 0;
+            }
             if (j % 100 == 0) {
                 std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
                 /*std::cout << "ray_dir: " << ray.direction() << '\n';
@@ -68,10 +71,8 @@ int main(int argc, char *argv[]) {
     std::cout << '\r';
     std::cout << "tracing complete." << std::endl;
 
-    std::string filename = argv[1];
-    filename.std::string::erase(filename.std::string::find("."));
     std::ofstream output;
-    output.open(filename + ".ppm");
+    output.open("render.ppm");
 
     if (!output.is_open()) {
         std::cout << "failed to create output file.";
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < size; i++) {
         image << pixel_to_string(pixelmap[i]);
         if (i == size - 1) {
-            std::cout << filename << ".ppm created." << std::endl;
+            std::cout << "render.ppm created." << std::endl;
         }
     }
     output << image.str();

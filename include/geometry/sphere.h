@@ -19,7 +19,7 @@ class Sphere : public IShape {
 
         int get_type() const override {return 0;}
         Hit intersect(const Ray& r, bool with_uv = false) const override;
-        Vector3 normal(const Hit& h, const Point3& p) const override;
+        Vector3 normal(const Hit& h, const Point3& p) const;
 
         Point3 center;
         float radius;

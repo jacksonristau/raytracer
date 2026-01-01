@@ -24,6 +24,12 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   include(CTest)
 endif()
 
+# Create symlink to resource files in build directory
+file(CREATE_LINK
+  ${CMAKE_SOURCE_DIR}/files
+  ${CMAKE_BINARY_DIR}/files
+  SYMBOLIC)
+
 # FetchContent added in CMake 3.11, downloads during the configure step
 # FetchContent_MakeAvailable was added in CMake 3.14; simpler usage
 include(FetchContent)
