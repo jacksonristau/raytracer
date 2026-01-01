@@ -1,0 +1,22 @@
+# house.mtl
+
+newmtl grass
+Ka 0.2 0.2 0.2
+Kd 0.6 0.6 0.6
+Ks 1 1 1
+Ns 20
+map_Kd ../../files/textures/grass.ppm
+
+newmtl wood
+Ka 0.2 0.2 0.2
+Kd 0.6 0.6 0.6
+Ks 1 1 1
+Ns 20
+map_Kd ../../files/textures/wood.ppm
+
+newmtl redwood
+Ka 0.2 0.2 0.2
+Kd 0.6 0.6 0.6
+Ks 1 1 1
+Ns 20
+map_Kd ../../files/textures/redwood.ppm

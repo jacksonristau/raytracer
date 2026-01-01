@@ -116,39 +116,56 @@ Scene::Scene() {
             }
             for (const auto& shape : reader.GetShapes()) {
                 auto attrib_ptr = std::make_shared<tinyobj::attrib_t>(reader.GetAttrib());
-                for (size_t i = 0; i < shape.mesh.indices.size(); i++) {
-                    tinyobj::index_t idx = shape.mesh.indices[i];
-                    if (idx.texcoord_index >= 0) {
-                        float u = attrib_ptr->texcoords[2 * idx.texcoord_index + 0];
-                        float v = attrib_ptr->texcoords[2 * idx.texcoord_index + 1];
-                        std::cout << "Index " << i << ": texcoord_index=" << idx.texcoord_index 
-                                  << ", u=" << u << ", v=" << v << '\n';
-                    }
-                }
                 meshes.emplace_back(attrib_ptr, shape);
-            }
-            for (size_t i = 0; i < meshes.back().ntris; i++) {
-                std::shared_ptr<Material> m;
-                if (!mesh_json.contains("material")) {
-                    if (!materials.empty()) {
-                        m = materials[0];
+
+                // Create primitives for this shape's triangles with per-face materials
+                for (size_t i = 0; i < meshes.back().ntris; i++) {
+                    std::shared_ptr<Material> m;
+
+                    // Look up material for this face from OBJ file's material_ids
+                    if (!shape.mesh.material_ids.empty() && i < shape.mesh.material_ids.size()) {
+                        int mat_id = shape.mesh.material_ids[i];
+                        if (mat_id >= 0 && mat_id < static_cast<int>(reader.GetMaterials().size())) {
+                            std::string mat_name = reader.GetMaterials()[mat_id].name;
+                            if (material_map.count(mat_name) > 0) {
+                                m = materials[material_map.at(mat_name)];
+                            }
+                            else {
+                                std::cerr << "warning: OBJ material '" << mat_name << "' not found in scene materials, using default\n";
+                                if (!materials.empty()) {
+                                    m = materials[0];
+                                }
+                                else {
+                                    m = std::make_shared<BPMaterial>();
+                                    materials.push_back(m);
+                                }
+                            }
+                        }
+                        else {
+                            // Invalid material ID, use default
+                            if (!materials.empty()) {
+                                m = materials[0];
+                            }
+                            else {
+                                m = std::make_shared<BPMaterial>();
+                                materials.push_back(m);
+                            }
+                        }
                     }
                     else {
-                        m = std::make_shared<BPMaterial>();
-                        materials.push_back(m);
+                        // No material_ids available, use default
+                        if (!materials.empty()) {
+                            m = materials[0];
+                        }
+                        else {
+                            m = std::make_shared<BPMaterial>();
+                            materials.push_back(m);
+                        }
                     }
+
+                    auto tri = std::make_shared<Triangle>(&meshes.back(), int(i * 3));
+                    primitives.emplace_back(tri, m, id++);
                 }
-                else {
-                    std::string name = mesh_json.at("material");
-                    if (material_map.count(name) > 0) {
-                        m = materials[material_map.at(name)];
-                    }
-                    else {
-                        throw std::runtime_error("Failed to create scene, unknown material: " + name);
-                    }
-                }
-                auto tri = std::make_shared<Triangle>(&meshes.back(), int(i * 3));
-                primitives.emplace_back(tri, m, id++);
             }
         }
     }

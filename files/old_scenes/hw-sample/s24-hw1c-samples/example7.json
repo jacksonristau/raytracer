@@ -1,0 +1,80 @@
+{
+  "materials": [
+    {
+      "name": "grass",
+      "imagetexture": "../../files/textures/grass.ppm",
+      "specular": [ 1, 1, 1 ],
+      "ka": 0.2,
+      "kd": 0.6,
+      "ks": 0.2,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    },
+    {
+      "name": "wood",
+      "imagetexture": "../../files/textures/wood.ppm",
+      "specular": [ 1, 1, 1 ],
+      "ka": 0.2,
+      "kd": 0.6,
+      "ks": 0.2,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    },
+    {
+      "name": "redwood",
+      "imagetexture": "../../files/textures/redwood.ppm",
+      "specular": [ 1, 1, 1 ],
+      "ka": 0.2,
+      "kd": 0.6,
+      "ks": 0.2,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    },
+    {
+      "name": "soccerball",
+      "imagetexture": "../../files/textures/soccerball.ppm",
+      "specular": [ 1, 1, 1 ],
+      "ka": 0.2,
+      "kd": 0.6,
+      "ks": 0.2,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    }
+  ],
+  "camera": {
+    "eye": [ 12.5, 5, 2.5 ],
+    "view": [ -2, -0.5, 2 ],
+    "up": [ 0, 1, 0 ],
+    "hfov": 45,
+    "imsize": [ 900, 600 ],
+    "depthcueing": {
+      "color": [ -1, -1, -1 ],
+      "alpha": [ 0.1, 1 ],
+      "dist": [ 1, 10 ]
+    }
+  },
+  "bkgcolor": [ 0.5, 0.7, 0.9 ],
+  "spheres": [
+    {
+      "center": [ -2.5, 0.5, 9 ],
+      "radius": 0.5,
+      "material": "soccerball"
+    }
+  ],
+  "meshes": [
+    {
+      "file": "../../files/objs/house.obj"
+    }
+  ],
+  "lights": [
+    {
+      "l": [ 1, -1, 1 ],
+      "type": "directional",
+      "i": 1
+    }
+  ]
+}
