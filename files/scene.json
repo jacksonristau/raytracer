@@ -1,13 +1,13 @@
 {
   "materials": [
     {
-      "name": "red",
-      "colortexture": [ 1, 0, 0 ],
-      "specular": [ 0, 0, 1 ],
+      "name": "green",
+      "colortexture": [ 0, 1, 0 ],
+      "specular": [ 1, 1, 1 ],
       "ka": 0.2,
       "kd": 0.6,
-      "ks": 0.8,
-      "n": 50,
+      "ks": 0.2,
+      "n": 20,
       "alpha": 1,
       "eta": 1.2
     }
@@ -24,17 +24,17 @@
       "dist": [ 1, 10 ]
     }
   },
-  "bkgcolor": [ 0.2, 0.2, 0.2 ],
-  "spheres": [
+  "bkgcolor": [ 0.0, 0.0, 0.0 ],
+  "spheres": [],
+  "meshes":[
     {
-      "center": [ 0, 0, -8 ],
-      "radius": 2,
-      "material": "red"
+      "material": "green",
+      "file": "../../files/objs/cube.obj"
     }
   ],
   "lights": [
     {
-      "l": [ 0, 5, -4 ],
+      "l": [ 0, 0, 0 ],
       "type": "point",
       "i": 1
     }

@@ -71,11 +71,16 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
 
     float beta     = (((d22 * dp1) - (d12 * dp2)) / det);
     float gamma    = (((d11 * dp2) - (d12 * dp1)) / det);
+
     float alpha = 1.0f - (beta + gamma);
 
     // exit if the point is outside the triangle
     if (is_negative(alpha) || alpha >= 1.0f || is_negative(beta) || beta >= 1.0f || is_negative(gamma) || gamma >= 1.0f)
         return Hit();
+
+    float edge_threshhold = 0.01f;
+    if (alpha < edge_threshhold || beta < edge_threshhold || gamma < edge_threshhold)
+        h.is_edge = true;
 
     if (!has_uv()) {
         Point2 uv = compute_planar_uv(h.x_pos, h.normal);

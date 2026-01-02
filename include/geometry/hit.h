@@ -25,6 +25,7 @@ class Hit {
         Point3 x_pos;
         Vector3 normal;
         Primitive* primitive;
+        bool is_edge = false;
 
         Hit operator=(const Hit& h);
 

@@ -15,5 +15,6 @@ Hit Hit::operator=(const Hit& h) {
     x_pos = h.x_pos;
     normal = h.normal;
     primitive = h.primitive;
+    is_edge = h.is_edge;
     return *this;
 }

@@ -5,6 +5,7 @@
 #include "../include/gfx/raytracer.h"
 
 namespace Raytracer {
+	bool wireframe_mode = false;
 	Hit intersect_scene_naive(const Ray& r) {
 		Hit nearest = Hit();
 		for (Primitive& prim : Scene::primitives) {
@@ -63,7 +64,9 @@ namespace Raytracer {
 		float ndoti = hit.normal.dot(i);
 
 		auto material = hit.primitive->material;
-		bool tex_color = material->get_color();
+		
+		if (wireframe_mode)
+			return hit.is_edge ?  Color(0, 1, 0) :  Scene::bkgcolor;
 
 		Color reflection = Color(0, 0, 0);
 		Color transmission = Color(0, 0, 0);

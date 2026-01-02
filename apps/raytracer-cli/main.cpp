@@ -18,16 +18,45 @@
 using json = nlohmann::json;
 
 int main(int argc, char *argv[]) {
-    // only argument should be the input file name
-    if (argc != 2) {
-        printf("usage: raytracer-cli <name of input file>\n");
+    if (argc < 2) {
+        printf("usage: raytracer-cli <name of input file> [options]\n");
+        printf("options:\n");
+        printf("  -W, --wireframe     Enable wireframe rendering\n");
         return 0;
     }
-    auto f = std::ifstream(argv[1]);
-    if (!f) {
-        std::cerr << "failed to open: " << argv[1] << '\n';
+
+    // Parse command-line arguments
+    std::string scene_file;
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "-W" || arg == "--wireframe") {
+            Raytracer::wireframe_mode = true;
+            std::cout << "Wireframe mode enabled" << std::endl;
+        } else if (arg[0] != '-') {
+            // Non-flag argument is the scene file
+            if (scene_file.empty()) {
+                scene_file = arg;
+            } else {
+                std::cerr << "error: multiple input files specified\n";
+                return 1;
+            }
+        } else {
+            std::cerr << "error: unknown option '" << arg << "'\n";
+            return 1;
+        }
+    }
+
+    if (scene_file.empty()) {
+        std::cerr << "error: no input file specified\n";
         return 1;
     }
+
+    auto f = std::ifstream(scene_file);
+    if (!f) {
+        std::cerr << "failed to open: " << scene_file << '\n';
+        return 1;
+    }
+
     Scene scene;
     try {
         json scene_description = json::parse(f);
