@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     Color *pixelmap = new Color[size];
 
     // for every pixel in the output image trace a ray to get its color
-    std::cout << "tracing rays..." << std::endl;
+    std::cout << "tracing rays...\n";
     std::cout << "0% complete...";
     for (int i = 0; i < Scene::camera.px_height(); i++) {
         for (int j = 0; j < Scene::camera.px_width(); j++){

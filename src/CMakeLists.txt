@@ -8,6 +8,7 @@ set(
   ${PROJECT_SOURCE_DIR}/src/geometry/sphere.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/triangle.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/hit.cpp
+  ${PROJECT_SOURCE_DIR}/src/geometry/boundingbox.cpp
   
   ${PROJECT_SOURCE_DIR}/src/gfx/camera.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/color.cpp
@@ -20,9 +21,11 @@ set(
 
 
   ${PROJECT_SOURCE_DIR}/src/math/floatutil.cpp
+  ${PROJECT_SOURCE_DIR}/src/math/matrix4x4.cpp
   ${PROJECT_SOURCE_DIR}/src/math/point2.cpp
   ${PROJECT_SOURCE_DIR}/src/math/point3.cpp
   ${PROJECT_SOURCE_DIR}/src/math/ray.cpp
+  ${PROJECT_SOURCE_DIR}/src/math/transform.cpp
   ${PROJECT_SOURCE_DIR}/src/math/vector3.cpp
 
   ${PROJECT_SOURCE_DIR}/src/stringhelpers.cpp

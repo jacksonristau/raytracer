@@ -14,6 +14,8 @@ namespace Raytracer {
 			Hit hit = prim.intersect(r);
 			if (!hit.valid())
 				continue;
+			if (wireframe_mode && !hit.is_edge)
+				continue;
 
 			if (!nearest.valid()) {
 				nearest = hit;
@@ -59,14 +61,14 @@ namespace Raytracer {
 		Hit hit = intersect_scene_naive(r);
 		if (!hit.valid())
 			return Scene::bkgcolor;
+		
+		if (wireframe_mode)
+			return Color(0, 1, 0);
 
 		Vector3 i = -r.direction;
 		float ndoti = hit.normal.dot(i);
 
 		auto material = hit.primitive->material;
-		
-		if (wireframe_mode)
-			return hit.is_edge ?  Color(0, 1, 0) :  Scene::bkgcolor;
 
 		Color reflection = Color(0, 0, 0);
 		Color transmission = Color(0, 0, 0);

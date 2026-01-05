@@ -13,6 +13,9 @@ public:
     Point3(json p);
     Point3(const Point3& p1);
 
+    static Point3 max(const Point3& p1, const Point3& p2);
+    static Point3 min(const Point3& p1, const Point3& p2);
+
     virtual ~Point3();
 
     // negation

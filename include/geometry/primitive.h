@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "../math/transform.h"
 
 class IShape;
 class Hit;
@@ -8,9 +9,9 @@ class Ray;
 
 class Primitive {
 	public:
-		Primitive() : geometry(nullptr), material(nullptr), id(-1) {}
-		Primitive(std::shared_ptr<IShape> geometry, std::shared_ptr<Material> material, int id)
-			: geometry(std::move(geometry)), material(std::move(material)), id(id) {
+		Primitive() : geometry(nullptr), material(nullptr), id(-1), transform() {}
+		Primitive(std::shared_ptr<IShape> geometry, std::shared_ptr<Material> material, int id, const Transform& transform = Transform())
+			: geometry(std::move(geometry)), material(std::move(material)), id(id), transform(transform) {
 		}
 		~Primitive() {}
 
@@ -20,6 +21,7 @@ class Primitive {
 		std::shared_ptr<IShape> geometry;
 		std::shared_ptr<Material> material;
 		int id;
+		Transform transform;
 
 		bool operator==(const Primitive& other) const {
 			return id == other.id;

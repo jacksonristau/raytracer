@@ -8,6 +8,7 @@
 #include "../include/geometry/triangle.h"
 #include "../include/geometry/sphere.h"
 #include "../include/gfx/tiny_obj_loader.h"
+#include "../include/geometry/boundingbox.h"
 
 
 #include <nlohmann/json.hpp>
@@ -93,7 +94,14 @@ Scene::Scene() {
                     throw std::runtime_error("Failed to create scene, unknown material: " +  name);
                 }
             }
-			primitives.emplace_back(s, m, id++);
+
+            // Parse transform if present
+            Transform transform;
+            if (sphere_json.contains("transform")) {
+                transform = Transform(sphere_json["transform"]);
+            }
+
+			primitives.emplace_back(s, m, id++, transform);
         }
     }
     meshes = std::vector<Mesh>();
@@ -114,10 +122,31 @@ Scene::Scene() {
             if (!reader.Warning().empty()) {
                 std::cout << "tinyobj: " << reader.Warning();
             }
+            
+            std::cout << "building primitive list\n";
             for (const auto& shape : reader.GetShapes()) {
                 auto attrib_ptr = std::make_shared<tinyobj::attrib_t>(reader.GetAttrib());
                 meshes.emplace_back(attrib_ptr, shape);
-
+                Transform mesh_transform;
+                if (mesh_json.contains("transform")) {
+                    json transform_json = mesh_json["transform"];
+                    Vector3 translation = Vector3(transform_json["translate"]);
+                    Vector3 scale = Vector3(transform_json["scale"]);
+                    Vector3 rotate = Vector3(transform_json["rotate"]);
+                    BoundingBox bb = BoundingBox(meshes.back());
+                    Point3 center_offset = bb.center();
+                    Vector3 centered_translation = Vector3(-center_offset.x * scale.x, 
+                                                           -center_offset.y * scale.y, 
+                                                           -center_offset.z * scale.z);
+                    translation = translation + centered_translation;
+                    std::cout << "BB Min: " << bb.min.x << ", " << bb.min.y << ", " << bb.min.z << std::endl;
+                    std::cout << "BB Max: " << bb.max.x << ", " << bb.max.y << ", " << bb.max.z << std::endl;
+                    std::cout << "BB Center: " << bb.center().x << ", " << bb.center().y << ", " << bb.center().z << std::endl;
+                    std::cout << "Centered Translation: " << centered_translation.x << ", " << centered_translation.y << ", " << centered_translation.z << std::endl;
+                    std::cout << "Final Translation: " << translation.x << ", " << translation.y << ", " << translation.z << std::endl;                    
+                    mesh_transform = Transform(translation, rotate, scale);
+                }
+                //Vector3 translation = Point3(0, 0, 0) - bb.center();
                 // Create primitives for this shape's triangles with per-face materials
                 for (size_t i = 0; i < meshes.back().ntris; i++) {
                     std::shared_ptr<Material> m;
@@ -164,7 +193,7 @@ Scene::Scene() {
                     }
 
                     auto tri = std::make_shared<Triangle>(&meshes.back(), int(i * 3));
-                    primitives.emplace_back(tri, m, id++);
+                    primitives.emplace_back(tri, m, id++, mesh_transform);
                 }
             }
         }

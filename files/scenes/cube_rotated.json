@@ -1,0 +1,41 @@
+{
+  "camera": {
+    "eye": [0, 0, 0],
+    "view": [0, 0, -1],
+    "up": [0, 1, 0],
+    "hfov": 60,
+    "imsize": [800, 600]
+  },
+  "bkgcolor": [0.2, 0.3, 0.4],
+  "lights": [
+    {
+      "type": "directional",
+      "l": [1, -1, -1],
+      "i": 1.0
+    }
+  ],
+  "materials": [
+    {
+      "name": "white",
+      "diffuse": [0.8, 0.8, 0.8],
+      "specular": [1, 1, 1],
+      "ka": 0.2,
+      "kd": 0.7,
+      "ks": 0.3,
+      "n": 50,
+      "alpha": 1,
+      "eta": 1.0
+    }
+  ],
+  "meshes": [
+    {
+      "file": "files/objs/cube.obj",
+      "material": "white",
+      "transform": {
+        "translate": [0, 0, -5],
+        "rotate": [0, 45, 0],
+        "scale": [1, 1, 1]
+      }
+    }
+  ]
+}

@@ -68,3 +68,21 @@ Point3 operator*(const Point3& p1, float s) {
 std::ostream& operator<<(std::ostream& os, const Point3& p) {
 	return os << "(" << p.x << ", " << p.y << ", " << p.z << ")";
 }
+
+Point3 Point3::max(const Point3& p1, const Point3& p2){
+	Point3 res = Point3();
+	res.x = fmax(p1.x, p2.x);
+	res.y = fmax(p1.y, p2.y);
+	res.z = fmax(p1.z, p2.z);
+
+	return res;
+}
+
+Point3 Point3::min(const Point3& p1, const Point3& p2){
+	Point3 res = Point3();
+	res.x = fmin(p1.x, p2.x);
+	res.z = fmin(p1.z, p2.z);
+	res.y = fmin(p1.y, p2.y);
+
+	return res;
+}

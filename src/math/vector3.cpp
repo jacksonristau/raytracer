@@ -63,7 +63,7 @@ Vector3 Vector3::cross(const Vector3& v1) const {
 }
 
 float Vector3::magnitude() const {
-    return 1.0f / sqrt(x * x + y * y + z * z);
+    return sqrt(x * x + y * y + z * z);
 }
 
 float Vector3::distance(const Vector3& v1) const {
