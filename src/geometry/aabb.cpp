@@ -1,4 +1,4 @@
-#include "../../include/geometry/boundingbox.h"
+#include "../../include/geometry/aabb.h"
 
 #include <limits>
 #include <algorithm>

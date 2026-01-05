@@ -8,7 +8,7 @@
 #include "../include/geometry/triangle.h"
 #include "../include/geometry/sphere.h"
 #include "../include/gfx/tiny_obj_loader.h"
-#include "../include/geometry/boundingbox.h"
+#include "../include/geometry/aabb.h"
 
 
 #include <nlohmann/json.hpp>
@@ -122,8 +122,6 @@ Scene::Scene() {
             if (!reader.Warning().empty()) {
                 std::cout << "tinyobj: " << reader.Warning();
             }
-            
-            std::cout << "building primitive list\n";
             for (const auto& shape : reader.GetShapes()) {
                 auto attrib_ptr = std::make_shared<tinyobj::attrib_t>(reader.GetAttrib());
                 meshes.emplace_back(attrib_ptr, shape);
@@ -139,11 +137,7 @@ Scene::Scene() {
                                                            -center_offset.y * scale.y, 
                                                            -center_offset.z * scale.z);
                     translation = translation + centered_translation;
-                    std::cout << "BB Min: " << bb.min.x << ", " << bb.min.y << ", " << bb.min.z << std::endl;
-                    std::cout << "BB Max: " << bb.max.x << ", " << bb.max.y << ", " << bb.max.z << std::endl;
-                    std::cout << "BB Center: " << bb.center().x << ", " << bb.center().y << ", " << bb.center().z << std::endl;
-                    std::cout << "Centered Translation: " << centered_translation.x << ", " << centered_translation.y << ", " << centered_translation.z << std::endl;
-                    std::cout << "Final Translation: " << translation.x << ", " << translation.y << ", " << translation.z << std::endl;                    
+
                     mesh_transform = Transform(translation, rotate, scale);
                 }
                 //Vector3 translation = Point3(0, 0, 0) - bb.center();

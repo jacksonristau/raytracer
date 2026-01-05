@@ -2,61 +2,98 @@
   "materials": [
     {
       "name": "bink",
-      "colortexture": [ 0.98, 0.71, 0.95 ],
-      "specular": [ 1, 1, 1 ],
+      "colortexture": [
+        0.98,
+        0.71,
+        0.95
+      ],
+      "specular": [
+        1,
+        1,
+        1
+      ],
       "ka": 0.2,
-      "kd": 0.6,
-      "ks": 0.0,
+      "kd": 0.8,
+      "ks": 0.4,
       "n": 20,
       "alpha": 1,
       "eta": 1.2
     }
   ],
   "camera": {
-    "eye": [ 0, 0, 0 ],
-    "view": [ 0, 0, -1 ],
-    "up": [ 0, 1, 0 ],
+    "eye": [
+      0,
+      0,
+      0
+    ],
+    "view": [
+      0,
+      0,
+      -1
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
     "hfov": 60,
-    "imsize": [ 256, 256 ],
+    "imsize": [
+      256,
+      256
+    ],
     "depthcueing": {
-      "color": [ 0.0, 0.0, 0.0 ],
-      "alpha": [ 0.1, 1 ],
-      "dist": [ 1, 50 ]
+      "color": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alpha": [
+        0.1,
+        1
+      ],
+      "dist": [
+        1,
+        50
+      ]
     }
   },
-  "bkgcolor": [ 0.23, 0.13, 0.05 ],
+  "bkgcolor": [
+    0.23,
+    0.13,
+    0.05
+  ],
   "spheres": [],
-  "meshes":[
+  "meshes": [
     {
       "material": "bink",
       "file": "../../files/objs/bunny.obj",
       "transform": {
-        "translate": [0, 0, -50],
-        "rotate": [-25, 0, 0],
-        "scale": [0.25, 0.25, 0.25]
+        "translate": [
+          0.5,
+          -0.5,
+          -5
+        ],
+        "rotate": [
+          -90,
+          0.0,
+          0
+        ],
+        "scale": [
+          0.025,
+          0.025,
+          0.025
+        ]
       }
     }
   ],
   "lights": [
     {
-      "l": [ 0, 0, -49 ],
-      "type": "point",
-      "i": 1
-    },
-    {
-      "l": [ 0, 0, -1 ],
+      "l": [
+        0,
+        -0.5,
+        -0.5
+      ],
       "type": "directional",
-      "i": 1
-    },
-    {
-      "l": [ 0, -0.5, -0.5 ],
-      "type": "directional",
-      "i": 1
-    }
-    ,
-    {
-      "l": [ 0, 0, -49.5 ],
-      "type": "point",
       "i": 1
     }
   ]
