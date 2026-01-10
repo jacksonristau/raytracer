@@ -21,9 +21,11 @@ class Triangle : public IShape {
 		bool has_normal() const;
 		bool has_uv() const;
 
-		int get_type() const override {return 1;}
+		int get_type() const override {return SHAPE_TYPE_TRIANGLE;}
 		Hit intersect(const Ray& r, bool with_uv = false) const override;
 		Point2 compute_planar_uv(const Point3& p, const Vector3& normal) const;
+		AABB get_aabb() const override;
+		Point3 get_centroid() const override;
 
 		const Mesh* mesh;
 		int index;

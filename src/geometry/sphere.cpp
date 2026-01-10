@@ -3,6 +3,7 @@
 #include "../include/math/floatutil.h"
 #include "../include/geometry/hit.h"
 #include "../include/math/point2.h"
+#include "../include/geometry/aabb.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -70,6 +71,13 @@ Hit Sphere::intersect(const Ray& r, bool with_uv) const {
             return Hit(min_t, uv.x, uv.y, r, x_p, this->normal(Hit(), x_p), nullptr);
         }
     }
+}
+
+AABB Sphere::get_aabb() const {
+    Point3 min = Point3(center.x - radius, center.y - radius, center.z - radius);
+    Point3 max = Point3(center.x + radius, center.y + radius, center.z + radius);
+
+    return AABB(min, max);
 }
 
 // expects a point on the surface of the sphere

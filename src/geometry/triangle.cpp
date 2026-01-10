@@ -1,5 +1,6 @@
 #include "../include/geometry/triangle.h"
 #include "../include/geometry/plane.h"
+#include "../include/geometry/aabb.h"
 
 Point3 Triangle::get_vertex(int v) const {
     tinyobj::index_t idx = mesh->indices[index + v];
@@ -122,4 +123,36 @@ Point2 Triangle::compute_planar_uv(const Point3& p, const Vector3& normal) const
         // Project onto XY plane
         return Point2(p.x, p.y);
     }
+}
+
+AABB Triangle::get_aabb() const {
+    Point3 min = Point3::infinity();
+    Point3 max = Point3::negative_infinity();
+
+    Point3 v0 = get_vertex(0);
+    Point3 v1 = get_vertex(1);
+    Point3 v2 = get_vertex(2);
+
+
+    min = Point3::min(min, v0);
+    min = Point3::min(min, v1);
+    min = Point3::min(min, v2);
+
+    max = Point3::max(max, v0);
+    max = Point3::max(max, v1);
+    max = Point3::max(max, v2);
+
+    return AABB(min, max);
+}
+
+Point3 Triangle::get_centroid() const {
+    Point3 v0 = get_vertex(0);
+    Point3 v1 = get_vertex(1);
+    Point3 v2 = get_vertex(2);
+
+    float m0 = (v0.x + v1.x + v2.x) / 3.0f;
+    float m1 = (v0.y + v1.y + v2.y) / 3.0f;
+    float m2 = (v0.z + v1.z + v2.z) / 3.0f;
+
+    return Point3(m0, m1, m2);
 }

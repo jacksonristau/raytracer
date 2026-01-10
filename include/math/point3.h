@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <limits>
 #include <nlohmann/json.hpp>
 
 class Vector3;
@@ -15,6 +16,8 @@ public:
 
     static Point3 max(const Point3& p1, const Point3& p2);
     static Point3 min(const Point3& p1, const Point3& p2);
+    static Point3 infinity();
+    static Point3 negative_infinity();
 
     virtual ~Point3();
 
@@ -24,7 +27,14 @@ public:
     // assignment
     Point3 operator= (const Point3& p1);
 
-    float x, y, z;
+    // index access
+    float& operator[](int i) { return data[i]; }
+    const float& operator[](int i) const { return data[i]; }
+
+    union {
+        float data[3];
+        struct { float x, y, z; };
+    };
 };
 
 float distance(const Point3& p1, const Point3& p2);

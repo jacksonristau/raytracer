@@ -1,6 +1,7 @@
 #include "../include/math/point3.h"
 #include "../include/math/vector3.h"
 #include "../include/math/floatutil.h"
+#include <limits>
 
 Point3::Point3() : x(0.0f), y(0.0f), z(0.0f) {}
 
@@ -85,4 +86,14 @@ Point3 Point3::min(const Point3& p1, const Point3& p2){
 	res.y = fmin(p1.y, p2.y);
 
 	return res;
+}
+
+Point3 Point3::infinity() {
+	float inf = std::numeric_limits<float>::infinity();
+	return Point3(inf, inf, inf);
+}
+
+Point3 Point3::negative_infinity() {
+	float inf = std::numeric_limits<float>::infinity();
+	return Point3(-inf, -inf, -inf);
 }

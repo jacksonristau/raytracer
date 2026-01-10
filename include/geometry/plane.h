@@ -3,6 +3,7 @@
 #include "../include/math/vector3.h"
 #include "shape.h"
 #include "hit.h"
+#include "aabb.h"
 
 /*
     plane eq: A*x + B*y + C*z + D
@@ -17,9 +18,11 @@ class Plane : public IShape {
         Plane();
         Plane(Point3 p, Vector3 n);
 
-        int get_type() const override {return 2;}
+        int get_type() const override {return SHAPE_TYPE_PLANE;}
         Hit intersect(const Ray& r, bool with_uv = false) const override;
         Vector3 normal(const Hit& h, const Point3& p) const { return n; }
+        AABB get_aabb() const override { return AABB(); }
+        Point3 get_centroid() const override { return Point3(); }
 
         Point3 pos;
         Vector3 n;

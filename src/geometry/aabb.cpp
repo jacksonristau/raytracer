@@ -1,28 +1,42 @@
 #include "../../include/geometry/aabb.h"
+#include "../../include/geometry/primitive.h"
+#include "../../include/geometry/shape.h"
+#include "../../include/geometry//triangle.h"
 
 #include <limits>
 #include <algorithm>
 
-BoundingBox::BoundingBox(Mesh m) {
-    auto vertices = m.get_vertices();
-    if (vertices.size() > 0)
-    {
-        Point3 min_vertex = Point3(vertices[0], vertices[1], vertices[2]);
-        Point3 max_vertex = Point3(vertices[0], vertices[1], vertices[2]);
+AABB::AABB(Point3 min, Point3 max) : min(min), max(max) {}
 
-        for (int i = 0; i < vertices.size(); i+=3)
-        {
-            min_vertex = Point3::min(min_vertex, Point3(vertices[i], vertices[i + 1], vertices[i + 2]));
-            max_vertex = Point3::max(max_vertex, Point3(vertices[i], vertices[i + 1], vertices[i + 2]));
-        }
-        min = min_vertex;
-        max = max_vertex;
-        return;
+AABB::AABB(std::vector<Primitive*> primitives) {
+    min = Point3::infinity();
+    max = Point3::negative_infinity();
+    for (Primitive* p : primitives) {
+        AABB bounds = p->geometry->get_aabb();
+
+        combine(bounds);
     }
-    min = Point3();
-    max = Point3();
 }
 
-Point3 BoundingBox::center() const{
+AABB::AABB(std::vector<Primitive*>::const_iterator begin, std::vector<Primitive*>::const_iterator end) {
+    min = Point3::infinity();
+    max = Point3::negative_infinity();
+
+    for (auto it = begin; it != end; ++it) {
+        this->combine(expand(*(*it)));
+    }
+}
+
+AABB AABB::expand(const Primitive& p) const {
+    return this->combine(p.geometry->get_aabb());
+}
+
+AABB AABB::combine(AABB other) const {
+    Point3 min = Point3::min(this->min, other.min);
+    Point3 max = Point3::max(this->max, other.max);
+    return AABB(min, max);
+}
+
+Point3 AABB::center() const{
     return Point3(0.5f * max.x + 0.5f * min.x, 0.5f * min.y + 0.5f * max.y, 0.5f * min.z + 0.5f * max.z);
 }

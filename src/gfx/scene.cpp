@@ -131,13 +131,6 @@ Scene::Scene() {
                     Vector3 translation = Vector3(transform_json["translate"]);
                     Vector3 scale = Vector3(transform_json["scale"]);
                     Vector3 rotate = Vector3(transform_json["rotate"]);
-                    BoundingBox bb = BoundingBox(meshes.back());
-                    Point3 center_offset = bb.center();
-                    Vector3 centered_translation = Vector3(-center_offset.x * scale.x, 
-                                                           -center_offset.y * scale.y, 
-                                                           -center_offset.z * scale.z);
-                    translation = translation + centered_translation;
-
                     mesh_transform = Transform(translation, rotate, scale);
                 }
                 //Vector3 translation = Point3(0, 0, 0) - bb.center();

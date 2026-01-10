@@ -29,7 +29,7 @@
   "meshes": [
     {
       "material": "teal",
-      "file": "square_flat.obj"
+      "file": "../../files/objs/square_flat.obj"
     }
   ],
   "lights": [

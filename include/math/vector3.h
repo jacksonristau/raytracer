@@ -26,6 +26,9 @@ class Vector3 {
         // assignment
         Vector3 operator=(const Vector3& v1);
 
+        float& operator[](int i) { return data[i]; }
+        const float& operator[](int i) const { return data[i]; }
+
         void normalize();
 
         Vector3 cross(const Vector3& v1) const;
@@ -44,7 +47,10 @@ class Vector3 {
 
         static const Vector3& Inf();
 
-        float x, y, z;
+        union {
+            float data[3];
+            struct { float x, y, z; };
+        };
 };
 Vector3 operator+(const Vector3& v1, const Vector3& v2);
 
