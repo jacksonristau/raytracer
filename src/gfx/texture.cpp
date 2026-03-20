@@ -39,7 +39,7 @@ Color ImageTexture::get_pixel(float u, float v) const {
     if (v > 1){
         v = std::modf(v, &temp);
     }
-    y = static_cast<int>(v * (height - 1));
+    y = static_cast<int>((1.0f - v) * (height - 1));
     x = static_cast<int>(u * (width - 1));
     if (y * width + x >= data.size()){
         throw std::runtime_error("invalid texture coordinates: " + std::to_string(x) + ", " + std::to_string(y) + " in " + filename + " with size " + std::to_string(width) + "x" + std::to_string(height) + " and " + std::to_string(data.size()) + " pixels");
