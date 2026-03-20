@@ -8,22 +8,22 @@
 
 AABB::AABB(Point3 min, Point3 max) : min(min), max(max) {}
 
-AABB::AABB(std::vector<Primitive*> primitives) {
+AABB::AABB(std::vector<Primitive> primitives) {
     min = Point3::infinity();
     max = Point3::negative_infinity();
-    for (Primitive* p : primitives) {
-        AABB bounds = p->geometry->get_aabb();
+    for (Primitive p : primitives) {
+        AABB bounds = p.geometry->get_aabb();
 
         combine(bounds);
     }
 }
 
-AABB::AABB(std::vector<Primitive*>::const_iterator begin, std::vector<Primitive*>::const_iterator end) {
+AABB::AABB(std::vector<Primitive>::const_iterator begin, std::vector<Primitive>::const_iterator end) {
     min = Point3::infinity();
     max = Point3::negative_infinity();
 
     for (auto it = begin; it != end; ++it) {
-        this->combine(expand(*(*it)));
+        this->combine(expand((*it)));
     }
 }
 
@@ -35,6 +35,10 @@ AABB AABB::combine(AABB other) const {
     Point3 min = Point3::min(this->min, other.min);
     Point3 max = Point3::max(this->max, other.max);
     return AABB(min, max);
+}
+
+int AABB::intersect(const Ray& ray) const {
+    
 }
 
 Point3 AABB::center() const{

@@ -1,5 +1,8 @@
+#pragma once
+
 #include "aabb.h"
 #include "primitive.h"
+#include "../math/ray.h"
 
 struct BVHNode {
 	AABB bounds;
@@ -32,9 +35,11 @@ struct BVHNode {
 };
 
 class BVH {
-	BVH(std::vector<Primitive*> primitives);
-	uint32_t build_bvh_object_median(uint32_t& node_index, uint32_t start_index, uint32_t end_index);
+	public:
+		BVH(std::vector<Primitive> primitives);
+		uint32_t build_bvh_object_median(uint32_t& node_index, uint32_t start_index, uint32_t end_index);
+		void traverse(BVHNode&, Ray& ray, int& t);
 
-	std::vector<Primitive*> primitives;
-	std::vector<BVHNode> nodes;
+		std::vector<Primitive> primitives;
+		std::vector<BVHNode> nodes;
 };

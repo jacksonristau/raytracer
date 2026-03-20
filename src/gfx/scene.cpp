@@ -9,6 +9,7 @@
 #include "../include/geometry/sphere.h"
 #include "../include/gfx/tiny_obj_loader.h"
 #include "../include/geometry/aabb.h"
+#include "../include/geometry/bvh.h"
 
 
 #include <nlohmann/json.hpp>
@@ -185,6 +186,9 @@ Scene::Scene() {
             }
         }
     }
+    BVH bvh = BVH(primitives);
+    uint32_t root = 0;
+    bvh.build_bvh_object_median(root, 0, primitives.size() - 1);
 }
 
  Scene::~Scene() {}
