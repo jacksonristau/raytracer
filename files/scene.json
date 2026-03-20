@@ -1,12 +1,8 @@
 {
   "materials": [
     {
-      "name": "bink",
-      "colortexture": [
-        0.98,
-        0.71,
-        0.95
-      ],
+      "name": "cat_tex",
+      "imagetexture": "../../files/textures/cat_tex.ppm",
       "specular": [
         1,
         1,
@@ -14,7 +10,7 @@
       ],
       "ka": 0.2,
       "kd": 0.8,
-      "ks": 0.4,
+      "ks": 0.1,
       "n": 20,
       "alpha": 1,
       "eta": 1.2
@@ -38,8 +34,8 @@
     ],
     "hfov": 60,
     "imsize": [
-      64,
-      64
+      256,
+      256
     ],
     "depthcueing": {
       "color": [
@@ -65,17 +61,17 @@
   "spheres": [],
   "meshes": [
     {
-      "material": "bink",
-      "file": "../../files/objs/stanford_bunny_good.obj",
+      "material": "cat_tex",
+      "file": "../../files/objs/low_poly_cat.obj",
       "transform": {
         "translate": [
           0,
-          0.5877852522924731,
-          -5
+          -1,
+          -10
         ],
         "rotate": [
+          90,
           0,
-          36.0,
           0
         ],
         "scale": [
@@ -89,9 +85,9 @@
   "lights": [
     {
       "l": [
+        -1,
         0,
-        1,
-        -3
+        -1
       ],
       "type": "point",
       "i": 1
