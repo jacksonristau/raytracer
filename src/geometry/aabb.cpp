@@ -38,7 +38,30 @@ AABB AABB::combine(AABB other) const {
 }
 
 int AABB::intersect(const Ray& ray) const {
-    
+    // find t_min and t_max for each plane
+    // find the max of the mins and the mins of the maxs to get the interval
+    // if interval is valid and its max is greater than zero thats an intersection
+    Vector3 min_distance = min - ray.origin;
+    Vector3 max_distance = max - ray.origin;
+
+    int t_min_x = min_distance.x / ray.direction.x;
+    int t_min_y = min_distance.y / ray.direction.y;
+    int t_min_z = min_distance.z / ray.direction.z;
+
+    int t_max_x = max_distance.x / ray.direction.x;
+    int t_max_y = max_distance.y / ray.direction.y;
+    int t_max_z = max_distance.z / ray.direction.z;
+
+    Point2 overlap = Point2(std::max(std::max(t_min_x, t_min_y), t_min_z), std::min(std::min(t_max_x, t_max_y), t_max_z));
+
+    // invalid interval
+    if (overlap.y < overlap.x)
+        return -1;
+    // behind origin
+    if (overlap.y < 0)
+        return -1;
+
+    return overlap.x;
 }
 
 Point3 AABB::center() const{
