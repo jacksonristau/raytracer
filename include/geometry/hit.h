@@ -16,6 +16,8 @@ class Hit {
             x_pos(p),
             normal(n),
             primitive(prim) {}
+        
+        static Hit infinity();
 
         float t = -1.0f;
         float u = 0.0f;
@@ -29,5 +31,5 @@ class Hit {
 
         Hit operator=(const Hit& h);
 
-        bool valid() const { return ! is_negative(t); }
+        bool valid() const { return ! is_negative(t) && ! std::isinf(t); }
 };

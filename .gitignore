@@ -64,3 +64,4 @@ test/test_runner
 /.vs
 /build/x64-Debug/apps/raytracer-cli/scene.json
 /build/x64-Debug/apps/raytracer-cli/scene.ppm
+.cache/**

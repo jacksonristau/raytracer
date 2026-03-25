@@ -2,7 +2,7 @@
   "materials": [
     {
       "name": "cat_tex",
-      "imagetexture": "../../files/textures/cat_tex.ppm",
+      "imagetexture": "files/textures/cat_tex.ppm",
       "specular": [
         1,
         1,
@@ -62,7 +62,7 @@
   "meshes": [
     {
       "material": "cat_tex",
-      "file": "../../files/objs/low_poly_cat.obj",
+      "file": "files/objs/low_poly_cat.obj",
       "transform": {
         "translate": [
           0,

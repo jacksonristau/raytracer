@@ -7,6 +7,10 @@ Hit::Hit() {
     primitive = nullptr;
 }
 
+Hit Hit::infinity() {
+    return Hit(INFINITY, 0.0f, 0.0f, Ray(), Point3(), Vector3(), nullptr);
+}
+
 Hit Hit::operator=(const Hit& h) {
     t = h.t,
     u = h.u;

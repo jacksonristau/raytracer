@@ -12,7 +12,7 @@ AABB::AABB(std::vector<Primitive> primitives) {
     min = Point3::infinity();
     max = Point3::negative_infinity();
     for (Primitive p : primitives) {
-        AABB bounds = p.geometry->get_aabb();
+        AABB bounds = p.get_aabb();
 
         *this = combine(bounds);
     }
@@ -23,12 +23,12 @@ AABB::AABB(std::vector<Primitive>::const_iterator begin, std::vector<Primitive>:
     max = Point3::negative_infinity();
 
     for (auto it = begin; it != end; ++it) {
-        this->combine(expand((*it)));
+        *this = this->combine(expand((*it)));
     }
 }
 
 AABB AABB::expand(const Primitive& p) const {
-    return this->combine(p.geometry->get_aabb());
+    return this->combine(p.get_aabb());
 }
 
 AABB AABB::combine(AABB other) const {
@@ -37,29 +37,31 @@ AABB AABB::combine(AABB other) const {
     return AABB(min, max);
 }
 
-int AABB::intersect(const Ray& ray) const {
+float AABB::intersect(const Ray& ray) const {
     // find t_min and t_max for each plane
     // find the max of the mins and the mins of the maxs to get the interval
     // if interval is valid and its max is greater than zero thats an intersection
     Vector3 min_distance = min - ray.origin;
     Vector3 max_distance = max - ray.origin;
 
-    int t_min_x = min_distance.x / ray.direction.x;
-    int t_min_y = min_distance.y / ray.direction.y;
-    int t_min_z = min_distance.z / ray.direction.z;
-
-    int t_max_x = max_distance.x / ray.direction.x;
-    int t_max_y = max_distance.y / ray.direction.y;
-    int t_max_z = max_distance.z / ray.direction.z;
+    float t_min_x = min_distance.x / ray.direction.x;
+    float t_min_y = min_distance.y / ray.direction.y;
+    float t_min_z = min_distance.z / ray.direction.z;
+    float t_max_x = max_distance.x / ray.direction.x;
+    float t_max_y = max_distance.y / ray.direction.y;
+    float t_max_z = max_distance.z / ray.direction.z;
+    if (t_min_x > t_max_x) std::swap(t_min_x, t_max_x);
+    if (t_min_y > t_max_y) std::swap(t_min_y, t_max_y);
+    if (t_min_z > t_max_z) std::swap(t_min_z, t_max_z);
 
     Point2 overlap = Point2(std::max(std::max(t_min_x, t_min_y), t_min_z), std::min(std::min(t_max_x, t_max_y), t_max_z));
 
     // invalid interval
     if (overlap.y < overlap.x)
-        return -1;
+        return -1.0f;
     // behind origin
     if (overlap.y < 0)
-        return -1;
+        return -1.0f;
 
     return overlap.x;
 }

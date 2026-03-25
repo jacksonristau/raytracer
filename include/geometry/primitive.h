@@ -6,6 +6,7 @@ class IShape;
 class Hit;
 class Material;
 class Ray;
+class AABB;
 
 class Primitive {
 	public:
@@ -16,6 +17,7 @@ class Primitive {
 		~Primitive() {}
 
 		Hit intersect(const Ray& r);
+		AABB get_aabb() const;
 
 
 		std::shared_ptr<IShape> geometry;

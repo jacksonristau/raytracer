@@ -3,7 +3,10 @@
 #include "../include/geometry/primitive.h"
 #include "../include/geometry/shape.h"
 #include <vector>
-
+BVH::BVH(){
+	primitives = std::vector<Primitive>();
+	nodes = std::vector<BVHNode>();
+}
 BVH::BVH(std::vector<Primitive> primitives) : primitives(primitives){
 	nodes = std::vector<BVHNode>((2 * primitives.size()) - 1);
 }
@@ -33,19 +36,43 @@ uint32_t BVH::build_bvh_object_median(uint32_t& next_node_index, uint32_t start_
 	};
 	std::nth_element(start_iter, mid_iter, end_iter, cmp);
 
-	uint32_t left = build_bvh_object_median(node_index, start_index, mid_index);
-	uint32_t right = build_bvh_object_median(node_index, mid_index, end_index);
+	uint32_t left = build_bvh_object_median(next_node_index, start_index, mid_index);
+	uint32_t right = build_bvh_object_median(next_node_index, mid_index, end_index);
 	
 	nodes[node_index] = BVHNode::branch(bounds, left, right);
 	return node_index;
 }
 
-// void BVH::traverse(BVHNode node, Ray& ray, int& t) {
-// 	node.bounds.
+Hit BVH::intersect_node(const BVHNode& node, const Ray& ray) const {
+	Hit closest = Hit::infinity();
+	for (uint32_t i = node.start; i < node.end; i++) {
+		Primitive p = primitives[i];
+		if (ray.o_primitive != nullptr && p == *ray.o_primitive)
+			continue;
+		Hit h = p.intersect(ray);
+		if (h.valid() && h.t < closest.t) {
+			closest = h;
+		}
+	}
+	return closest;
+}
 
-	// intersect with root 
-	// if closer than t min process the bvhnode
-	// process the closest node first
-	// if inner nodes recurse. further ones on the function stack if need be
-	// if its a leaf check all the triangles and update t min for closest triangle intersection
-// }
+// intersect with root 
+// if closer than t min process the bvhnode
+// process the closest node first
+// if inner nodes recurse. further ones on the function stack if need be
+// if its a leaf check all the triangles and update t min for closest triangle intersection
+void BVH::traverse(const BVHNode& node, const Ray& ray, Hit& closest) const {
+	if (node.bounds.intersect(ray) > closest.t)
+		return;
+
+	if (node.is_leaf()) {
+		Hit h = intersect_node(node, ray);
+		if (h.valid() && h.t < closest.t)
+			closest = h;
+	}
+	else {
+		traverse(nodes[node.left], ray, closest);
+		traverse(nodes[node.right], ray, closest);
+	}
+}

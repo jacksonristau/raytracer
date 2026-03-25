@@ -14,7 +14,7 @@ class AABB {
 
         AABB expand(const Primitive& p) const;
         AABB combine(AABB bb) const;
-        int intersect(const Ray& ray) const;
+        float intersect(const Ray& ray) const;
 
         Point3 center() const;
         Point3 min;

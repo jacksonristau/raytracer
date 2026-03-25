@@ -131,6 +131,10 @@ int main(int argc, char *argv[]) {
     int size = Scene::camera.px_width() * Scene::camera.px_height();
     Color *pixelmap = new Color[size];
 
+    Raytracer::bvh = BVH(Scene::primitives);
+    uint32_t next_node = 0;
+    Raytracer::bvh.build_bvh_object_median(next_node, 0, Scene::primitives.size());
+
 	int hardware_threads = std::thread::hardware_concurrency();
 	int num_threads = hardware_threads > 0 ? hardware_threads - 1 : 2;
     std::vector<std::thread> threads(num_threads);

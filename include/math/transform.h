@@ -26,15 +26,11 @@ public:
     const Matrix4x4& get_world_to_object() const { return world_to_object; }
 
 private:
-    Vector3 translation;
-    Vector3 rotation;      // Euler angles in degrees
-    Vector3 scale_factors;
-
     Matrix4x4 object_to_world;  // T * R * S
     Matrix4x4 world_to_object;  // S^-1 * R^-1 * T^-1
 
     bool is_identity_flag;
 
-    void rebuild_matrices();  // Builds both matrices analytically
-    bool check_if_identity() const;
+    void build_matrices(const Vector3& translation, const Vector3& rotation, const Vector3& scale);  
+    bool check_if_identity(const Vector3& translation, const Vector3& rotation, const Vector3& scale) const;
 };

@@ -6,6 +6,8 @@
 
 namespace Raytracer {
 	bool wireframe_mode = false;
+	BVH bvh = BVH();
+
 	Hit intersect_scene_naive(const Ray& r) {
 		Hit nearest = Hit();
 		for (Primitive& prim : Scene::primitives) {
@@ -29,8 +31,9 @@ namespace Raytracer {
 	}
 
 	Hit intersect_scene_bvh(const Ray& r) {
-		Hit nearest = Hit();
-		
+		Hit nearest = Hit::infinity();
+		bvh.traverse(bvh.nodes[0], r, nearest);
+		return nearest;
 	}
 
 	float trace_shadow_ray_naive(const Ray& r, const ILight* l, float d) {
@@ -63,7 +66,7 @@ namespace Raytracer {
 	}
 
 	Color trace_ray(Ray r, int depth) {
-		Hit hit = intersect_scene_naive(r);
+		Hit hit = intersect_scene_bvh(r);
 		if (!hit.valid())
 			return Scene::bkgcolor;
 		
