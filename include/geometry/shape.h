@@ -14,7 +14,6 @@ class IShape {
 		virtual Point3 get_centroid() const = 0;
 };
 
-// Shape type constants
 constexpr int SHAPE_TYPE_SPHERE = 1;
 constexpr int SHAPE_TYPE_PLANE  = 2;
 constexpr int SHAPE_TYPE_TRIANGLE = 3;

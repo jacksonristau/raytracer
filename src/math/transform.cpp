@@ -108,8 +108,7 @@ Vector3 Transform::to_world_space_normal(const Vector3& object_normal) const {
     if (is_identity_flag) {
         return object_normal;
     }
-    // CRITICAL: Normals must be transformed by inverse transpose!
-    // world_to_object is already the inverse, so we transpose it
+    
     Matrix4x4 inverse_transpose = world_to_object.transpose();
     return inverse_transpose.transform_vector(object_normal);
 }

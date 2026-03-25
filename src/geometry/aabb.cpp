@@ -14,7 +14,7 @@ AABB::AABB(std::vector<Primitive> primitives) {
     for (Primitive p : primitives) {
         AABB bounds = p.geometry->get_aabb();
 
-        combine(bounds);
+        *this = combine(bounds);
     }
 }
 
