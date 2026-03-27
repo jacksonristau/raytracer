@@ -23,6 +23,7 @@ class Triangle : public IShape {
 
 		int get_type() const override {return SHAPE_TYPE_TRIANGLE;}
 		Hit intersect(const Ray& r, bool with_uv = false) const override;
+		Hit intersect_old(const Ray& r, bool with_uv = false) const;
 		Point2 compute_planar_uv(const Point3& p, const Vector3& normal) const;
 		AABB get_aabb() const override;
 		Point3 get_centroid() const override;

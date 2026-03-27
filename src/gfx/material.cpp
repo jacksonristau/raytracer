@@ -143,7 +143,7 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
         float i = light->intensity() * light->atten(d);
         final_color = final_color + (i * shadow_mask * (diffuse + specular));
     }
-    final_color = final_color + reflection + transmission;
+    final_color = a * final_color + reflection + transmission;
     final_color = Scene::camera.depth_cue(hit.x_pos, final_color);
     return final_color;
 }

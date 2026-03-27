@@ -72,7 +72,8 @@ float AABB::intersect(const Ray& ray) const {
     if (t_max < 0.0f)
         return -1.0f;
 
-    return t_min;
+    // If t_min < 0, ray origin is inside the AABB; return t_max for sorting/pruning
+    return t_min < 0.0f ? t_max : t_min;
 }
 
 Point3 AABB::center() const{

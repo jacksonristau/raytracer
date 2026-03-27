@@ -10,6 +10,7 @@ set(
   ${PROJECT_SOURCE_DIR}/src/geometry/hit.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/aabb.cpp
   ${PROJECT_SOURCE_DIR}/src/geometry/bvh.cpp
+  ${PROJECT_SOURCE_DIR}/src/geometry/mesh.cpp
   
   ${PROJECT_SOURCE_DIR}/src/gfx/camera.cpp
   ${PROJECT_SOURCE_DIR}/src/gfx/color.cpp

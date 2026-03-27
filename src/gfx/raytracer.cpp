@@ -81,22 +81,38 @@ namespace Raytracer {
 			return Color(0, 1, 0);
 
 		Vector3 i = -r.direction;
-		float ndoti = hit.normal.dot(i);
+		Vector3 shading_normal = hit.normal;
+		float ndoti = shading_normal.dot(i);
+
+		// Flip normal if we hit the back face (ray is inside the mesh)
+		if (ndoti < 0) {
+			shading_normal = -shading_normal;
+			ndoti = -ndoti;
+		}
 
 		auto material = hit.primitive->material;
 
 		Color reflection = Color(0, 0, 0);
 		Color transmission = Color(0, 0, 0);
+		Point3 reflect_origin = hit.x_pos + Eps * shading_normal;
+		Point3 refract_origin = hit.x_pos - Eps * shading_normal;
 		if (material->is_glossy() && depth < 6) {
 			float fr = fresnel(ndoti, material->eta(), 0.0, true);
-			Ray reflected_ray(hit.x_pos, r.reflect(hit.normal), r.entering, r.eta, hit.primitive);
+			Ray reflected_ray(reflect_origin, r.reflect(shading_normal), r.entering, r.eta, hit.primitive);
 			reflection = fr * trace_ray(reflected_ray, depth + 1);
 		}
 		if (material->is_transparent() && depth < 6) {
 			float nt = r.entering ? material->eta() : Scene::bkgeta;
 			float fr = fresnel(ndoti, r.eta, nt, false);
-			Ray refracted_ray(hit.x_pos, r.refract(hit.normal, ndoti, r.eta, nt), !r.entering, nt, hit.primitive);
-			transmission = (1 - fr) * (1 - material->alpha()) * trace_ray(refracted_ray, depth + 1);
+			Vector3 refract_dir = r.refract(shading_normal, ndoti, r.eta, nt);
+			if (refract_dir.is_zero()) {
+				Ray tir_ray(reflect_origin, r.reflect(shading_normal), r.entering, r.eta, hit.primitive);
+				transmission = (1 - material->alpha()) * trace_ray(tir_ray, depth + 1);
+			}
+			else {
+				Ray refracted_ray(refract_origin, refract_dir, !r.entering, nt, hit.primitive);
+				transmission = (1 - fr) * (1 - material->alpha()) * trace_ray(refracted_ray, depth + 1);
+			}
 		}
 		
 		return material->evaluate(hit, reflection, transmission);

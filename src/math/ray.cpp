@@ -39,7 +39,6 @@ Vector3 Ray::refract(Vector3 N, float ndotv, float n1, float n2) const{
     }
     catch (std::exception e){
         // total internal reflection
-        std::cout << "TIR" << std::endl;
         return Vector3(0.0f, 0.0f, 0.0f);
     }
 }

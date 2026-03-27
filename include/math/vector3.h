@@ -22,6 +22,8 @@ class Vector3 {
         float& operator[](int i) { return data[i]; }
         const float& operator[](int i) const { return data[i]; }
 
+        bool is_zero();
+
         void normalize();
 
         Vector3 cross(const Vector3& v1) const;

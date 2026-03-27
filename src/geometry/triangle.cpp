@@ -3,47 +3,24 @@
 #include "../include/geometry/aabb.h"
 
 Point3 Triangle::get_vertex(int v) const {
-    tinyobj::index_t idx = mesh->indices[index + v];
-    const auto& vertices = mesh->get_vertices();
-
-    tinyobj::real_t vx = vertices.at(3 * size_t(idx.vertex_index) + 0);
-    tinyobj::real_t vz = vertices.at(3 * size_t(idx.vertex_index) + 2);
-    tinyobj::real_t vy = vertices.at(3 * size_t(idx.vertex_index) + 1);
-    return Point3(vx, vy, vz);
+    size_t i = (index + v) * 3;
+    return Point3(mesh->vertices[i], mesh->vertices[i + 1], mesh->vertices[i + 2]);
 }
 
 Vector3 Triangle::get_normal(int n) const {
-    const auto& normals = mesh->get_normals();
-
-    tinyobj::index_t idx = mesh->indices[index + n];
-    tinyobj::real_t nx = normals.at(3 * size_t(idx.normal_index) + 0);
-    tinyobj::real_t ny = normals.at(3 * size_t(idx.normal_index) + 1);
-    tinyobj::real_t nz = normals.at(3 * size_t(idx.normal_index) + 2);
-
-    return Vector3(nx, ny, nz);
+    size_t i = (index + n) * 3;
+    return Vector3(mesh->normals[i], mesh->normals[i + 1], mesh->normals[i + 2]);
 }
 
 Point2 Triangle::get_uv(int t) const {
-    const auto& uvs = mesh->get_uvs();
-
-    tinyobj::index_t idx = mesh->indices[index + t];
-    tinyobj::real_t u = uvs.at(2 * size_t(idx.texcoord_index) + 0);
-    tinyobj::real_t v = uvs.at(2 * size_t(idx.texcoord_index) + 1);
-
-    return Point2(u, v);
+    size_t i = (index + t) * 2;
+    return Point2(mesh->uvs[i], mesh->uvs[i + 1]);
 }
 
-bool Triangle::has_normal() const {
-    tinyobj::index_t idx = mesh->indices[index];
-    return idx.normal_index >= 0;
-}
+bool Triangle::has_normal() const { return mesh->has_normals; }
+bool Triangle::has_uv() const { return mesh->has_uvs; }
 
-bool Triangle::has_uv() const {
-    tinyobj::index_t idx = mesh->indices[index];
-    return idx.texcoord_index >= 0;
-}
-
-Hit Triangle::intersect(const Ray& r, bool with_uv) const {
+Hit Triangle::intersect_old(const Ray& r, bool with_uv) const {
     Point3 v0 = get_vertex(0);
     Point3 v1 = get_vertex(1);
     Point3 v2 = get_vertex(2);
@@ -59,8 +36,8 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
         return Hit();
 
     // backface culling
-    if (n.dot(r.direction) > 0)
-        return Hit();
+    //if (n.dot(r.direction) > 0)
+    //    return Hit();
 
     Plane plane(v0, n);
     Hit h = plane.intersect(r);
@@ -113,6 +90,79 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     // simple planar normal already set for h.normal
 
     return h;
+}
+
+// moller trombore
+Hit Triangle::intersect(const Ray& r, bool with_uv) const {
+    Point3 v0 = get_vertex(0);
+    Point3 v1 = get_vertex(1);
+    Point3 v2 = get_vertex(2);
+
+    Vector3 e1 = v1 - v0;
+    Vector3 e2 = v2 - v0;
+
+    Vector3 h_vec = r.direction.cross(e2);
+    float a = e1.dot(h_vec);
+
+    if (a > -Eps && a < Eps)
+        return Hit();
+
+    float f = 1.0f / a;
+    Vector3 s = r.origin - v0;
+    float beta = f * s.dot(h_vec);
+    if (is_negative(beta) || beta >= 1.0f)
+        return Hit();
+
+    Vector3 q = s.cross(e1);
+    float gamma = f * r.direction.dot(q);
+    if (is_negative(gamma) || beta + gamma >= 1.0f)
+        return Hit();
+
+    float t = f * e2.dot(q);
+    if (is_negative(t))
+        return Hit();
+
+    float alpha = 1.0f - (beta + gamma);
+    Point3 x_pos = r.get_point(t);
+    Vector3 face_normal = e1.cross(e2);
+    face_normal.normalize();
+
+    Hit hit;
+    hit.t = t;
+    hit.r = r;
+    hit.x_pos = x_pos;
+    hit.normal = face_normal;
+    hit.primitive = nullptr;
+
+    float edge_threshold = 0.01f;
+    if (alpha < edge_threshold || beta < edge_threshold || gamma < edge_threshold)
+        hit.is_edge = true;
+
+    if (!with_uv && !has_uv() && !has_normal())
+        return hit;
+
+    if (!has_uv()) {
+        Point2 uv = compute_planar_uv(x_pos, face_normal);
+        hit.u = uv.x;
+        hit.v = uv.y;
+    } else {
+        Point2 uv0 = get_uv(0);
+        Point2 uv1 = get_uv(1);
+        Point2 uv2 = get_uv(2);
+        hit.u = alpha * uv0.x + beta * uv1.x + gamma * uv2.x;
+        hit.v = alpha * uv0.y + beta * uv1.y + gamma * uv2.y;
+    }
+
+    if (has_normal()) {
+        Vector3 n0 = get_normal(0);
+        Vector3 n1 = get_normal(1);
+        Vector3 n2 = get_normal(2);
+        Vector3 n = alpha * n0 + beta * n1 + gamma * n2;
+        n.normalize();
+        hit.normal = n;
+    }
+
+    return hit;
 }
 
 Point2 Triangle::compute_planar_uv(const Point3& p, const Vector3& normal) const {

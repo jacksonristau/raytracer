@@ -37,6 +37,10 @@ void Vector3::normalize() {
     z *= magnitude;
 }
 
+bool Vector3::is_zero() {
+    return x == 0 && y == 0 && z == 0;
+}
+
 // v1.cross(v2) -> v1 X v2
 Vector3 Vector3::cross(const Vector3& v1) const {
     // v cross v1
