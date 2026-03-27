@@ -15,7 +15,7 @@
 
 class Plane : public IShape {
     public:
-        Plane();
+        Plane() = default;
         Plane(Point3 p, Vector3 n);
 
         int get_type() const override {return SHAPE_TYPE_PLANE;}

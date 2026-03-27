@@ -7,7 +7,7 @@ class Ray;
 
 class Hit {
     public: 
-        Hit();
+        Hit() = default;
         Hit(float t, float u, float v, Ray r, Point3 p, Vector3 n, Primitive* prim) :
             t(t),
             u(u),
@@ -26,10 +26,8 @@ class Hit {
         Ray r;
         Point3 x_pos;
         Vector3 normal;
-        Primitive* primitive;
+        const Primitive* primitive;
         bool is_edge = false;
-
-        Hit operator=(const Hit& h);
 
         bool valid() const { return ! is_negative(t) && ! std::isinf(t); }
 };

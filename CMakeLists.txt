@@ -5,10 +5,26 @@ project(raytracer)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# macOS-specific optimization flags
-if(APPLE)
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto")
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -flto")
+# Platform-specific Release optimization flags
+if(MSVC)
+  # /O2    - maximize speed (default for Release, explicit for clarity)
+  # /Ob3   - aggressive inlining beyond /Ob2
+  # /GL    - whole program optimization (pairs with /LTCG)
+  # /fp:fast - relaxed IEEE float math for faster codegen
+  # /Oi    - replace function calls with intrinsics
+  # /Ot    - favor fast code over small code
+  # /GS-   - disable buffer security checks
+  # /Gy    - function-level linking (discard unused functions)
+  # /Gw    - global data optimization
+  # /arch:AVX2 - use AVX2 SIMD instructions
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob3 /GL /fp:fast /Oi /Ot /GS- /Gy /Gw /arch:AVX2")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /Ob3 /GL /fp:fast /Oi /Ot /GS- /Gy /Gw /arch:AVX2")
+  # Link-time code generation (pairs with /GL)
+  set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+  set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
+elseif(APPLE)
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto -ffast-math -funroll-loops")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -flto -ffast-math -funroll-loops")
 endif()
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory

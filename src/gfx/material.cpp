@@ -117,7 +117,7 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
     for (const ILight* light : Scene::lights) {
         Ray shadow_ray = light->get_shadow_ray(hit);
         float d = light->dist(hit.x_pos);
-        float shadow_mask = Raytracer::trace_shadow_ray_naive(shadow_ray, light, d);
+        float shadow_mask = Raytracer::trace_shadow_ray_bvh(shadow_ray, light, d);
         
         Vector3 v(hit.r.origin - hit.x_pos);
         v.normalize();
@@ -141,8 +141,9 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
             specular = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : std::pow(ndoth, n_val) * k[2] * specular;
         }
         float i = light->intensity() * light->atten(d);
-        final_color = final_color + (i * shadow_mask * (diffuse + specular + reflection + transmission));
+        final_color = final_color + (i * shadow_mask * (diffuse + specular));
     }
+    final_color = final_color + reflection + transmission;
     final_color = Scene::camera.depth_cue(hit.x_pos, final_color);
     return final_color;
 }

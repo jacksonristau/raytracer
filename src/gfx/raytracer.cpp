@@ -36,8 +36,15 @@ namespace Raytracer {
 		return nearest;
 	}
 
+	float trace_shadow_ray_bvh(const Ray& r, const ILight* l, float d) {
+		return bvh.traverse_shadow(bvh.nodes[0], r, l, d);
+	}
+
 	float trace_shadow_ray_naive(const Ray& r, const ILight* l, float d) {
 		float s = 1.0f;
+		Hit nearest = intersect_scene_bvh(r);
+		if (!nearest.valid() || !is_negative(nearest.t))
+
 		for (Primitive& prim : Scene::primitives) {
 			if (r.o_primitive != nullptr && prim == *r.o_primitive)
 				continue;

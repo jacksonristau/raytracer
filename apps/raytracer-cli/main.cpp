@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <nlohmann/json.hpp>
 #include <thread>
+#include <atomic>
 
 #include "../include/math/vector3.h"
 #include "../include/math/ray.h"
@@ -50,28 +51,68 @@ void render_image_serial(Color* pixelmap, int size) {
     std::cout << "tracing complete." << std::endl;
 }
 
-void render_rows(int start, int end, Color* pixelmap) {
-    for (int i = start; i < end; i++) {
-        for (int j = 0; j < Scene::camera.px_width(); j++) {
-            int pos = j + (Scene::camera.px_width() * i);
-            Ray ray = Scene::camera.generate_ray(j, i);
-            try {
-                Color pixel_color = Raytracer::trace_ray(ray, true);
-                if (pos < Scene::camera.px_width() * Scene::camera.px_height())
-                    pixelmap[pos] = pixel_color;
-            }
-            catch (std::exception& e) {
-                std::cout << e.what() << std::endl;
-                return;
-            }
-            catch (const std::string* str) {
-                std::cout << "failed to trace ray: " << j << ", " << i << '\n' << str << '\n';
-                return;
-            }
+void render_row(int row, Color* pixelmap) {
+    for (int i = 0; i < Scene::camera.px_width(); i++) {
+        int pos = i + (Scene::camera.px_width() * row);
+        Ray ray = Scene::camera.generate_ray(i, row);
+        try {
+            Color pixel_color = Raytracer::trace_ray(ray, true);
+            pixelmap[pos] = pixel_color;
+        }
+        catch (std::exception& e) {
+            std::cout << e.what() << std::endl;
+            return;
+        }
+        catch (const std::string* str) {
+            std::cout << "failed to trace ray: " << i << ", " << row << '\n' << str << '\n';
+            return;
         }
     }
 }
 
+void render_rows_static(int start, int end, Color* pixelmap) {
+    for (int i = start; i < end; i++) {
+        render_row(i, pixelmap);
+    }
+}
+
+void render_rows_dynamic(std::atomic<int>& next_row, Color* pixelmap) {
+    int my_row;
+    int height = Scene::camera.px_height();
+
+    while ((my_row = next_row.fetch_add(1)) < height) {
+        render_row(my_row, pixelmap);
+    }
+}
+
+Color* multi_render_static(int num_threads, int img_size) {
+    Color* pixelmap = new Color[img_size];
+    std::vector<std::thread> threads(num_threads);
+    int rows_per_thread = Scene::camera.px_height() / num_threads;
+
+    std::cout << "rendering..." << '\n';
+    // block rows to render for each thread
+    for (int i = 0; i < num_threads; i++) {
+        int start_row = i * rows_per_thread;
+        int end_row = (i == num_threads - 1) ? Scene::camera.px_height() : start_row + rows_per_thread;
+        threads[i] = std::thread(render_rows_static, start_row, end_row, pixelmap);
+    }
+    for (auto& t : threads) t.join();
+    return pixelmap;
+}
+
+Color* multi_render_dynamic(int num_threads, int img_size) {
+    Color* pixelmap = new Color[img_size];
+    std::vector<std::thread> threads(num_threads);
+    std::atomic<int> next_row = 0;
+
+    std::cout << "rendering..." << '\n';
+    for (int i = 0; i < num_threads; i++) {
+        threads[i] = std::thread(render_rows_dynamic, std::ref(next_row), pixelmap);
+    }
+    for (auto& t : threads) t.join();
+    return pixelmap;
+}
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -128,26 +169,16 @@ int main(int argc, char *argv[]) {
         return 1;
 	}
     
-    int size = Scene::camera.px_width() * Scene::camera.px_height();
-    Color *pixelmap = new Color[size];
-
     Raytracer::bvh = BVH(Scene::primitives);
     uint32_t next_node = 0;
     Raytracer::bvh.build_bvh_object_median(next_node, 0, Scene::primitives.size());
 
 	int hardware_threads = std::thread::hardware_concurrency();
 	int num_threads = hardware_threads > 0 ? hardware_threads - 1 : 2;
-    std::vector<std::thread> threads(num_threads);
-	int rows_per_thread = Scene::camera.px_height() / num_threads;
-    
-    std::cout << "rendering..." << '\n';
-    // block rows to render for each thread
-    for (int i = 0; i < num_threads; i++) {
-        int start_row = i * rows_per_thread;
-        int end_row = (i == num_threads - 1) ? Scene::camera.px_height() : start_row + rows_per_thread;
-		threads[i] = std::thread(render_rows, start_row, end_row, pixelmap);
-	}
-    for (auto& t : threads) t.join();
+    std::cout << "utilizing " << num_threads << " threads" << '\n';
+
+    int size = Scene::camera.px_width() * Scene::camera.px_height();
+    Color* pixelmap = multi_render_dynamic(num_threads, size);
     
     std::ofstream output;
     output.open("render.ppm");

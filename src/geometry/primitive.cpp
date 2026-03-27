@@ -4,7 +4,7 @@
 #include "../include/math/floatutil.h"
 #include "../include/gfx/material.h"
 
-Hit Primitive::intersect(const Ray& world_ray) {
+Hit Primitive::intersect(const Ray& world_ray) const {
     bool with_uv = !material->is_uniform();
 
     // 1. Transform ray to object space
@@ -22,6 +22,7 @@ Hit Primitive::intersect(const Ray& world_ray) {
     h.normal = transform.to_world_space_normal(h.normal);
     h.normal.normalize();  // Re-normalize after transformation
     h.r = world_ray;  // Store original world-space ray
+    h.t = (h.x_pos - world_ray.origin).dot(world_ray.direction);
     h.primitive = this;
 
     return h;

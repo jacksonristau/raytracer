@@ -10,7 +10,6 @@ const Vector3& Vector3::Inf() {
 
 static const Vector3 ZERO = Vector3(0.0f, 0.0f, 0.0f);
 
-// defaults to a Vector3
 Vector3::Vector3(): x(0.0f), y(0.0f), z(0.0f) {
 }
 
@@ -19,15 +18,6 @@ Vector3::Vector3(json v) {
     x = v[0];
     y = v[1];
     z = v[2];
-}
-
-Vector3::Vector3(const Vector3& v2) {
-    x = v2.x;
-    y = v2.y;
-    z = v2.z;
-}
-
-Vector3::~Vector3() {
 }
 
 bool Vector3::operator==(const Vector3& v1) const {
@@ -39,13 +29,6 @@ bool Vector3::operator==(const Vector3& v1) const {
 Vector3 Vector3::operator-() {
     return Vector3(-x, -y, -z);
 } 
-
-Vector3 Vector3::operator=(const Vector3& v1) {
-    x = v1.x;
-    y = v1.y;
-    z = v1.z;
-    return *this;
-}
 
 void Vector3::normalize() {
     float magnitude = 1.0f / sqrt(x * x + y * y + z * z);

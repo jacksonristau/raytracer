@@ -3,6 +3,7 @@
 #include "aabb.h"
 #include "primitive.h"
 #include "../math/ray.h"
+#include <gfx/lights.h>
 
 struct BVHNode {
 	AABB bounds;
@@ -40,8 +41,10 @@ class BVH {
 		BVH();
 		BVH(std::vector<Primitive> primitives);
 		uint32_t build_bvh_object_median(uint32_t& node_index, uint32_t start_index, uint32_t end_index);
-		void traverse(const BVHNode& node, const Ray& ray, Hit& t) const;
+		void traverse(const BVHNode& node, const Ray& ray, Hit& closest) const;
+		float traverse_shadow(const BVHNode& node, const Ray& ray, const ILight* l, float d) const;
 		Hit intersect_node(const BVHNode& node, const Ray& ray) const;
+		float intersect_node_shadow(const BVHNode& node, const Ray& ray, const ILight* l, float d) const;
 
 		std::vector<Primitive> primitives;
 		std::vector<BVHNode> nodes;

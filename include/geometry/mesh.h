@@ -15,9 +15,9 @@ class Mesh {
 			  ntris(shape.mesh.num_face_vertices.size()),
 			  nverts(attrib->vertices.size()) {}
 
-		std::vector<tinyobj::real_t> get_vertices() const {return attrib->vertices;}
-		std::vector<tinyobj::real_t> get_normals() const {return attrib->normals;}
-		std::vector<tinyobj::real_t> get_uvs() const {return attrib->texcoords;}
+		const std::vector<tinyobj::real_t>& get_vertices() const {return attrib->vertices;}
+		const std::vector<tinyobj::real_t>& get_normals() const {return attrib->normals;}
+		const std::vector<tinyobj::real_t>& get_uvs() const {return attrib->texcoords;}
 
 		const std::shared_ptr<tinyobj::attrib_t> attrib;
 		std::vector<tinyobj::index_t> indices;

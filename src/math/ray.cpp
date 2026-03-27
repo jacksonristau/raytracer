@@ -12,25 +12,6 @@ Ray::Ray(Point3 origin, Vector3 direction) : origin(origin), direction(direction
     this->direction.normalize();
 }
 
-Ray::Ray(const Ray& r) {
-    origin = r.origin;
-    direction = r.direction;
-	entering = r.entering;
-    eta = r.eta;
-	o_primitive = r.o_primitive;
-}
-
-Ray Ray::operator= (const Ray& r) {
-    origin = r.origin;
-    direction = r.direction;
-	entering = r.entering;
-	eta = r.eta;
-	o_primitive = r.o_primitive;
-    return *this;
-}
-
-Ray::~Ray() {}
-
 bool operator==(const Ray& r1, const Ray& r2) {
     return r1.origin == r2.origin && r1.direction == r2.direction;
 }

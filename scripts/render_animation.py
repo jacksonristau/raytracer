@@ -41,18 +41,18 @@ def render_animation(scene_path, num_frames, output_dir="frames"):
             original_rotation[2]
         ]
 
-        mesh["transform"]["translate"] = [
-            original_translation[0],
-            original_translation[1] + y_translation,
-            original_translation[2]
-        ]
+        #mesh["transform"]["translate"] = [
+        #    original_translation[0],
+        #    original_translation[1] + y_translation,
+        #    original_translation[2]
+        #]
 
         # Write modified scene
         with open(scene_path, 'w') as f:
             json.dump(scene, f, indent=2)
 
         print(f"Rendering frame {i + 1}/{num_frames} (rotation Y = {y_rotation:.1f}°)")
-        print(f"(translation Y = {y_translation:.1f}°)")
+        #print(f"(translation Y = {y_translation:.1f}°)")
 
 
         # Call raytracer-cli from build dir (where relative paths in scene.json expect)
@@ -88,7 +88,7 @@ def render_animation(scene_path, num_frames, output_dir="frames"):
         json.dump(scene, f, indent=2)
 
     result = subprocess.run(
-            ["ffmpeg", "-framerate", "30", "-i", "frame_%03d.ppm", "-vf", "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "output.gif"],
+            ["ffmpeg", "-framerate", "10", "-i", "frame_%03d.ppm", "-vf", "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "output.gif"],
             cwd=output_dir,
             capture_output=True,
             text=True

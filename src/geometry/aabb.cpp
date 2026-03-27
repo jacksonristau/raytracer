@@ -39,31 +39,40 @@ AABB AABB::combine(AABB other) const {
 
 float AABB::intersect(const Ray& ray) const {
     // find t_min and t_max for each plane
+    // swap min and max if necessary
     // find the max of the mins and the mins of the maxs to get the interval
     // if interval is valid and its max is greater than zero thats an intersection
-    Vector3 min_distance = min - ray.origin;
-    Vector3 max_distance = max - ray.origin;
+    const float inv_dx = 1.0f / ray.direction.x;
+    const float inv_dy = 1.0f / ray.direction.y;
+    const float inv_dz = 1.0f / ray.direction.z;
 
-    float t_min_x = min_distance.x / ray.direction.x;
-    float t_min_y = min_distance.y / ray.direction.y;
-    float t_min_z = min_distance.z / ray.direction.z;
-    float t_max_x = max_distance.x / ray.direction.x;
-    float t_max_y = max_distance.y / ray.direction.y;
-    float t_max_z = max_distance.z / ray.direction.z;
-    if (t_min_x > t_max_x) std::swap(t_min_x, t_max_x);
-    if (t_min_y > t_max_y) std::swap(t_min_y, t_max_y);
-    if (t_min_z > t_max_z) std::swap(t_min_z, t_max_z);
+    const float t1x = (min.x - ray.origin.x) * inv_dx;
+    const float t1y = (min.y - ray.origin.y) * inv_dy;
+    const float t1z = (min.z - ray.origin.z) * inv_dz;
 
-    Point2 overlap = Point2(std::max(std::max(t_min_x, t_min_y), t_min_z), std::min(std::min(t_max_x, t_max_y), t_max_z));
+    const float t2x = (max.x - ray.origin.x) * inv_dx;
+    const float t2y = (max.y - ray.origin.y) * inv_dy;
+    const float t2z = (max.z - ray.origin.z) * inv_dz;
+    
+    const float t_min_x = fminf(t1x, t2x);
+    const float t_min_y = fminf(t1y, t2y);
+    const float t_min_z = fminf(t1z, t2z);
+
+    const float t_max_x = fmaxf(t1x, t2x);
+    const float t_max_y = fmaxf(t1y, t2y);
+    const float t_max_z = fmaxf(t1z, t2z);
+
+    const float t_min = fmaxf(fmaxf(t_min_x, t_min_y), t_min_z);
+    const float t_max = fminf(fminf(t_max_x, t_max_y), t_max_z);
 
     // invalid interval
-    if (overlap.y < overlap.x)
+    if (t_max < t_min)
         return -1.0f;
     // behind origin
-    if (overlap.y < 0)
+    if (t_max < 0.0f)
         return -1.0f;
 
-    return overlap.x;
+    return t_min;
 }
 
 Point3 AABB::center() const{

@@ -12,20 +12,14 @@ public:
     Point3();
     Point3(float x, float y, float z);
     Point3(json p);
-    Point3(const Point3& p1);
 
     static Point3 max(const Point3& p1, const Point3& p2);
     static Point3 min(const Point3& p1, const Point3& p2);
     static Point3 infinity();
     static Point3 negative_infinity();
 
-    virtual ~Point3();
-
     // negation
     Point3 operator- () const;
-
-    // assignment
-    Point3 operator= (const Point3& p1);
 
     // index access
     float& operator[](int i) { return data[i]; }

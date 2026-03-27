@@ -4,12 +4,33 @@
 
 Point3 Triangle::get_vertex(int v) const {
     tinyobj::index_t idx = mesh->indices[index + v];
-    std::vector<tinyobj::real_t> vertices = mesh->get_vertices();
+    const auto& vertices = mesh->get_vertices();
 
     tinyobj::real_t vx = vertices.at(3 * size_t(idx.vertex_index) + 0);
     tinyobj::real_t vz = vertices.at(3 * size_t(idx.vertex_index) + 2);
     tinyobj::real_t vy = vertices.at(3 * size_t(idx.vertex_index) + 1);
     return Point3(vx, vy, vz);
+}
+
+Vector3 Triangle::get_normal(int n) const {
+    const auto& normals = mesh->get_normals();
+
+    tinyobj::index_t idx = mesh->indices[index + n];
+    tinyobj::real_t nx = normals.at(3 * size_t(idx.normal_index) + 0);
+    tinyobj::real_t ny = normals.at(3 * size_t(idx.normal_index) + 1);
+    tinyobj::real_t nz = normals.at(3 * size_t(idx.normal_index) + 2);
+
+    return Vector3(nx, ny, nz);
+}
+
+Point2 Triangle::get_uv(int t) const {
+    const auto& uvs = mesh->get_uvs();
+
+    tinyobj::index_t idx = mesh->indices[index + t];
+    tinyobj::real_t u = uvs.at(2 * size_t(idx.texcoord_index) + 0);
+    tinyobj::real_t v = uvs.at(2 * size_t(idx.texcoord_index) + 1);
+
+    return Point2(u, v);
 }
 
 bool Triangle::has_normal() const {
@@ -22,27 +43,6 @@ bool Triangle::has_uv() const {
     return idx.texcoord_index >= 0;
 }
 
-Vector3 Triangle::get_normal(int n) const {
-    std::vector<tinyobj::real_t> normals = mesh->get_normals();
-
-    tinyobj::index_t idx = mesh->indices[index + n];
-    tinyobj::real_t nx = normals.at(3 * size_t(idx.normal_index) + 0);
-    tinyobj::real_t ny = normals.at(3 * size_t(idx.normal_index) + 1);
-    tinyobj::real_t nz = normals.at(3 * size_t(idx.normal_index) + 2);
-
-    return Vector3(nx, ny, nz);
-}
-
-Point2 Triangle::get_uv(int t) const {
-    std::vector<tinyobj::real_t> uvs = mesh->get_uvs();
-
-    tinyobj::index_t idx = mesh->indices[index + t];
-    tinyobj::real_t u = uvs.at(2 * size_t(idx.texcoord_index) + 0);
-    tinyobj::real_t v = uvs.at(2 * size_t(idx.texcoord_index) + 1);
-    
-    return Point2(u, v);
-}
-
 Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     Point3 v0 = get_vertex(0);
     Point3 v1 = get_vertex(1);
@@ -53,7 +53,9 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
 
     const Vector3& n = e1.cross(e2);
     float mag = n.magnitude();
-    if (is_near_zero(mag))
+    float angle = mag / (e1.magnitude() * e2.magnitude());
+    // degen triangle
+    if (is_near_zero(angle))
         return Hit();
 
     Plane plane(v0, n);

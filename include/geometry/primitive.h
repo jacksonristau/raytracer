@@ -16,7 +16,7 @@ class Primitive {
 		}
 		~Primitive() {}
 
-		Hit intersect(const Ray& r);
+		Hit intersect(const Ray& r) const;
 		AABB get_aabb() const;
 
 

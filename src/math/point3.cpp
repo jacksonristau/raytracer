@@ -7,25 +7,10 @@ Point3::Point3() : x(0.0f), y(0.0f), z(0.0f) {}
 
 Point3::Point3(float x, float y, float z) : x(x), y(y), z(z) {}
 
-Point3::Point3(const Point3& p1) {
-	x = p1.x;
-	y = p1.y;
-	z = p1.z;
-}
-
 Point3::Point3(json p) {
 	x = p[0];
 	y = p[1];
 	z = p[2];
-}
-
-Point3::~Point3(){}
-
-Point3 Point3::operator=(const Point3& p1) {
-	x = p1.x;
-	y = p1.y;
-	z = p1.z;
-	return *this;
 }
 
 Vector3 operator- (const Point3& p1, const Point3& p2) {

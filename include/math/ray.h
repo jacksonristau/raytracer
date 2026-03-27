@@ -9,7 +9,7 @@ class Ray {
     public:
         Ray();
         Ray(Point3 origin, Vector3 direction);
-        Ray(Point3 origin, Vector3 direction, bool entering, float eta, Primitive* p) :
+        Ray(Point3 origin, Vector3 direction, bool entering, float eta, const Primitive* p) :
             origin(origin),
             direction(direction),
             entering(entering),
@@ -18,13 +18,6 @@ class Ray {
             this->direction.normalize();
         }
 
-        // copy
-        Ray(const Ray& r);
-
-        // assignment
-        Ray operator= (const Ray& r);
-
-        virtual ~Ray();
         Vector3 reflect(const Vector3& n) const;
         Vector3 refract(Vector3 n, float ndotv, float n1, float n2) const;
 
@@ -34,7 +27,7 @@ class Ray {
         Vector3 direction;
         bool entering;
         float eta;
-        Primitive* o_primitive;
+        const Primitive* o_primitive;
 };
 
 // equality

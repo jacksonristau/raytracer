@@ -13,18 +13,11 @@ class Vector3 {
         Vector3(float x, float y, float z);
         Vector3(json v);
 
-        Vector3(const Vector3& v2);
-
-        virtual ~Vector3();
-
         // equality
         bool operator==(const Vector3& v) const;
 
         // negation
         Vector3 operator-();
-
-        // assignment
-        Vector3 operator=(const Vector3& v1);
 
         float& operator[](int i) { return data[i]; }
         const float& operator[](int i) const { return data[i]; }
