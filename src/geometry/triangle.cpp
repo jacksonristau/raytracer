@@ -58,6 +58,10 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     if (is_near_zero(angle))
         return Hit();
 
+    // backface culling
+    if (n.dot(r.direction) > 0)
+        return Hit();
+
     Plane plane(v0, n);
     Hit h = plane.intersect(r);
     if (is_negative(h.t))
