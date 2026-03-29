@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <atomic>
+#include <filesystem>
 
 #include "../include/math/vector3.h"
 #include "../include/math/ray.h"
@@ -118,20 +119,44 @@ int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("usage: raytracer-cli <name of input file> [options]\n");
         printf("options:\n");
-        printf("  -W, --wireframe     Enable wireframe rendering\n");
+        printf("  -W, --wireframe       enable wireframe rendering (bool)\n");
+        printf("  -D, --depth           set recursion max depth (int)\n");
+        printf("  -e, --edge-threshold  set edge detection threshold (float)\n");
         return 0;
     }
-
     // Parse command-line arguments
     std::string scene_file;
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-W" || arg == "--wireframe") {
             Raytracer::wireframe_mode = true;
-            std::cout << "Wireframe mode enabled" << std::endl;
+            std::cout << "wireframe mode enabled" << std::endl;
         } 
-        else if (arg == "") {
-
+        else if ((arg == "-D" || arg == "--depth") && i+1 < argc) {
+            try{
+                const std::string val = argv[++i];
+                int depth = std::stoi(val);
+                Raytracer::max_depth = std::stoi(val);
+                std::cout << "max depth: " << val << "\n";
+            }
+            catch (std::invalid_argument const& ex)
+            {
+                std::cout << "invalid depth argument " << ex.what() << '\n';
+                return 1;
+            }
+        }
+        else if ((arg == "-e" || arg == "--edge-threshold") && i+1 < argc) {
+            try{
+                const std::string val = argv[++i];
+                float et = std::stof(val);
+                Raytracer::edge_threshold = std::stof(val);
+                std::cout << "edge threshold: " << val << "\n";
+            }
+            catch (std::invalid_argument const& ex)
+            {
+                std::cout << "invalid edge-threshold argument " << ex.what() << '\n';
+                return 1;
+            }
         }
         else if (arg[0] != '-') {
             // Non-flag argument is the scene file
@@ -166,6 +191,7 @@ int main(int argc, char *argv[]) {
     }
 	catch(std::exception& e) {
         std::cerr << "failed to parse scene: " << e.what() << '\n';
+        std::cerr << "cwd " << std::filesystem::current_path() << '\n';
         return 1;
 	}
     

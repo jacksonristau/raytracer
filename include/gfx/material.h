@@ -20,6 +20,23 @@ class Material {
         virtual bool get_color() const = 0;
 };
 
+class ToonMaterial : public Material {
+    public:
+        ToonMaterial();
+        ToonMaterial(json material_json);
+        ToonMaterial(std::shared_ptr<ImageTexture> t);
+
+        Color evaluate(const Hit& hit, Color reflected, Color refracted) const override;
+        float alpha() const override { return 1.0f; };
+        float eta() const override { return 1.0f; }
+        bool is_glossy() const override { return false; }
+        bool is_transparent() const override { return false; }
+        bool is_uniform() const override { return true; }
+        bool get_color() const override { return false; }
+    private:
+        std::shared_ptr<Texture> ramp;
+};
+
 class BPMaterial : public Material {
     public:
         BPMaterial();
@@ -40,7 +57,7 @@ class BPMaterial : public Material {
 
     private:
         std::shared_ptr<Texture> texture;
-        Color specular;
+        Color spec;
         float k[3];
         Color precomp[3];
         float refractive_index;

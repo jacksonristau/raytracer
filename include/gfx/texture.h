@@ -17,7 +17,6 @@ class ImageTexture : public Texture {
         bool is_uniform() const { return false; }
         std::string filename;
         int width, height;
-    private:
         std::vector<Color> data;
 };
 

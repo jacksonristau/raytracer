@@ -29,18 +29,13 @@ Vector3 Ray::refract(Vector3 N, float ndotv, float n1, float n2) const{
     Vector3 v(-direction.x, -direction.y, -direction.z);
     Vector3 B = snell * ((ndotv * N) - v);
 
-    try{
-        float discrim = 1.0f - (powf(snell, 2) * (1.0f - powf(ndotv, 2)));
-        if (discrim < 0.0f) {
-            throw std::exception();
-        }
-        Vector3 A = sqrt(discrim) * (-N);
-        return A + B;
-    }
-    catch (std::exception e){
-        // total internal reflection
+    float discrim = 1.0f - (powf(snell, 2) * (1.0f - powf(ndotv, 2)));
+    if (discrim < 0.0f) {
+        // total internal reflections
         return Vector3(0.0f, 0.0f, 0.0f);
     }
+    Vector3 A = sqrt(discrim) * (-N);
+    return A + B;
 }
 
 Point3 Ray::get_point(float t) const {

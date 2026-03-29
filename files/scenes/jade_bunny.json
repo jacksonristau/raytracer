@@ -1,13 +1,7 @@
 {
   "materials": [
     {
-      "name": "toon",
-      "type": "toon",
-      "imagetexture": "../../files/textures/color_ramps/red_ramp3.ppm"
-    },
-    {
       "name": "emerald",
-      "type": "blinn-phong",
       "diffuse": [
         0.07568,
         0.61424,
@@ -27,7 +21,6 @@
     },
     {
       "name": "green_glass",
-      "type": "blinn-phong",
       "diffuse": [
         0.07568,
         0.61424,
@@ -47,7 +40,6 @@
     },
     {
       "name": "jade",
-      "type": "blinn-phong",
       "diffuse": [
         0.3,
         0.8,
@@ -64,6 +56,36 @@
       "n": 12.8,
       "alpha": 0.95,
       "eta": 1.6
+    },
+    {
+      "name": "wood",
+      "imagetexture": "../../files/textures/wood.ppm",
+      "specular": [
+        1,
+        1,
+        1
+      ],
+      "ka": 0.2,
+      "kd": 0.8,
+      "ks": 0.0,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    },
+    {
+      "name": "umn",
+      "imagetexture": "../../files/textures/umn.ppm",
+      "specular": [
+        1,
+        1,
+        1
+      ],
+      "ka": 0.2,
+      "kd": 0.8,
+      "ks": 0.0,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
     }
   ],
   "camera": {
@@ -84,8 +106,8 @@
     ],
     "hfov": 60,
     "imsize": [
-      512,
-      512
+      1080,
+      1080
     ],
     "depthcueing": {
       "color": [
@@ -104,30 +126,51 @@
     }
   },
   "bkgcolor": [
-    0.255,
-    0.31,
-    0.41
+    0.23,
+    0.13,
+    0.05
   ],
   "spheres": [],
   "meshes": [
     {
-      "material": "toon",
-      "file": "../../files/objs/stanford/stanford_bunny_good.obj",
+      "material": "jade",
+      "file": "../../files/objs/stanford_bunny.obj",
       "transform": {
         "translate": [
           0,
           0,
-          -5
+          -4
         ],
         "rotate": [
           0,
-          90,
+          0,
           0
         ],
         "scale": [
-          1,
-          1,
-          1
+          10,
+          10,
+          10
+        ]
+      }
+    },
+    {
+      "material": "umn",
+      "file": "../../files/objs/plane.obj",
+      "transform": {
+        "translate": [
+          0,
+          0,
+          -7
+        ],
+        "rotate": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          5,
+          5,
+          5
         ]
       }
     }
@@ -135,9 +178,9 @@
   "lights": [
     {
       "l": [
-        -3,
         0,
-        0
+        0,
+        -0.01
       ],
       "type": "point",
       "i": 1

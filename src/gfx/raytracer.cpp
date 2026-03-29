@@ -6,6 +6,8 @@
 
 namespace Raytracer {
 	bool wireframe_mode = false;
+	int max_depth = 4;
+	float edge_threshold = 0.02f;
 	BVH bvh = BVH();
 
 	Hit intersect_scene_naive(const Ray& r) {
@@ -33,7 +35,12 @@ namespace Raytracer {
 	Hit intersect_scene_bvh(const Ray& r) {
 		Hit nearest = Hit::infinity();
 		bvh.traverse(bvh.nodes[0], r, nearest);
-		return nearest;
+		if (wireframe_mode){
+			return nearest.is_edge ? nearest : Hit();
+		}
+		else {
+			return nearest;
+		}
 	}
 
 	float trace_shadow_ray_bvh(const Ray& r, const ILight* l, float d) {
@@ -101,7 +108,7 @@ namespace Raytracer {
 			Ray reflected_ray(reflect_origin, r.reflect(shading_normal), r.entering, r.eta, hit.primitive);
 			reflection = fr * trace_ray(reflected_ray, depth + 1);
 		}
-		if (material->is_transparent() && depth < 6) {
+		if (material->is_transparent() && depth < max_depth) {
 			float nt = r.entering ? material->eta() : Scene::bkgeta;
 			float fr = fresnel(ndoti, r.eta, nt, false);
 			Vector3 refract_dir = r.refract(shading_normal, ndoti, r.eta, nt);

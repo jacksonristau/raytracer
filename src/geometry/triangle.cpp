@@ -1,6 +1,7 @@
 #include "../include/geometry/triangle.h"
 #include "../include/geometry/plane.h"
 #include "../include/geometry/aabb.h"
+#include "../include/gfx/raytracer.h"
 
 Point3 Triangle::get_vertex(int v) const {
     size_t i = (index + v) * 3;
@@ -134,8 +135,7 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     hit.normal = face_normal;
     hit.primitive = nullptr;
 
-    float edge_threshold = 0.01f;
-    if (alpha < edge_threshold || beta < edge_threshold || gamma < edge_threshold)
+    if (alpha < Raytracer::edge_threshold || beta < Raytracer::edge_threshold || gamma < Raytracer::edge_threshold)
         hit.is_edge = true;
 
     if (!with_uv && !has_uv() && !has_normal())
