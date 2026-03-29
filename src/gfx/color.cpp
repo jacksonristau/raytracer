@@ -65,8 +65,11 @@ Color operator*(const Color& c1, float s){
 
 void Color::clamp() {
     if (r > 1.0) r = 1.0f;
+    if (r < 0.0) r = .0f;
     if (g > 1.0) g = 1.0f;
+    if (g < 0.0) g = 0.0f;
     if (b > 1.0) b = 1.0f;
+    if (b < 0.0) b = 0.0f;
 }
 
 std::ostream & operator<< ( std::ostream& os, const Color &c1) {

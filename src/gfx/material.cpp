@@ -189,7 +189,7 @@ Color ToonMaterial::evaluate(const Hit& hit, Color reflection, Color transmissio
         float kl = 0.5 * ndotl + 0.5;
         Color ramp_color = ramp->get_pixel(kl, 1.0f);
 
-        Color specular = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : std::pow(ndoth, 20) * 0.5 * ramp->get_pixel(1.0, 1.0);
+        Color specular = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : std::pow(ndoth, 20) * ramp->get_pixel(1.0, 1.0);
 
         float i = light->intensity() * light->atten(d);
         if (i < max_i) {

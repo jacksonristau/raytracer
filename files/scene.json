@@ -46,6 +46,22 @@
       "eta": 1.6
     },
     {
+      "name": "umn",
+      "type": "blinn-phong",
+      "imagetexture": "../../files/textures/umn.ppm",
+      "specular": [
+        1,
+        1,
+        1
+      ],
+      "ka": 0.2,
+      "kd": 0.8,
+      "ks": 0.0,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
+    },
+    {
       "name": "jade",
       "type": "blinn-phong",
       "diffuse": [
@@ -111,18 +127,18 @@
   "spheres": [],
   "meshes": [
     {
-      "material": "toon",
+      "material": "green_glass",
       "file": "../../files/objs/stanford/stanford_bunny_good.obj",
       "transform": {
         "translate": [
           0,
-          0,
+          -0.1,
           -5
         ],
         "rotate": [
           0,
-          90,
-          0
+          0,
+          0 
         ],
         "scale": [
           1,
