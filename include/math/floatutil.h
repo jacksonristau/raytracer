@@ -5,7 +5,7 @@
 
 bool equalf(float A, float B);
 
-bool is_negative(float value);
+bool is_negative(float value, float eps = Eps);
 
 bool is_near_zero(float value);
 

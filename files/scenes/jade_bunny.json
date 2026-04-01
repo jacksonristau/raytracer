@@ -1,13 +1,7 @@
 {
   "materials": [
     {
-      "name": "toon",
-      "type": "toon",
-      "imagetexture": "../../files/textures/color_ramps/red_ramp3.ppm"
-    },
-    {
       "name": "emerald",
-      "type": "blinn-phong",
       "diffuse": [
         0.07568,
         0.61424,
@@ -27,7 +21,6 @@
     },
     {
       "name": "green_glass",
-      "type": "blinn-phong",
       "diffuse": [
         0.07568,
         0.61424,
@@ -46,24 +39,7 @@
       "eta": 1.6
     },
     {
-      "name": "umn",
-      "type": "blinn-phong",
-      "imagetexture": "../../files/textures/umn.ppm",
-      "specular": [
-        1,
-        1,
-        1
-      ],
-      "ka": 0.2,
-      "kd": 0.8,
-      "ks": 0.0,
-      "n": 20,
-      "alpha": 1,
-      "eta": 1.2
-    },
-    {
       "name": "jade",
-      "type": "blinn-phong",
       "diffuse": [
         0.3,
         0.8,
@@ -79,7 +55,22 @@
       "ks": 0.15,
       "n": 12.8,
       "alpha": 0.95,
-      "eta": 1.05
+      "eta": 1.6
+    },
+    {
+      "name": "wood",
+      "imagetexture": "../../files/textures/wood.ppm",
+      "specular": [
+        1,
+        1,
+        1
+      ],
+      "ka": 0.2,
+      "kd": 0.8,
+      "ks": 0.0,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
     },
     {
       "name": "umn",
@@ -116,8 +107,8 @@
     ],
     "hfov": 60,
     "imsize": [
-      512,
-      512
+      1080,
+      1080
     ],
     "depthcueing": {
       "color": [
@@ -136,22 +127,33 @@
     }
   },
   "bkgcolor": [
-    0.255,
-    0.31,
-    0.41
+    0.23,
+    0.13,
+    0.05
   ],
-  "spheres": [
-    {
-      "center": [
-        0,
-        0,
-        -4
-      ],
-      "radius": 1,
-      "material": "green_glass"
-    }
-  ],
+  "spheres": [],
   "meshes": [
+    {
+      "material": "jade",
+      "file": "../../files/objs/stanford_bunny.obj",
+      "transform": {
+        "translate": [
+          0,
+          0,
+          -4
+        ],
+        "rotate": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          10,
+          10,
+          10
+        ]
+      }
+    },
     {
       "material": "umn",
       "file": "../../files/objs/basic/plane.obj",
@@ -159,7 +161,7 @@
         "translate": [
           0,
           0,
-          -10
+          -7
         ],
         "rotate": [
           0,
@@ -169,7 +171,7 @@
         "scale": [
           5,
           5,
-          1
+          5
         ]
       }
     }
@@ -177,11 +179,11 @@
   "lights": [
     {
       "l": [
-        -3,
         0,
-        0
+        0,
+        -0.01
       ],
-      "type": "directional",
+      "type": "point",
       "i": 1
     }
   ]

@@ -5,6 +5,8 @@ import sys
 import os
 import math
 
+from sys import platform
+
 def render_animation(scene_path, num_frames, output_dir="frames"):
     # Load scene
     with open(scene_path, 'r') as f:
@@ -56,12 +58,20 @@ def render_animation(scene_path, num_frames, output_dir="frames"):
 
 
         # Call raytracer-cli from build dir (where relative paths in scene.json expect)
-        build_dir = os.path.join(project_root, "build/x64-Release")
-        raytracer = os.path.join(build_dir, "apps/raytracer-cli/raytracer-cli")
+        if platform == "linux" or platform == "linux2" or platform == "darwin":
+            build_dir = os.path.join(project_root, "build")
+            working = os.path.join(build_dir, "apps", "raytracer-cli")
+        elif platform == "win32":
+            build_dir = os.path.join(project_root, "build", "x64-Release")
+            working = build_dir
+        else:
+            print("unrecognized platform!")
+            return
+        raytracer = os.path.join(build_dir, "apps", "raytracer-cli", "raytracer-cli")
         print(raytracer)
         result = subprocess.run(
             [raytracer, scene_path],
-            cwd=build_dir,
+            cwd=working,
             capture_output=True,
             text=True
         )
@@ -69,10 +79,10 @@ def render_animation(scene_path, num_frames, output_dir="frames"):
         if result.returncode != 0:
             print(f"Error rendering frame {i}:")
             print(result.stderr)
-            continue
+            return
 
         # Rename render.ppm to frames/render_001.ppm etc.
-        src = os.path.join(build_dir, "render.ppm")
+        src = os.path.join(working, "render.ppm")
         dst = os.path.join(output_dir, f"frame_{i:03d}.ppm")
 
         if os.path.exists(src):

@@ -4,9 +4,12 @@
 
 Color::Color() {
     // nice lil green
-    r = 0.2f;
-    g = 0.6f;
-    b = 0.2f;
+    // r = 0.2f;
+    // g = 0.6f;
+    // b = 0.2f;
+    r = 0.0f;
+    g = 0.0f;
+    b = 0.0f;
 }
 
 Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
@@ -63,10 +66,17 @@ Color operator*(const Color& c1, float s){
     return Color(s * c1.r, s * c1.g, s * c1.b);
 }
 
+Color operator/(const Color& c1, float s){
+    return Color(c1.r / s, c1.g / s, c1.b / s);
+}
+
 void Color::clamp() {
     if (r > 1.0) r = 1.0f;
+    if (r < 0.0) r = .0f;
     if (g > 1.0) g = 1.0f;
+    if (g < 0.0) g = 0.0f;
     if (b > 1.0) b = 1.0f;
+    if (b < 0.0) b = 0.0f;
 }
 
 std::ostream & operator<< ( std::ostream& os, const Color &c1) {

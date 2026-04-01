@@ -1,6 +1,7 @@
 #include "../include/geometry/triangle.h"
 #include "../include/geometry/plane.h"
 #include "../include/geometry/aabb.h"
+#include "../include/gfx/raytracer.h"
 
 Point3 Triangle::get_vertex(int v) const {
     size_t i = (index + v) * 3;
@@ -110,16 +111,16 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     float f = 1.0f / a;
     Vector3 s = r.origin - v0;
     float beta = f * s.dot(h_vec);
-    if (is_negative(beta) || beta >= 1.0f)
+    if (is_negative(beta, Eps * 128) || beta >= 1.0f)
         return Hit();
 
     Vector3 q = s.cross(e1);
     float gamma = f * r.direction.dot(q);
-    if (is_negative(gamma) || beta + gamma >= 1.0f)
+    if (is_negative(gamma, Eps * 128) || beta + gamma >= 1.0f)
         return Hit();
 
     float t = f * e2.dot(q);
-    if (is_negative(t))
+    if (is_negative(t, Eps * 128))
         return Hit();
 
     float alpha = 1.0f - (beta + gamma);
@@ -134,8 +135,7 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     hit.normal = face_normal;
     hit.primitive = nullptr;
 
-    float edge_threshold = 0.01f;
-    if (alpha < edge_threshold || beta < edge_threshold || gamma < edge_threshold)
+    if (alpha < Raytracer::edge_threshold || beta < Raytracer::edge_threshold || gamma < Raytracer::edge_threshold)
         hit.is_edge = true;
 
     if (!with_uv && !has_uv() && !has_normal())

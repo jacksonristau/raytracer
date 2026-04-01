@@ -64,8 +64,15 @@ Scene::Scene() {
     else {
         int i = 0;
         for (const json& material_json : scene_desc.at("materials")) {
-            auto m = std::make_shared<BPMaterial>(material_json);
-            materials.push_back(m);
+            std::string type = material_json.at("type");
+            if (type.compare("toon") == 0) {
+                auto m = std::make_shared<ToonMaterial>(material_json);
+                materials.push_back(m);
+;            }
+            else {
+                auto m = std::make_shared<BPMaterial>(material_json);
+                materials.push_back(m);
+            }
             std::string name = material_json.at("name");
             material_map.insert(std::make_pair(name, i++));
         }

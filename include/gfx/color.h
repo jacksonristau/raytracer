@@ -36,4 +36,7 @@ Color operator*(float s, const Color& c1);
 
 Color operator*(const Color& c1, float s);
 
+Color operator/(const Color& c1, float s);
+
+
 std::ostream & operator<< ( std::ostream &os, const Color &c1);

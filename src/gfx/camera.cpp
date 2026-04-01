@@ -111,8 +111,32 @@ Ray Camera::generate_ray(int x, int y) {
     // perspective projection moves the view direction around
 	else {
         Vector3 direction = (ul + ((yf * deltav) + (xf * deltah))) - eye_pos;
+        int N = 4; // 4x4 = 16 samples per pixel
+        for (int sy = 0; sy < N; sy++) {
+            for (int sx = 0; sx < N; sx++) {
+                float sample_xf = xf + (sx + 0.5f) / N;
+                float sample_yf = yf + (sy + 0.5f) / N;
+                Vector3 direction = (ul + (sample_yf * deltav) + (sample_xf * deltah)) - eye_pos;
+            }
+        }
 		return Ray(eye_pos, direction);
 	}
+}
+
+std::vector<Ray> Camera::generate_ray_aa(int x, int y) {
+    std::vector<Ray> rays = std::vector<Ray>();
+    float xf = static_cast<float>(x);
+    float yf = static_cast<float>(y);
+    Vector3 direction = (ul + ((yf * deltav) + (xf * deltah))) - eye_pos;
+    for (int sy = 0; sy < n_samples; sy++) {
+        for (int sx = 0; sx < n_samples; sx++) {
+            float sample_xf = xf + (sx + 0.5f) / n_samples;
+            float sample_yf = yf + (sy + 0.5f) / n_samples;
+            Vector3 direction = (ul + (sample_yf * deltav) + (sample_xf * deltah)) - eye_pos;
+            rays.push_back(Ray(eye_pos, direction));
+        }
+    }
+    return rays;
 }
 
 Color Camera::depth_cue(Point3 x_p, Color i) const {
