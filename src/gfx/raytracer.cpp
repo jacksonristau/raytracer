@@ -98,7 +98,10 @@ namespace Raytracer {
 		}
 
 		auto material = hit.primitive->material;
-
+		// umn texture
+		if (r.entering == false && hit.primitive->material->is_uniform() == false) {
+			return Color(0, 1, 0);
+		}
 		//Color reflection = Color(0, 0, 0);
 		Color transmission = Color(0, 0, 0);
 		Point3 reflect_origin = hit.x_pos + 1e-3 * shading_normal;
@@ -147,8 +150,8 @@ namespace Raytracer {
 
 		Color reflection = Color(0, 0, 0);
 		Color transmission = Color(0, 0, 0);
-		Point3 reflect_origin = hit.x_pos + 1e-3 * shading_normal;
-		Point3 refract_origin = hit.x_pos - 1e-3 * shading_normal;
+		Point3 reflect_origin = hit.x_pos + Eps * shading_normal;
+		Point3 refract_origin = hit.x_pos - Eps * shading_normal;
 		if (material->is_glossy() && depth < max_depth) {
 			float fr = fresnel(ndoti, material->eta(), 0.0, true);
 			Ray reflected_ray(reflect_origin, r.reflect(shading_normal), r.entering, r.eta, hit.primitive);
