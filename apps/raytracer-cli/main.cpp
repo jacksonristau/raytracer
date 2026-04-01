@@ -25,15 +25,15 @@ Color* render_image_serial(int size) {
     Color* pixelmap = new Color[size];
     for (int i = 0; i < Scene::camera.px_height(); i++) {
         for (int j = 0; j < Scene::camera.px_width(); j++) {
-            if (i == 167 && j == 115) {
+            if (i == 301 && j == 135) {
                 std::cout << "good";
             }
-            if (i == 289 && j == 103) {
+            if (i == 302 && j == 116) {
                 std::cout << "bad";
             }
             int pos = j + (Scene::camera.px_width() * i);
             Ray ray = Scene::camera.generate_ray(j, i);
-            Color pixel_color = Raytracer::trace_debug(ray, 1);
+            Color pixel_color = Raytracer::trace_debug(ray, 1, i == 302 && j == 116);
             pixelmap[pos] = pixel_color;
         }
     }
@@ -61,10 +61,10 @@ void render_row(int row, Color* pixelmap) {
 void render_row_aa(int row, Color* pixelmap) {
     for (int i = 0; i < Scene::camera.px_width(); i++) {
         int pos = i + (Scene::camera.px_width() * row);
-        std::vector<Ray> rays = Scene::camera.generate_ray_aa(i, row);
+        std::vector<Ray> rays = Scene::camera.generate_ray_aa_urandom(i, row);
         try {
             Color pixel_color = Color(0.0f, 0.0f, 0.0f);
-            for (Ray ray : rays) {
+            for (const Ray& ray : rays) {
                 pixel_color = pixel_color + Raytracer::trace_ray(ray, true);
             }
             pixel_color = pixel_color / (Scene::camera.n_samples * Scene::camera.n_samples);
@@ -234,16 +234,17 @@ int main(int argc, char *argv[]) {
     uint32_t next_node = 0;
     Raytracer::bvh.build_bvh_object_median(next_node, 0, Scene::primitives.size());
 
-	int hardware_threads = std::thread::hardware_concurrency();
-	int num_threads = hardware_threads > 0 ? hardware_threads - 1 : 2;
-    std::cout << "utilizing " << num_threads << " threads" << '\n';
-
+    Color* pixelmap; 
     int size = Scene::camera.px_width() * Scene::camera.px_height();
-    Color* pixelmap;
-    if (debug_mode_enabled)
+    std::cout << "camera_s " << Scene::camera.n_samples << "\n";
+    if (debug_mode_enabled) {
         pixelmap = render_image_serial(size);
-    else
+    } else {
+        int hardware_threads = std::thread::hardware_concurrency();
+        int num_threads = hardware_threads > 0 ? hardware_threads - 1 : 2;
+        std::cout << "utilizing " << num_threads << " threads" << '\n';
         pixelmap = multi_render_dynamic(num_threads, size);
+    }
     
     std::ofstream output;
     output.open("render.ppm");

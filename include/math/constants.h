@@ -8,11 +8,13 @@
 #define PiOver4 0.78539816339744830961f
 #define Sqrt2 1.41421356237309504880f
 #define TwoPi 6.28318530718f
+
 #if defined(_MSC_VER)
+    #include <float.h>
     #define Eps (128 * FLT_EPSILON)
     #define Min FLT_MIN
 #elif defined(__GNUC__) || defined(__clang__)
-    #define Eps (__FLT_EPSILON__)
+    #define Eps (128 * __FLT_EPSILON__)
     #define Min __FLT_MIN__
 #else
     #define Eps (128 * 1.19209290e-7F)

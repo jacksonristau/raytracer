@@ -85,8 +85,8 @@
   "camera": {
     "eye": [
       0,
-      0.05,
-      0.2
+      0,
+      0
     ],
     "view": [
       0,
@@ -100,8 +100,8 @@
     ],
     "hfov": 60,
     "imsize": [
-      512,
-      512
+      1080,
+      1080
     ],
     "depthcueing": {
       "color": [
@@ -127,22 +127,43 @@
   "spheres": [],
   "meshes": [
     {
-      "material": "jade",
-      "file": "../../files/objs/stanford/stanford_bunny.obj",
+      "material": "green_glass",
+      "file": "../../files/objs/stanford/bunny.obj",
       "transform": {
         "translate": [
           0,
           0,
-          0
+          -2
         ],
         "rotate": [
-          -90,
+          0,
           0,
           0
         ],
         "scale": [
           1,
           1,
+          1
+        ]
+      }
+    },
+    {
+      "material": "umn",
+      "file": "../../files/objs/basic/plane.obj",
+      "transform": {
+        "translate": [
+          0,
+          0,
+          -8
+        ],
+        "rotate": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          5,
+          5,
           1
         ]
       }

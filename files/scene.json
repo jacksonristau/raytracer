@@ -141,15 +141,6 @@
     0.41
   ],
   "spheres": [
-    {
-      "center": [
-        0,
-        0,
-        -4
-      ],
-      "radius": 1,
-      "material": "green_glass"
-    }
   ],
   "meshes": [
     {
@@ -159,7 +150,7 @@
         "translate": [
           0,
           0,
-          -10
+          -20
         ],
         "rotate": [
           0,
@@ -167,8 +158,29 @@
           0
         ],
         "scale": [
-          5,
-          5,
+          15,
+          15,
+          1
+        ]
+      }
+    },
+    {
+      "material": "green_glass",
+      "file": "../../files/objs/stanford/low_poly_stanford_bunny.obj",
+      "transform": {
+        "translate": [
+          0,
+          0,
+          -15
+        ],
+        "rotate": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
           1
         ]
       }
@@ -177,12 +189,12 @@
   "lights": [
     {
       "l": [
-        -3,
         0,
-        0
+        0,
+        -1
       ],
       "type": "directional",
-      "i": 1
+      "i": 2
     }
   ]
 }

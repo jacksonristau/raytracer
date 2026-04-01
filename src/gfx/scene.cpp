@@ -19,6 +19,8 @@ Camera Scene::camera;
 std::vector<ILight*> Scene::lights;
 std::vector<Primitive> Scene::primitives;
 std::vector<Mesh> Scene::meshes;
+std::uniform_real_distribution<float> uniform_dist;
+std::default_random_engine gen;
 
 Scene::Scene() {
     materials = std::vector<std::shared_ptr<Material>>();
@@ -28,10 +30,12 @@ Scene::Scene() {
     attribs = std::vector<tinyobj::attrib_t>();
     camera = Camera();
     bkgcolor = Color();
+    uniform_dist = std::uniform_real_distribution<float>(0.0, 1.0);
 }
 
  Scene::Scene(json scene_desc) {
     std::unordered_map<std::string, int> material_map;
+    uniform_dist = std::uniform_real_distribution<float>(0.0, 1.0);
     bkgcolor = Color();
     if (scene_desc.contains("bkgcolor")){
         bkgcolor = Color(scene_desc.at("bkgcolor"));
@@ -192,3 +196,7 @@ Scene::Scene() {
 }
 
  Scene::~Scene() {}
+
+float Scene::rand() {
+    return uniform_dist(gen);
+}

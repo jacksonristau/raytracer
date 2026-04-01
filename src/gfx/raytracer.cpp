@@ -79,8 +79,8 @@ namespace Raytracer {
 		return fo + (1 - fo) * std::powf((1 - cosi), 5);
 	}
 
-	Color trace_debug(Ray r, int depth) {
-		Hit hit = intersect_scene_bvh(r);
+	Color trace_debug(Ray r, int depth, bool bad_pixel) {
+		Hit hit = bad_pixel ? intersect_scene_naive(r) : intersect_scene_bvh(r);
 		if (!hit.valid())
 			return Color(0.0f, 0.0f, 0.0f);
 		
@@ -117,11 +117,11 @@ namespace Raytracer {
 			Vector3 refract_dir = r.refract(shading_normal, ndoti, r.eta, nt);
 			if (refract_dir.is_zero()) {
 				Ray tir_ray(reflect_origin, r.reflect(shading_normal), r.entering, r.eta, hit.primitive);
-				transmission = fr * trace_debug(tir_ray, depth + 1) + Color(0.0f, 0.2f, 0.0f);
+				transmission = fr * trace_debug(tir_ray, depth + 1, bad_pixel);
 			}
 			else {
 				Ray refracted_ray(refract_origin, refract_dir, !r.entering, nt, hit.primitive);
-				transmission = (1 - fr) * (1 - material->alpha()) * trace_debug(refracted_ray, depth + 1);
+				transmission = (1 - fr) * (1 - material->alpha()) * trace_debug(refracted_ray, depth + 1, bad_pixel);
 			}
 		}
 

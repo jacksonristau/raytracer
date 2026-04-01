@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <random>
 
 #include "../math/vector3.h"
 #include "../geometry/primitive.h"
@@ -21,7 +22,8 @@ class Scene {
         Scene(json scene_desc);
         ~Scene();
 
-        // make sure these get updated
+        static float rand();
+
         inline static Color bkgcolor = Color();
         inline static float bkgeta = 1.000293;
 

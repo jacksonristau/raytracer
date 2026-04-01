@@ -1,5 +1,6 @@
 #include "../include/gfx/camera.h"
 #include "../include/math/floatutil.h"
+#include <random>
 
 Camera::Camera() {
 	eye_pos = Point3(0.0f, 0.0f, 1.0f);
@@ -62,6 +63,13 @@ Camera::Camera(json cam) {
         dist[0] = dc.at("dist")[0];
         dist[1] = dc.at("dist")[1];
     }
+    else {
+        depth_color = Color();
+        alpha[0] = 1.0;
+        alpha[1] = 1.0;
+        dist[0] = 0.0;
+        dist[1] = 0.0;
+    }
 
     eye_pos = Point3(cam.at("eye"));
 
@@ -111,29 +119,42 @@ Ray Camera::generate_ray(int x, int y) {
     // perspective projection moves the view direction around
 	else {
         Vector3 direction = (ul + ((yf * deltav) + (xf * deltah))) - eye_pos;
-        int N = 4; // 4x4 = 16 samples per pixel
-        for (int sy = 0; sy < N; sy++) {
-            for (int sx = 0; sx < N; sx++) {
-                float sample_xf = xf + (sx + 0.5f) / N;
-                float sample_yf = yf + (sy + 0.5f) / N;
-                Vector3 direction = (ul + (sample_yf * deltav) + (sample_xf * deltah)) - eye_pos;
-            }
-        }
 		return Ray(eye_pos, direction);
 	}
 }
 
-std::vector<Ray> Camera::generate_ray_aa(int x, int y) {
-    std::vector<Ray> rays = std::vector<Ray>();
+std::vector<Ray> Camera::generate_ray_aa_fixed(int x, int y) {
+    std::vector<Ray> rays = std::vector<Ray>(n_samples * n_samples);
     float xf = static_cast<float>(x);
     float yf = static_cast<float>(y);
     Vector3 direction = (ul + ((yf * deltav) + (xf * deltah))) - eye_pos;
+    int i = 0;
     for (int sy = 0; sy < n_samples; sy++) {
         for (int sx = 0; sx < n_samples; sx++) {
             float sample_xf = xf + (sx + 0.5f) / n_samples;
             float sample_yf = yf + (sy + 0.5f) / n_samples;
             Vector3 direction = (ul + (sample_yf * deltav) + (sample_xf * deltah)) - eye_pos;
-            rays.push_back(Ray(eye_pos, direction));
+            rays[i++] = Ray(eye_pos, direction);
+        }
+    }
+    return rays;
+}
+
+std::vector<Ray> Camera::generate_ray_aa_urandom(int x, int y) {
+    std::vector<Ray> rays = std::vector<Ray>(n_samples * n_samples);
+    float xf = static_cast<float>(x);
+    float yf = static_cast<float>(y);
+    Vector3 direction = (ul + ((yf * deltav) + (xf * deltah))) - eye_pos;
+    int i = 0;
+    // should not be instantiated on every function call
+    std::default_random_engine gen;
+    std::uniform_real_distribution<float> distribution(0.0, 1.0);
+    for (int sy = 0; sy < n_samples; sy++) {
+        for (int sx = 0; sx < n_samples; sx++) {
+            float sample_xf = xf + distribution(gen);
+            float sample_yf = yf + distribution(gen);
+            Vector3 direction = (ul + (sample_yf * deltav) + (sample_xf * deltah)) - eye_pos;
+            rays[i++] = Ray(eye_pos, direction);
         }
     }
     return rays;

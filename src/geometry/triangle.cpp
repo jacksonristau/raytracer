@@ -105,22 +105,22 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     Vector3 h_vec = r.direction.cross(e2);
     float a = e1.dot(h_vec);
 
-    if (a > -Eps && a < Eps)
+    if (is_near_zero(a))
         return Hit();
 
     float f = 1.0f / a;
     Vector3 s = r.origin - v0;
     float beta = f * s.dot(h_vec);
-    if (is_negative(beta, Eps * 128) || beta >= 1.0f)
+    if (is_negative(beta, Eps) || beta >= 1.0f)
         return Hit();
 
     Vector3 q = s.cross(e1);
     float gamma = f * r.direction.dot(q);
-    if (is_negative(gamma, Eps * 128) || beta + gamma >= 1.0f)
+    if (is_negative(gamma, Eps) || beta + gamma >= 1.0f)
         return Hit();
 
     float t = f * e2.dot(q);
-    if (is_negative(t, Eps * 128))
+    if (is_negative(t, Eps))
         return Hit();
 
     float alpha = 1.0f - (beta + gamma);
@@ -151,6 +151,7 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
         Point2 uv2 = get_uv(2);
         hit.u = alpha * uv0.x + beta * uv1.x + gamma * uv2.x;
         hit.v = alpha * uv0.y + beta * uv1.y + gamma * uv2.y;
+
     }
 
     if (has_normal()) {

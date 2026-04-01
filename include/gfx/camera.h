@@ -15,7 +15,8 @@ class Camera {
 		~Camera();
 
 		Ray generate_ray(int x, int y);
-		std::vector<Ray> generate_ray_aa(int x, int y);
+		std::vector<Ray> generate_ray_aa_fixed(int x, int y);
+		std::vector<Ray> generate_ray_aa_urandom(int x, int y);
 
 		Color depth_cue(Point3 x_p, Color i) const;
 
