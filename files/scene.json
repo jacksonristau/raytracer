@@ -79,7 +79,23 @@
       "ks": 0.15,
       "n": 12.8,
       "alpha": 0.95,
-      "eta": 1.6
+      "eta": 1.05
+    },
+    {
+      "name": "umn",
+      "type": "blinn-phong",
+      "imagetexture": "../../files/textures/umn.ppm",
+      "specular": [
+        1,
+        1,
+        1
+      ],
+      "ka": 0.2,
+      "kd": 0.8,
+      "ks": 0.0,
+      "n": 20,
+      "alpha": 1,
+      "eta": 1.2
     }
   ],
   "camera": {
@@ -124,26 +140,36 @@
     0.31,
     0.41
   ],
-  "spheres": [],
+  "spheres": [
+    {
+      "center": [
+        0,
+        0,
+        -4
+      ],
+      "radius": 1,
+      "material": "green_glass"
+    }
+  ],
   "meshes": [
     {
-      "material": "green_glass",
-      "file": "../../files/objs/stanford/stanford_bunny_good.obj",
+      "material": "umn",
+      "file": "../../files/objs/basic/plane.obj",
       "transform": {
         "translate": [
           0,
-          -0.1,
-          -5
+          0,
+          -10
         ],
         "rotate": [
           0,
           0,
-          0 
+          0
         ],
         "scale": [
-          1,
-          1,
-          1
+          5,
+          5,
+          5
         ]
       }
     }

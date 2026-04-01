@@ -4,9 +4,12 @@
 
 Color::Color() {
     // nice lil green
-    r = 0.2f;
-    g = 0.6f;
-    b = 0.2f;
+    // r = 0.2f;
+    // g = 0.6f;
+    // b = 0.2f;
+    r = 0.0f;
+    g = 0.0f;
+    b = 0.0f;
 }
 
 Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
@@ -61,6 +64,10 @@ Color operator*(float s, const Color& c1) {
 
 Color operator*(const Color& c1, float s){
     return Color(s * c1.r, s * c1.g, s * c1.b);
+}
+
+Color operator/(const Color& c1, float s){
+    return Color(c1.r / s, c1.g / s, c1.b / s);
 }
 
 void Color::clamp() {

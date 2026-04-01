@@ -12,8 +12,8 @@ bool equalf(float a, float b)
     return diff < std::fmax(Min, Eps * norm);   
 }   
 
-bool is_negative(float value) {
-    return value < -Eps;
+bool is_negative(float value, float eps) {
+    return value < -eps;
 }
 
 bool is_near_zero(float value) {

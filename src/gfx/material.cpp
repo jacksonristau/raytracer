@@ -117,7 +117,7 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
     for (const ILight* light : Scene::lights) {
         Ray shadow_ray = light->get_shadow_ray(hit);
         float d = light->dist(hit.x_pos);
-        float shadow_mask = Raytracer::trace_shadow_ray_bvh(shadow_ray, light, d);
+        float shadow_mask = 1.0f; //Raytracer::trace_shadow_ray_bvh(shadow_ray, light, d);
         
         Vector3 v(hit.r.origin - hit.x_pos);
         v.normalize();
@@ -145,6 +145,45 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
     }
     final_color = a * final_color + reflection + transmission;
     final_color = Scene::camera.depth_cue(hit.x_pos, final_color);
+    return final_color;
+}
+
+Color BPMaterial::evaluate_debug(const Hit& hit, Color reflection, Color transmission) const {
+    Color dlambda = texture->get_pixel(hit.u, hit.v);
+    //Color final_color = texture->is_uniform() ? precomp[0] : k[0] * dlambda;
+    Color final_color = Color(0.0f, 0.0f, 0.0f);
+    for (const ILight* light : Scene::lights) {
+        Ray shadow_ray = light->get_shadow_ray(hit);
+        float d = light->dist(hit.x_pos);
+        float shadow_mask = 1.0f; //Raytracer::trace_shadow_ray_bvh(shadow_ray, light, d);
+        
+        Vector3 v(hit.r.origin - hit.x_pos);
+        v.normalize();
+        Vector3 l(shadow_ray.direction);
+        
+
+        float ndotl = std::max(0.0f, hit.normal.dot(l));
+        float ndoth = 0.0f;
+        if (ndotl != 0.0f) {
+            Vector3 h = l + v;
+            h.normalize();
+            ndoth = std::max(0.0f, hit.normal.dot(h));
+        }
+
+        // Color diffuse, specular;
+        // if (texture->is_uniform()) {
+        //     diffuse = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : ndotl * precomp[1];
+        //     specular = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : std::pow(ndoth, n_val) * precomp[2];
+        // }
+        // else {
+        //     diffuse = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : ndotl * k[1] * dlambda;
+        //     specular = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : std::pow(ndoth, n_val) * k[2] * spec;
+        // }
+        float i = light->intensity();
+        final_color = final_color + (i * shadow_mask * (Color(0.5f, 0.5f, 0.5f) * ndotl + Color(0.5f, 0.5f, 0.5f) * ndoth));
+    }
+    final_color = a * final_color + reflection + transmission;
+    // final_color = Scene::camera.depth_cue(hit.x_pos, final_color);
     return final_color;
 }
 
@@ -202,4 +241,8 @@ Color ToonMaterial::evaluate(const Hit& hit, Color reflection, Color transmissio
     }
     final_color = Scene::camera.depth_cue(hit.x_pos, final_color);
     return final_color;
+}
+
+Color ToonMaterial::evaluate_debug(const Hit& hit, Color reflection, Color transmission) const {
+    return Color(0,0,0);
 }

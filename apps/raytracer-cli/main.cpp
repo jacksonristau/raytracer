@@ -19,37 +19,25 @@
 
 
 using json = nlohmann::json;
+bool debug_mode_enabled = false;
 
-void render_image_serial(Color* pixelmap, int size) {
-    // for every pixel in the output image trace a ray to get its color
-    std::cout << "tracing rays...\n";
-    std::cout << "0% complete...";
+Color* render_image_serial(int size) {
+    Color* pixelmap = new Color[size];
     for (int i = 0; i < Scene::camera.px_height(); i++) {
         for (int j = 0; j < Scene::camera.px_width(); j++) {
+            if (i == 167 && j == 115) {
+                std::cout << "good";
+            }
+            if (i == 289 && j == 103) {
+                std::cout << "bad";
+            }
             int pos = j + (Scene::camera.px_width() * i);
             Ray ray = Scene::camera.generate_ray(j, i);
-            try {
-                Color pixel_color = Raytracer::trace_ray(ray, true);
-                if (pos < size)
-                    pixelmap[pos] = pixel_color;
-            }
-            catch (std::exception& e) {
-                std::cout << e.what() << std::endl;
-                return;
-            }
-            catch (const std::string* str) {
-                std::cout << "failed to trace ray: " << j << ", " << i << '\n' << str << '\n';
-                return;
-            }
-            if (j % 100 == 0) {
-                std::cout << '\r' << (int)((float)pos / (float)size * 100) << "% complete..." << std::flush;
-                /*std::cout << "ray_dir: " << ray.direction() << '\n';
-                std::cout << "i: " << i << "j: " << j << '\n';*/
-            }
+            Color pixel_color = Raytracer::trace_debug(ray, 1);
+            pixelmap[pos] = pixel_color;
         }
     }
-    std::cout << '\r';
-    std::cout << "tracing complete." << std::endl;
+    return pixelmap;
 }
 
 void render_row(int row, Color* pixelmap) {
@@ -58,6 +46,29 @@ void render_row(int row, Color* pixelmap) {
         Ray ray = Scene::camera.generate_ray(i, row);
         try {
             Color pixel_color = Raytracer::trace_ray(ray, true);
+            pixelmap[pos] = pixel_color;
+        }
+        catch (std::exception& e) {
+            std::cout << e.what() << std::endl;
+            return;
+        }
+        catch (const std::string* str) {
+            std::cout << "failed to trace ray: " << i << ", " << row << '\n' << str << '\n';
+            return;
+        }
+    }
+}
+void render_row_aa(int row, Color* pixelmap) {
+    for (int i = 0; i < Scene::camera.px_width(); i++) {
+        int pos = i + (Scene::camera.px_width() * row);
+        std::vector<Ray> rays = Scene::camera.generate_ray_aa(i, row);
+        try {
+            Color pixel_color = Color(0.0f, 0.0f, 0.0f);
+            for (Ray ray : rays) {
+                pixel_color = pixel_color + Raytracer::trace_ray(ray, true);
+            }
+            pixel_color = pixel_color / (Scene::camera.n_samples * Scene::camera.n_samples);
+
             pixelmap[pos] = pixel_color;
         }
         catch (std::exception& e) {
@@ -82,7 +93,10 @@ void render_rows_dynamic(std::atomic<int>& next_row, Color* pixelmap) {
     int height = Scene::camera.px_height();
 
     while ((my_row = next_row.fetch_add(1)) < height) {
-        render_row(my_row, pixelmap);
+        if (Scene::camera.n_samples < 2)
+            render_row(my_row, pixelmap);
+        else
+            render_row_aa(my_row, pixelmap);
     }
 }
 
@@ -121,16 +135,23 @@ int main(int argc, char *argv[]) {
         printf("options:\n");
         printf("  -W, --wireframe       enable wireframe rendering (bool)\n");
         printf("  -D, --depth           set recursion max depth (int)\n");
-        printf("  -e, --edge-threshold  set edge detection threshold (float)\n");
+        printf("  -E, --edge-threshold  set edge detection threshold (float)\n");
+        printf("  -S, --samples         set number of sub pixel samples (int)");
+        printf("  -d, --debug           enable debug ray tracing");
         return 0;
     }
     // Parse command-line arguments
     std::string scene_file;
+    int n_samples = 2;
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-W" || arg == "--wireframe") {
             Raytracer::wireframe_mode = true;
             std::cout << "wireframe mode enabled" << std::endl;
+        } 
+        else if (arg == "-d" || arg == "--debug") {
+            debug_mode_enabled= true;
+            std::cout << "debug mode enabled" << std::endl;
         } 
         else if ((arg == "-D" || arg == "--depth") && i+1 < argc) {
             try{
@@ -145,7 +166,20 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         }
-        else if ((arg == "-e" || arg == "--edge-threshold") && i+1 < argc) {
+        else if ((arg == "-S" || arg == "--samples") && i+1 < argc) {
+            try{
+                const std::string val = argv[++i];
+                int depth = std::stoi(val);
+                n_samples = std::stoi(val);
+                std::cout << "samples: " << val << "\n";
+            }
+            catch (std::invalid_argument const& ex)
+            {
+                std::cout << "invalid depth argument " << ex.what() << '\n';
+                return 1;
+            }
+        }
+        else if ((arg == "-E" || arg == "--edge-threshold") && i+1 < argc) {
             try{
                 const std::string val = argv[++i];
                 float et = std::stof(val);
@@ -194,6 +228,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "cwd " << std::filesystem::current_path() << '\n';
         return 1;
 	}
+    Scene::camera.n_samples = n_samples;
     
     Raytracer::bvh = BVH(Scene::primitives);
     uint32_t next_node = 0;
@@ -204,7 +239,11 @@ int main(int argc, char *argv[]) {
     std::cout << "utilizing " << num_threads << " threads" << '\n';
 
     int size = Scene::camera.px_width() * Scene::camera.px_height();
-    Color* pixelmap = multi_render_dynamic(num_threads, size);
+    Color* pixelmap;
+    if (debug_mode_enabled)
+        pixelmap = render_image_serial(size);
+    else
+        pixelmap = multi_render_dynamic(num_threads, size);
     
     std::ofstream output;
     output.open("render.ppm");

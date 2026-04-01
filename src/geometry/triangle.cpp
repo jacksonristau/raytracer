@@ -111,16 +111,16 @@ Hit Triangle::intersect(const Ray& r, bool with_uv) const {
     float f = 1.0f / a;
     Vector3 s = r.origin - v0;
     float beta = f * s.dot(h_vec);
-    if (is_negative(beta) || beta >= 1.0f)
+    if (is_negative(beta, Eps * 128) || beta >= 1.0f)
         return Hit();
 
     Vector3 q = s.cross(e1);
     float gamma = f * r.direction.dot(q);
-    if (is_negative(gamma) || beta + gamma >= 1.0f)
+    if (is_negative(gamma, Eps * 128) || beta + gamma >= 1.0f)
         return Hit();
 
     float t = f * e2.dot(q);
-    if (is_negative(t))
+    if (is_negative(t, Eps * 128))
         return Hit();
 
     float alpha = 1.0f - (beta + gamma);
