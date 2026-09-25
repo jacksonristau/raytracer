@@ -17,4 +17,6 @@ namespace Raytracer {
 	Hit intersect_scene_bvh(const Ray& r);
 	float trace_shadow_ray_naive(const Ray& r, const ILight* l, float d);
 	float trace_shadow_ray_bvh(const Ray& r, const ILight* l, float d);
+	// fraction of the light's intensity that reaches the hit point: 1 unoccluded, 0 fully blocked
+	float shadow_factor(const Hit& hit, const ILight* l);
 }

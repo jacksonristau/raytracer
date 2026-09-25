@@ -39,3 +39,5 @@ add_test_executable(scene_tests scene_test.cpp)
 add_test_executable(float_tests floatutils_test.cpp)
 
 add_test_executable(aabb_tests aabb_test.cpp)
+
+add_test_executable(shadow_tests shadow_test.cpp)

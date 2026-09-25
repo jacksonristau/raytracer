@@ -47,6 +47,17 @@ namespace Raytracer {
 		return bvh.traverse_shadow(bvh.nodes[0], r, l, d);
 	}
 
+	float shadow_factor(const Hit& hit, const ILight* l) {
+		Ray shadow_ray = l->get_shadow_ray(hit);
+		// nudge the origin off the surface on the light's side so neighboring
+		// triangles that share this point don't shadow it (shadow acne)
+		Vector3 n = hit.normal;
+		if (n.dot(shadow_ray.direction) < 0.0f)
+			n = -n;
+		shadow_ray.origin = shadow_ray.origin + Eps * n;
+		return trace_shadow_ray_bvh(shadow_ray, l, l->dist(hit.x_pos));
+	}
+
 	float trace_shadow_ray_naive(const Ray& r, const ILight* l, float d) {
 		float s = 1.0f;
 		Hit nearest = intersect_scene_bvh(r);

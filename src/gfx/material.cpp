@@ -117,7 +117,6 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
     for (const ILight* light : Scene::lights) {
         Ray shadow_ray = light->get_shadow_ray(hit);
         float d = light->dist(hit.x_pos);
-        float shadow_mask = 1.0f; //Raytracer::trace_shadow_ray_bvh(shadow_ray, light, d);
         
         Vector3 v(hit.r.origin - hit.x_pos);
         v.normalize();
@@ -125,6 +124,11 @@ Color BPMaterial::evaluate(const Hit& hit, Color reflection, Color transmission)
         
 
         float ndotl = std::max(0.0f, hit.normal.dot(l));
+        // surface faces away from the light, no need to trace a shadow ray
+        if (ndotl == 0.0f)
+            continue;
+        float shadow_mask = Raytracer::shadow_factor(hit, light);
+
         float ndoth = 0.0f;
         if (ndotl != 0.0f) {
             Vector3 h = l + v;
@@ -212,7 +216,7 @@ Color ToonMaterial::evaluate(const Hit& hit, Color reflection, Color transmissio
     for (const ILight* light : Scene::lights) {
         Ray shadow_ray = light->get_shadow_ray(hit);
         float d = light->dist(hit.x_pos);
-        // float shadow_mask = Raytracer::trace_shadow_ray_bvh(shadow_ray, light, d);
+        float shadow_mask = Raytracer::shadow_factor(hit, light);
         Vector3 l(shadow_ray.direction);
         Vector3 v(hit.r.origin - hit.x_pos);
         v.normalize();
@@ -224,11 +228,11 @@ Color ToonMaterial::evaluate(const Hit& hit, Color reflection, Color transmissio
             ndoth = std::max(0.0f, hit.normal.dot(h));
         }
         
-        // half lambert
-        float kl = 0.5 * ndotl + 0.5;
+        // half lambert, shadowed areas slide toward the dark end of the ramp
+        float kl = shadow_mask * (0.5 * ndotl + 0.5);
         Color ramp_color = ramp->get_pixel(kl, 1.0f);
 
-        Color specular = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : std::pow(ndoth, 20) * ramp->get_pixel(1.0, 1.0);
+        Color specular = ndotl == 0.0f ? Color(0.0f, 0.0f, 0.0f) : shadow_mask * std::pow(ndoth, 20) * ramp->get_pixel(1.0, 1.0);
 
         float i = light->intensity() * light->atten(d);
         if (i < max_i) {

@@ -66,9 +66,11 @@ float BVH::intersect_node_shadow(const BVHNode& node, const Ray& ray, const ILig
 		if (ray.o_primitive != nullptr && p == *ray.o_primitive)
 			continue;
 		Hit h = p.intersect(ray);
-		if (!h.valid() || is_negative(h.t))
+		// hits at t ~ 0 are the surface the shadow ray started on
+		if (!h.valid() || !is_greater_than_zero(h.t))
 			continue;
-		if (l->is_point() && h.t > d)
+		// occluders past a point light don't block it
+		if (l->is_point() && h.t >= d)
 			continue;
 		s *= (1 - p.material->alpha());
 		if (is_near_zero(s))
@@ -78,7 +80,8 @@ float BVH::intersect_node_shadow(const BVHNode& node, const Ray& ray, const ILig
 }
 float BVH::traverse_shadow(const BVHNode& node, const Ray& ray, const ILight* l, float d) const {
 	float t_bounds = node.bounds.intersect(ray);
-	if (is_negative(t_bounds))
+	// d is infinite for directional lights, so this only prunes past point lights
+	if (is_negative(t_bounds) || t_bounds > d)
 		return 1.0f;
 
 	if (node.is_leaf()) {
