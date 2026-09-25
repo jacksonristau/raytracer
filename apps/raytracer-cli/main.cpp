@@ -2,14 +2,11 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <cmath>
-#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <atomic>
 #include <filesystem>
 
-#include "../include/math/vector3.h"
 #include "../include/math/ray.h"
 #include "../include/gfx/color.h"
 #include "../include/gfx/scene.h"
@@ -17,111 +14,55 @@
 #include "../include/gfx/raytracer.h"
 #include "../include/stringhelpers.h"
 
-
 using json = nlohmann::json;
-bool debug_mode_enabled = false;
 
-Color* render_image_serial(int size) {
-    Color* pixelmap = new Color[size];
-    for (int i = 0; i < Scene::camera.px_height(); i++) {
-        for (int j = 0; j < Scene::camera.px_width(); j++) {
-            if (i == 301 && j == 135) {
-                std::cout << "good";
+// traces every pixel in a row, averaging n_samples x n_samples jittered rays per pixel when anti-aliasing
+void render_row(int row, Color* pixelmap) {
+    const int n_samples = Scene::camera.n_samples;
+    for (int i = 0; i < Scene::camera.px_width(); i++) {
+        int pos = i + (Scene::camera.px_width() * row);
+        try {
+            if (n_samples < 2) {
+                pixelmap[pos] = Raytracer::trace_ray(Scene::camera.generate_ray(i, row), 1);
+                continue;
             }
-            if (i == 302 && j == 116) {
-                std::cout << "bad";
+            Color pixel_color = Color(0.0f, 0.0f, 0.0f);
+            for (const Ray& ray : Scene::camera.generate_ray_aa_urandom(i, row)) {
+                pixel_color = pixel_color + Raytracer::trace_ray(ray, 1);
             }
-            int pos = j + (Scene::camera.px_width() * i);
-            Ray ray = Scene::camera.generate_ray(j, i);
-            Color pixel_color = Raytracer::trace_debug(ray, 1, i == 302 && j == 116);
-            pixelmap[pos] = pixel_color;
+            pixelmap[pos] = pixel_color / static_cast<float>(n_samples * n_samples);
         }
+        catch (const std::exception& e) {
+            std::cerr << "failed to trace pixel (" << i << ", " << row << "): " << e.what() << '\n';
+            return;
+        }
+    }
+}
+
+// single-threaded, top to bottom; deterministic ordering makes it easier to step through in a debugger
+Color* render_serial(int img_size) {
+    Color* pixelmap = new Color[img_size];
+    for (int row = 0; row < Scene::camera.px_height(); row++) {
+        render_row(row, pixelmap);
     }
     return pixelmap;
 }
 
-void render_row(int row, Color* pixelmap) {
-    for (int i = 0; i < Scene::camera.px_width(); i++) {
-        int pos = i + (Scene::camera.px_width() * row);
-        Ray ray = Scene::camera.generate_ray(i, row);
-        try {
-            Color pixel_color = Raytracer::trace_ray(ray, true);
-            pixelmap[pos] = pixel_color;
-        }
-        catch (std::exception& e) {
-            std::cout << e.what() << std::endl;
-            return;
-        }
-        catch (const std::string* str) {
-            std::cout << "failed to trace ray: " << i << ", " << row << '\n' << str << '\n';
-            return;
-        }
-    }
-}
-void render_row_aa(int row, Color* pixelmap) {
-    for (int i = 0; i < Scene::camera.px_width(); i++) {
-        int pos = i + (Scene::camera.px_width() * row);
-        std::vector<Ray> rays = Scene::camera.generate_ray_aa_urandom(i, row);
-        try {
-            Color pixel_color = Color(0.0f, 0.0f, 0.0f);
-            for (const Ray& ray : rays) {
-                pixel_color = pixel_color + Raytracer::trace_ray(ray, true);
-            }
-            pixel_color = pixel_color / (Scene::camera.n_samples * Scene::camera.n_samples);
-
-            pixelmap[pos] = pixel_color;
-        }
-        catch (std::exception& e) {
-            std::cout << e.what() << std::endl;
-            return;
-        }
-        catch (const std::string* str) {
-            std::cout << "failed to trace ray: " << i << ", " << row << '\n' << str << '\n';
-            return;
-        }
-    }
-}
-
-void render_rows_static(int start, int end, Color* pixelmap) {
-    for (int i = start; i < end; i++) {
-        render_row(i, pixelmap);
-    }
-}
-
+// each thread grabs the next unrendered row, so fast and slow regions of the image balance out
 void render_rows_dynamic(std::atomic<int>& next_row, Color* pixelmap) {
     int my_row;
     int height = Scene::camera.px_height();
 
     while ((my_row = next_row.fetch_add(1)) < height) {
-        if (Scene::camera.n_samples < 2)
-            render_row(my_row, pixelmap);
-        else
-            render_row_aa(my_row, pixelmap);
+        render_row(my_row, pixelmap);
     }
 }
 
-Color* multi_render_static(int num_threads, int img_size) {
-    Color* pixelmap = new Color[img_size];
-    std::vector<std::thread> threads(num_threads);
-    int rows_per_thread = Scene::camera.px_height() / num_threads;
-
-    std::cout << "rendering..." << '\n';
-    // block rows to render for each thread
-    for (int i = 0; i < num_threads; i++) {
-        int start_row = i * rows_per_thread;
-        int end_row = (i == num_threads - 1) ? Scene::camera.px_height() : start_row + rows_per_thread;
-        threads[i] = std::thread(render_rows_static, start_row, end_row, pixelmap);
-    }
-    for (auto& t : threads) t.join();
-    return pixelmap;
-}
-
-Color* multi_render_dynamic(int num_threads, int img_size) {
+Color* render_parallel(int num_threads, int img_size) {
     Color* pixelmap = new Color[img_size];
     std::vector<std::thread> threads(num_threads);
     std::atomic<int> next_row = 0;
 
-    std::cout << "rendering..." << '\n';
     for (int i = 0; i < num_threads; i++) {
         threads[i] = std::thread(render_rows_dynamic, std::ref(next_row), pixelmap);
     }
@@ -129,80 +70,62 @@ Color* multi_render_dynamic(int num_threads, int img_size) {
     return pixelmap;
 }
 
+void print_usage() {
+    std::cout << "usage: raytracer-cli <scene.json> [options]\n"
+              << "options:\n"
+              << "  -S, --samples <n>         anti-aliasing: n x n jittered samples per pixel (default 2, 1 disables)\n"
+              << "  -D, --depth <n>           max reflection/refraction recursion depth (default 4)\n"
+              << "  -W, --wireframe           render triangle edges only\n"
+              << "  -E, --edge-threshold <f>  barycentric threshold for wireframe edges (default 0.02)\n"
+              << "  -d, --debug               render on a single thread\n";
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("usage: raytracer-cli <name of input file> [options]\n");
-        printf("options:\n");
-        printf("  -W, --wireframe       enable wireframe rendering (bool)\n");
-        printf("  -D, --depth           set recursion max depth (int)\n");
-        printf("  -E, --edge-threshold  set edge detection threshold (float)\n");
-        printf("  -S, --samples         set number of sub pixel samples (int)");
-        printf("  -d, --debug           enable debug ray tracing");
-        return 0;
+        print_usage();
+        return 1;
     }
-    // Parse command-line arguments
+
     std::string scene_file;
     int n_samples = 2;
+    bool single_threaded = false;
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
-        if (arg == "-W" || arg == "--wireframe") {
-            Raytracer::wireframe_mode = true;
-            std::cout << "wireframe mode enabled" << std::endl;
-        } 
-        else if (arg == "-d" || arg == "--debug") {
-            debug_mode_enabled= true;
-            std::cout << "debug mode enabled" << std::endl;
-        } 
-        else if ((arg == "-D" || arg == "--depth") && i+1 < argc) {
-            try{
-                const std::string val = argv[++i];
-                int depth = std::stoi(val);
-                Raytracer::max_depth = std::stoi(val);
-                std::cout << "max depth: " << val << "\n";
+        bool has_value = i + 1 < argc;
+        try {
+            if (arg == "-h" || arg == "--help") {
+                print_usage();
+                return 0;
             }
-            catch (std::invalid_argument const& ex)
-            {
-                std::cout << "invalid depth argument " << ex.what() << '\n';
-                return 1;
+            else if (arg == "-W" || arg == "--wireframe") {
+                Raytracer::wireframe_mode = true;
             }
-        }
-        else if ((arg == "-S" || arg == "--samples") && i+1 < argc) {
-            try{
-                const std::string val = argv[++i];
-                int depth = std::stoi(val);
-                n_samples = std::stoi(val);
-                std::cout << "samples: " << val << "\n";
+            else if (arg == "-d" || arg == "--debug") {
+                single_threaded = true;
             }
-            catch (std::invalid_argument const& ex)
-            {
-                std::cout << "invalid depth argument " << ex.what() << '\n';
-                return 1;
+            else if ((arg == "-D" || arg == "--depth") && has_value) {
+                Raytracer::max_depth = std::stoi(argv[++i]);
             }
-        }
-        else if ((arg == "-E" || arg == "--edge-threshold") && i+1 < argc) {
-            try{
-                const std::string val = argv[++i];
-                float et = std::stof(val);
-                Raytracer::edge_threshold = std::stof(val);
-                std::cout << "edge threshold: " << val << "\n";
+            else if ((arg == "-S" || arg == "--samples") && has_value) {
+                n_samples = std::stoi(argv[++i]);
             }
-            catch (std::invalid_argument const& ex)
-            {
-                std::cout << "invalid edge-threshold argument " << ex.what() << '\n';
-                return 1;
+            else if ((arg == "-E" || arg == "--edge-threshold") && has_value) {
+                Raytracer::edge_threshold = std::stof(argv[++i]);
             }
-        }
-        else if (arg[0] != '-') {
-            // Non-flag argument is the scene file
-            if (scene_file.empty()) {
+            else if (arg[0] != '-') {
+                if (!scene_file.empty()) {
+                    std::cerr << "error: multiple input files specified\n";
+                    return 1;
+                }
                 scene_file = arg;
-            } else {
-                std::cerr << "error: multiple input files specified\n";
+            }
+            else {
+                std::cerr << "error: unknown option or missing value: " << arg << "\n";
                 return 1;
             }
-        } 
-        else {
-            std::cerr << "error: unknown option '" << arg << "'\n";
+        }
+        catch (const std::logic_error&) {
+            std::cerr << "error: invalid value for " << arg << ": " << argv[i] << "\n";
             return 1;
         }
     }
@@ -223,38 +146,38 @@ int main(int argc, char *argv[]) {
         json scene_description = json::parse(f);
         scene = Scene(scene_description);
     }
-	catch(std::exception& e) {
-        std::cerr << "failed to parse scene: " << e.what() << '\n';
-        std::cerr << "cwd " << std::filesystem::current_path() << '\n';
+    catch (const std::exception& e) {
+        std::cerr << "failed to load scene: " << e.what() << '\n';
+        std::cerr << "relative paths are resolved from " << std::filesystem::current_path() << '\n';
         return 1;
-	}
+    }
     Scene::camera.n_samples = n_samples;
-    
+
     Raytracer::bvh = BVH(Scene::primitives);
     uint32_t next_node = 0;
     Raytracer::bvh.build_bvh_object_median(next_node, 0, Scene::primitives.size());
 
-    Color* pixelmap; 
     int size = Scene::camera.px_width() * Scene::camera.px_height();
-    std::cout << "camera_s " << Scene::camera.n_samples << "\n";
-    if (debug_mode_enabled) {
-        pixelmap = render_image_serial(size);
-    } else {
+    Color* pixelmap;
+    if (single_threaded) {
+        std::cout << "rendering on 1 thread..." << '\n';
+        pixelmap = render_serial(size);
+    }
+    else {
         int hardware_threads = std::thread::hardware_concurrency();
-        int num_threads = hardware_threads > 0 ? hardware_threads - 1 : 2;
-        std::cout << "utilizing " << num_threads << " threads" << '\n';
-        pixelmap = multi_render_dynamic(num_threads, size);
+        int num_threads = hardware_threads > 1 ? hardware_threads - 1 : 1;
+        std::cout << "rendering on " << num_threads << " threads..." << '\n';
+        pixelmap = render_parallel(num_threads, size);
     }
-    
-    std::ofstream output;
-    output.open("render.ppm");
 
+    std::ofstream output("render.ppm");
     if (!output.is_open()) {
-        std::cout << "failed to create output file.";
-        return 0;
+        std::cerr << "failed to create render.ppm\n";
+        delete [] pixelmap;
+        return 1;
     }
 
-    // write colors to ppm file 
+    // write colors to ppm file
     output << "P3\n"
         << "#raytracingiscool\n"
         << Scene::camera.px_width()
@@ -265,14 +188,11 @@ int main(int argc, char *argv[]) {
     std::stringstream image;
     for (int i = 0; i < size; i++) {
         image << pixel_to_string(pixelmap[i]);
-        if (i == size - 1) {
-            std::cout << "render.ppm created." << std::endl;
-        }
     }
     output << image.str();
-
-    // cleanup
     output.close();
     delete [] pixelmap;
+
+    std::cout << "render.ppm created." << std::endl;
     return 0;
 }

@@ -12,7 +12,6 @@ class Hit;
 class Material {
     public:
         virtual Color evaluate(const Hit& hit, Color reflection, Color transmission) const = 0;
-        virtual Color evaluate_debug(const Hit& hit, Color reflection, Color transmission) const = 0;
         virtual float alpha() const = 0;
         virtual float eta() const = 0;
         virtual bool is_uniform() const = 0;
@@ -28,7 +27,6 @@ class ToonMaterial : public Material {
         ToonMaterial(std::shared_ptr<ImageTexture> t);
 
         Color evaluate(const Hit& hit, Color reflected, Color refracted) const override;
-        Color evaluate_debug(const Hit& hit, Color reflection, Color transmission) const override;
         float alpha() const override { return 1.0f; };
         float eta() const override { return 1.0f; }
         bool is_glossy() const override { return false; }
@@ -48,7 +46,6 @@ class BPMaterial : public Material {
         BPMaterial operator=(const BPMaterial& m1);
 
         Color evaluate(const Hit& hit, Color reflected, Color refracted) const override;
-        Color evaluate_debug(const Hit& hit, Color reflection, Color transmission) const override;
         float alpha() const override { return a; };
         float eta() const override { return refractive_index; }
         bool is_glossy() const override { return k[2] > 0.0f; }

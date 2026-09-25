@@ -45,7 +45,7 @@ Scene::Scene() {
         bkgeta = scene_desc.at("bkgeta");
     }
     if (!scene_desc.contains("camera")) {
-        std::cout << "camera settings must be provided, see example.json" << '\n';
+        std::cout << "camera settings must be provided, see the 'Scene format' section of README.md" << '\n';
         throw std::runtime_error("Failed to create scene, no camera was provided");
     }
     camera = Camera(scene_desc.at("camera"));
@@ -68,11 +68,11 @@ Scene::Scene() {
     else {
         int i = 0;
         for (const json& material_json : scene_desc.at("materials")) {
-            std::string type = material_json.at("type");
+            std::string type = material_json.value("type", "blinn-phong");
             if (type.compare("toon") == 0) {
                 auto m = std::make_shared<ToonMaterial>(material_json);
                 materials.push_back(m);
-;            }
+            }
             else {
                 auto m = std::make_shared<BPMaterial>(material_json);
                 materials.push_back(m);
@@ -127,10 +127,7 @@ Scene::Scene() {
             std::string file = mesh_json.at("file");
 
             if (!reader.ParseFromFile(file, reader_config)) {
-                if (!reader.Error().empty()) {
-                    std::cerr << "tinyobj: " << reader.Error();
-                }
-                throw reader.Error();
+                throw std::runtime_error("failed to load mesh " + file + ": " + reader.Error());
             }
 
             if (!reader.Warning().empty()) {
@@ -190,9 +187,6 @@ Scene::Scene() {
             }
         }
     }
-    BVH bvh = BVH(primitives);
-    uint32_t root = 0;
-    bvh.build_bvh_object_median(root, 0, primitives.size() - 1);
 }
 
  Scene::~Scene() {}

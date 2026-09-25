@@ -19,7 +19,7 @@ ILight* LightFactory::create(const json& light_json) {
 PointLight::PointLight(json light_json){
     l = Point3(0.0f, 0.0f, 10.0f);
     try {
-        if (light_json.contains("l")) l = l = Point3(light_json.at("l"));
+        if (light_json.contains("l")) l = Point3(light_json.at("l"));
         if (light_json.contains("i")) i = light_json.at("i");
 
         if (light_json.contains("att") && light_json.at("att").is_array()) {
@@ -36,7 +36,7 @@ PointLight::PointLight(json light_json){
 DirectionalLight::DirectionalLight(json light_json) {
     l = Vector3(0.0f, 0.0f, -1.0f);
     try {
-        if (light_json.contains("l")) l = l = Vector3(light_json.at("l"));
+        if (light_json.contains("l")) l = Vector3(light_json.at("l"));
         if (light_json.contains("i")) i = light_json.at("i");
     }
     catch (const json::exception& e) {
